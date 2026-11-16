@@ -1,0 +1,8 @@
+allow rdkhm_accel dev_graphics_file:chr_file { getattr map open read write };
+allow rdkhm_accel dev_dri_file:chr_file { getattr map open read write };
+allow rdkhm_accel dev_dri_file:dir { getattr search };
+allow rdkhm_accel vendor_lib_file:dir { getattr search };
+allow rdkhm_accel vendor_lib_file:file { getattr execute execute_no_trans open read map };
+allow rdkhm_accel dev_unix_socket:dir { search };
+allow rdkhm_accel self:unix_stream_socket { accept bind connect create listen read write getattr setopt };
+allowxperm rdkhm_accel dev_dri_file:chr_file ioctl { 0x641f 0x642d 0x642e 0x64b2 0x64b4 };

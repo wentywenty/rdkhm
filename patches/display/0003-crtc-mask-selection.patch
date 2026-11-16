@@ -1,0 +1,26 @@
+diff --git a/display/composer/vdi_base/src/drm_connector.cpp b/display/composer/vdi_base/src/drm_connector.cpp
+index 82a648e..b86d583 100644
+--- a/display/composer/vdi_base/src/drm_connector.cpp
++++ b/display/composer/vdi_base/src/drm_connector.cpp
+@@ -267,7 +267,7 @@ std::shared_ptr<DrmCrtc> DrmConnector::UpdateCrtcId(IdMapPtr<DrmEncoder> &encode
+ 
+     for (auto crtcIter = crtcs.begin(); crtcIter != crtcs.end(); ++crtcIter) {
+         auto &posCrts = crtcIter->second;
+-        if (possibleCrtcs == (1<<posCrts->GetPipe())) {
++        if ((possibleCrtcs & (1U << posCrts->GetPipe())) != 0) {
+             DISPLAY_LOGD("find crtc id %{public}d, pipe %{public}d", posCrts->GetId(), posCrts->GetPipe());
+             crtc = posCrts;
+             *crtc_id = posCrts->GetId();
+diff --git a/display/composer/vdi_base/src/drm_encoder.cpp b/display/composer/vdi_base/src/drm_encoder.cpp
+index 84ab6a7..b157c8b 100644
+--- a/display/composer/vdi_base/src/drm_encoder.cpp
++++ b/display/composer/vdi_base/src/drm_encoder.cpp
+@@ -35,7 +35,7 @@ int32_t DrmEncoder::PickIdleCrtcId(IdMapPtr<DrmCrtc> &crtcs, uint32_t &crtcId)
+         DISPLAY_LOGW("can not find crtc for id %{public}d", mCrtcId);
+         for (crtcIter = crtcs.begin(); crtcIter != crtcs.end(); ++crtcIter) {
+             auto &posCrts = crtcIter->second;
+-            if (mPossibleCrtcs == (1<<posCrts->GetPipe())) {
++            if ((mPossibleCrtcs & (1U << posCrts->GetPipe())) != 0) {
+                 DISPLAY_LOGD("find crtc id %{public}d, pipe %{public}d", posCrts->GetId(), posCrts->GetPipe());
+                 break;
+             }

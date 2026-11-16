@@ -1,0 +1,2 @@
+/vendor/bin/rdkhm-accelerator u:object_r:vendor_file:s0
+/vendor/lib64/rdkhm-accelerator/ld-linux-aarch64.so.1 u:object_r:rdkhm_accel_exec:s0

@@ -1,0 +1,206 @@
+diff --git a/display/buffer/vdi_base/BUILD.gn b/display/buffer/vdi_base/BUILD.gn
+index c2bdfbb..21791ea 100644
+--- a/display/buffer/vdi_base/BUILD.gn
++++ b/display/buffer/vdi_base/BUILD.gn
+@@ -45,6 +45,7 @@ ohos_shared_library("display_buffer_vdi_impl_default") {
+   external_deps = [
+     "c_utils:utils",
+     "drivers_interface_display:libdisplay_buffer_stub_1.0",
++    "drivers_interface_display:libdisplay_buffer_stub_1.2",
+     "drivers_interface_display:libdisplay_composer_stub_1.0",
+     "drivers_interface_display:libhdifd_parcelable",
+     "hdf_core:libhdf_utils",
+@@ -53,7 +54,7 @@ ohos_shared_library("display_buffer_vdi_impl_default") {
+     "libdrm:libdrm",
+   ]
+ 
+-  install_enable = false
++  install_enable = product_name == "rdk_x5"
+   install_images = [ chipset_base_dir ]
+   innerapi_tags = [ "chipsetsdk" ]
+   subsystem_name = "hdf"
+diff --git a/display/buffer/vdi_base/src/display_gralloc_gbm.cpp b/display/buffer/vdi_base/src/display_gralloc_gbm.cpp
+index ed06d77..80e4d9b 100644
+--- a/display/buffer/vdi_base/src/display_gralloc_gbm.cpp
++++ b/display/buffer/vdi_base/src/display_gralloc_gbm.cpp
+@@ -41,7 +41,11 @@ namespace DISPLAY {
+ using namespace OHOS::HDI::Display::Composer::V1_0;
+ using namespace OHOS::HDI::Display::Buffer::V1_0;
+ 
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++const char *g_drmFileNode = "/dev/dri/card0";
++#else
+ const char *g_drmFileNode = "/dev/dri/renderD128";
++#endif
+ static GrallocManager *g_grallocManager = nullptr;
+ static pthread_mutex_t g_lock;
+ 
+diff --git a/display/composer/vdi_base/BUILD.gn b/display/composer/vdi_base/BUILD.gn
+index 5461fd1..9dc8569 100644
+--- a/display/composer/vdi_base/BUILD.gn
++++ b/display/composer/vdi_base/BUILD.gn
+@@ -56,6 +56,9 @@ ohos_shared_library("display_composer_vdi_impl_default") {
+   external_deps = [
+     "c_utils:utils",
+     "drivers_interface_display:libdisplay_buffer_stub_1.0",
++    "drivers_interface_display:libdisplay_buffer_stub_1.2",
++    "drivers_interface_display:libdisplay_composer_stub_1.3",
++    "drivers_interface_display:libdisplay_composer_hdi_impl_1.3",
+     "drivers_interface_display:libdisplay_composer_hdi_impl_1.2",
+     "drivers_interface_display:libdisplay_composer_stub_1.0",
+     "graphic_surface:buffer_handle",
+@@ -65,7 +68,7 @@ ohos_shared_library("display_composer_vdi_impl_default") {
+     "ipc:ipc_single",
+     "libdrm:libdrm",
+   ]
+-  install_enable = false
++  install_enable = product_name == "rdk_x5"
+   install_images = [ chipset_base_dir ]
+   subsystem_name = "hdf"
+   part_name = "drivers_peripheral_display"
+diff --git a/display/composer/vdi_base/src/drm_crtc.cpp b/display/composer/vdi_base/src/drm_crtc.cpp
+index 6c016b7..901b236 100644
+--- a/display/composer/vdi_base/src/drm_crtc.cpp
++++ b/display/composer/vdi_base/src/drm_crtc.cpp
+@@ -51,6 +51,10 @@ int32_t DrmCrtc::Init(DrmDevice &drmDevice)
+     DISPLAY_CHK_RETURN((ret != DISPLAY_SUCCESS), DISPLAY_FAILURE, DISPLAY_LOGE("cat not get out fence prop id"));
+     mActivePropId = prop.propId;
+ 
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    return DISPLAY_SUCCESS;
++#endif
++
+     // Plane mask
+     mPlaneMask = 0;
+     ret = drmDevice.GetCrtcProperty(*this, "PLANE_MASK", prop);
+diff --git a/display/composer/vdi_base/src/drm_plane.cpp b/display/composer/vdi_base/src/drm_plane.cpp
+index 8f0f487..a601194 100644
+--- a/display/composer/vdi_base/src/drm_plane.cpp
++++ b/display/composer/vdi_base/src/drm_plane.cpp
+@@ -165,7 +165,9 @@ int32_t DrmPlane::Init(DrmDevice &drmDevice)
+     DrmProperty prop;
+     GetCrtcProp(drmDevice);
+     GetSrcProp(drmDevice);
++#ifndef RDK_X5_SOFTWARE_COMPOSITION
+     GetNameProp(drmDevice);
++#endif
+ 
+     ret = drmDevice.GetPlaneProperty(*this, PROP_FBID, prop);
+     mPropFbId = prop.propId;
+diff --git a/display/composer/vdi_base/src/hdi_drm_composition.cpp b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+index 0e6e88b..b5ea48c 100644
+--- a/display/composer/vdi_base/src/hdi_drm_composition.cpp
++++ b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+@@ -206,6 +206,10 @@ int32_t HdiDrmComposition::UpdateMode(std::unique_ptr<DrmModeBlock> &modeBlock)
+ 
+ int32_t HdiDrmComposition::RemoveUnusePlane(drmModeAtomicReqPtr pset)
+ {
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    // Only the primary plane is owned by this single-output software backend.
++    return DISPLAY_SUCCESS;
++#endif
+     int ret = 0;
+     /* Remove useless planes from the drm */
+     for (uint32_t j = 0; j < mPlanes.size(); j++) {
+@@ -222,6 +226,14 @@ int32_t HdiDrmComposition::RemoveUnusePlane(drmModeAtomicReqPtr pset)
+ 
+ int32_t HdiDrmComposition::FindPlaneAndApply(drmModeAtomicReqPtr pset)
+ {
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    DISPLAY_CHK_RETURN(mCompLayers.size() != 1 || mPrimPlanes.empty(), DISPLAY_FAILURE,
++        DISPLAY_LOGE("X5 requires a client buffer and primary plane"));
++    auto *layer = static_cast<HdiDrmLayer *>(mCompLayers.front());
++    DISPLAY_CHK_RETURN(layer->GetCurrentBuffer() == nullptr, DISPLAY_FAILURE,
++        DISPLAY_LOGE("X5 client buffer is missing"));
++    return ApplyPlane(*layer, *layer, *mPrimPlanes.front(), pset);
++#else
+     int32_t ret = 0;
+     for (uint32_t i = 0; i < mCompLayers.size(); i++) {
+         HdiDrmLayer *layer = static_cast<HdiDrmLayer *>(mCompLayers[i]);
+@@ -250,6 +262,7 @@ int32_t HdiDrmComposition::FindPlaneAndApply(drmModeAtomicReqPtr pset)
+         }
+     }
+     return DISPLAY_SUCCESS;
++#endif
+ }
+ 
+ int32_t HdiDrmComposition::Apply(bool modeSet)
+@@ -283,7 +296,8 @@ int32_t HdiDrmComposition::Apply(bool modeSet)
+         mConnector->GetId(), mConnector->GetEncoderId());
+ 
+     /*  Bind the plane not used by other crtcs to the crtc. */
+-    FindPlaneAndApply(atomicReqPtr.Get());
++    ret = FindPlaneAndApply(atomicReqPtr.Get());
++    DISPLAY_CHK_RETURN(ret != DISPLAY_SUCCESS, ret, DISPLAY_LOGE("plane selection failed"));
+     /* Remove useless planes from the drm */
+     RemoveUnusePlane(atomicReqPtr.Get());
+ 
+diff --git a/display/composer/vdi_base/src/hdi_gfx_composition.cpp b/display/composer/vdi_base/src/hdi_gfx_composition.cpp
+index 2d9f544..6a15429 100644
+--- a/display/composer/vdi_base/src/hdi_gfx_composition.cpp
++++ b/display/composer/vdi_base/src/hdi_gfx_composition.cpp
+@@ -29,6 +29,9 @@ namespace HDI {
+ namespace DISPLAY {
+ int32_t HdiGfxComposition::Init(void)
+ {
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    return DISPLAY_SUCCESS;
++#else
+     DISPLAY_LOGD();
+     int32_t ret = GfxModuleInit();
+     DISPLAY_CHK_RETURN((ret != DISPLAY_SUCCESS) || (mGfxFuncs == nullptr), DISPLAY_FAILURE,
+@@ -36,6 +39,7 @@ int32_t HdiGfxComposition::Init(void)
+     ret = mGfxFuncs->InitGfx();
+     DISPLAY_CHK_RETURN((ret != DISPLAY_SUCCESS), DISPLAY_FAILURE, DISPLAY_LOGE("gfx init failed"));
+     return DISPLAY_SUCCESS;
++#endif
+ }
+ 
+ int32_t HdiGfxComposition::GfxModuleInit(void)
+@@ -67,7 +71,7 @@ int32_t HdiGfxComposition::GfxModuleDeinit(void)
+ {
+     DISPLAY_LOGD();
+     int32_t ret = DISPLAY_SUCCESS;
+-    if (mGfxModule == nullptr) {
++    if (mGfxModule != nullptr) {
+         using DeinitFunc = int32_t (*)(GfxFuncs *funcs);
+         DeinitFunc func = reinterpret_cast<DeinitFunc>(dlsym(mGfxModule, "GfxUninitialize"));
+         if (func == nullptr) {
+@@ -106,6 +110,14 @@ bool HdiGfxComposition::UseCompositionClient(std::vector<HdiLayer *> &layers)
+ 
+ int32_t HdiGfxComposition::SetLayers(std::vector<HdiLayer *> &layers, HdiLayer &clientLayer)
+ {
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    mClientLayer = &clientLayer;
++    mCompLayers.clear();
++    for (auto *layer : layers) {
++        layer->SetDeviceSelect(COMPOSITION_CLIENT);
++    }
++    return DISPLAY_SUCCESS;
++#else
+     DISPLAY_LOGD("layers size %{public}zd", layers.size());
+     CompositionType defaultCompType = UseCompositionClient(layers) ? COMPOSITION_CLIENT : COMPOSITION_DEVICE;
+     mClientLayer = &clientLayer;
+@@ -126,6 +138,7 @@ int32_t HdiGfxComposition::SetLayers(std::vector<HdiLayer *> &layers, HdiLayer &
+     }
+     DISPLAY_LOGD("composer layers size %{public}zd", mCompLayers.size());
+     return DISPLAY_SUCCESS;
++#endif
+ }
+ 
+ void HdiGfxComposition::InitGfxSurface(ISurface &iSurface, HdiLayerBuffer &buffer)
+diff --git a/display/display_config.gni b/display/display_config.gni
+index 648b2fd..2f9218f 100644
+--- a/display/display_config.gni
++++ b/display/display_config.gni
+@@ -23,6 +23,10 @@ if (drivers_peripheral_display_community) {
+   display_defines = []
+ }
+ 
++if (product_name == "rdk_x5") {
++  display_defines += [ "RDK_X5_SOFTWARE_COMPOSITION" ]
++}
++
+ if (drivers_peripheral_display_vdi_default) {
+   display_defines += [
+     "COMPOSER_VDI_DEFAULT_LIBRARY_ENABLE",

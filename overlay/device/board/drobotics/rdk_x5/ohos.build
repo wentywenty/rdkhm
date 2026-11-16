@@ -1,0 +1,8 @@
+{
+  "subsystem": "device_rdk_x5",
+  "parts": {
+    "device_rdk_x5": {
+      "module_list": []
+    }
+  }
+}

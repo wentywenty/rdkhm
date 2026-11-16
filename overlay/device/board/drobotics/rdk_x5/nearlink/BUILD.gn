@@ -1,0 +1,17 @@
+import("//build/ohos.gni")
+
+# Experimental native stack only. No daemon, radio startup or public HAP API.
+ohos_shared_library("rdkhm_ssap") {
+  sources = [
+    "ssap/src/ssap_codec.c",
+    "ssap/src/hwsle_transport.c",
+    "ssap/src/ssap_server.c",
+    "ssap/src/ssap_link.c",
+    "ssap/src/feature_mgr.c",
+  ]
+  include_dirs = [ "ssap/include" ]
+  cflags = [ "-std=c11" ]
+  output_extension = "so"
+  part_name = "product_rdk_x5"
+  install_images = [ "vendor" ]
+}

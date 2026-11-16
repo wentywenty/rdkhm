@@ -1,0 +1,13 @@
+{
+  "whitelist": [
+    {
+      "name": "execute and execute_no_trans",
+      "user": [
+        "rdkhm_accel vendor_lib_file"
+      ],
+      "developer": [
+        "rdkhm_accel vendor_lib_file"
+      ]
+    }
+  ]
+}

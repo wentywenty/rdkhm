@@ -1,0 +1,13 @@
+# path url revision
+x5-kernel https://github.com/D-Robotics/x5-kernel.git b2edb450c6eaef1c7277885d49f74efb6088b634
+x5-kernel/drivers/media/platform/horizon/camsys https://github.com/D-Robotics/x5-drv-camsys.git 22c7c2e870622fe779d832ef1753b27191772cdd
+manifest https://gitcode.com/openharmony/manifest.git d6a0fef04cd19e2ecf0ea978e683e5d2f7953198
+openharmony/kernel/linux/linux-6.6 https://gitcode.com/openharmony/kernel_linux_6.6.git 05abe5cb2815cc7a2ebb64669a347884db467f6d
+openharmony/kernel/linux/config https://gitcode.com/openharmony/kernel_linux_config.git 3e172421da6aae23bbcc4eb29bc1498d570b5546
+openharmony/kernel/linux/patches https://gitcode.com/openharmony/kernel_linux_patches.git abbf648c02217175631e8bc3797022d217b8b6ba
+openharmony/kernel/linux/build https://gitcode.com/openharmony/kernel_linux_build.git d0bb4816a16a550ab94af3e6692820e7fe3070c4
+openharmony/kernel/linux/common_modules https://gitcode.com/openharmony/kernel_linux_common_modules.git 873afbfda1992ac3dad5d2dd6512e4f76edf8d3a
+openharmony/drivers/hdf_core https://gitcode.com/openharmony/drivers_hdf_core.git 530c883061478426a5714d6b23019784b07dd769
+openharmony/third_party/bounds_checking_function https://gitcode.com/openharmony/third_party_bounds_checking_function.git 2ae82839ecaaa7d031e66ccbd2076d671acfd615
+openharmony/device/board/hihope https://gitcode.com/openharmony/device_board_hihope.git a6a3f1e6962e318c5517ee06b200b26da0556880
+openharmony/vendor/hihope https://gitcode.com/openharmony/vendor_hihope.git 3e6a4e960f74ad7d0b156682b80845dbb544d237

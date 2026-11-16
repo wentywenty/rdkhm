@@ -1,0 +1,42 @@
+diff --git a/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp b/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp
+index 3544c0d..50b073d 100644
+--- a/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp
++++ b/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp
+@@ -94,7 +94,7 @@ int32_t SinkAdapterInit(struct SinkAdapter *adapter, const struct SinkAdapterAtt
+     sinkAttr.deviceNetworkId = attr->deviceNetworkId;
+     sinkAttr.deviceType = attr->deviceType;
+     sinkAttr.channelLayout = attr->channelLayout;
+-    sinkAttr.aux = attr->aux;
++    sinkAttr.aux = attr->aux != nullptr ? attr->aux : "";
+ 
+     return sink->Init(sinkAttr);
+ }
+diff --git a/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c b/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c
+index 4c3814f..92f7a51 100644
+--- a/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c
++++ b/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c
+@@ -4290,7 +4290,7 @@ static pa_hook_result_t SinkInputPutCb(pa_core *core, pa_sink_input *i, struct U
+ 
+ static int32_t PrepareDevice(struct Userdata *u, const char *filePath)
+ {
+-    struct SinkAdapterAttr sample_attrs;
++    struct SinkAdapterAttr sample_attrs = {0};
+     int32_t ret;
+ 
+     sample_attrs.format = ConvertPaToHdiAdapterFormat(u->ss.format);
+@@ -4330,7 +4330,7 @@ static int32_t PrepareDeviceOffload(struct Userdata *u)
+     const char *deviceNetworkId = safeProplistGets(u->sink->proplist, "NetworkId", "");
+     AUDIO_INFO_LOG("PrepareDeviceOffload enter, deviceClass %s, filePath %s",
+         u->offload.sinkAdapter->deviceClass, filePath);
+-    struct SinkAdapterAttr sample_attrs;
++    struct SinkAdapterAttr sample_attrs = {0};
+     int32_t ret;
+ 
+     enum AudioSampleFormatIntf format = ConvertPaToHdiAdapterFormat(u->ss.format);
+@@ -4918,4 +4918,4 @@ void PaHdiSinkFree(pa_sink *s)
+     pa_assert_se(u = s->userdata);
+ 
+     UserdataFree(u);
+-}
+\ No newline at end of file
++}

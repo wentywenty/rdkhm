@@ -1,0 +1,82 @@
+diff --git a/framework/core/host/src/hdf_device_node.c b/framework/core/host/src/hdf_device_node.c
+index 07d0c4c..b39368f 100644
+--- a/framework/core/host/src/hdf_device_node.c
++++ b/framework/core/host/src/hdf_device_node.c
+@@ -239,6 +239,9 @@ void HdfDeviceNodeDestruct(struct HdfDeviceNode *devNode)
+     switch (devNode->devStatus) {
+         case DEVNODE_LAUNCHED: /* fall-through */
+             HdfDeviceUnlaunchNode(devNode);
++#ifdef __KERNEL__
++            fallthrough;
++#endif
+         case DEVNODE_INITED:
+             HdfDeviceTokenFreeInstance(devNode->token);
+             devNode->token = NULL;
+diff --git a/framework/utils/src/hdf_sbuf.c b/framework/utils/src/hdf_sbuf.c
+index 0773a06..4b13fad 100644
+--- a/framework/utils/src/hdf_sbuf.c
++++ b/framework/utils/src/hdf_sbuf.c
+@@ -46,6 +46,7 @@ struct HdfSBufImpl *SbufBindIpc(uintptr_t base, size_t size) __attribute__((weak
+ struct HdfSBufImpl *SbufObtainIpcHw(size_t capacity) __attribute__((weak));
+ struct HdfSBufImpl *SbufBindRawIpcHw(uintptr_t base, size_t size) __attribute__((weak));
+ 
++#ifndef __KERNEL__
+ static const struct HdfSbufConstructor g_sbufConstructorMap[SBUF_TYPE_MAX] = {
+     [SBUF_RAW] = {
+         .obtain = SbufObtainRaw,
+@@ -69,6 +70,7 @@ static const struct HdfSbufConstructor *HdfSbufConstructorGet(uint32_t type)
+ 
+     return &g_sbufConstructorMap[type];
+ }
++#endif
+ 
+ uint8_t *HdfSbufGetData(const struct HdfSBuf *sbuf)
+ {
+@@ -266,6 +268,8 @@ struct HdfRemoteService *HdfSbufReadRemoteService(struct HdfSBuf *sbuf)
+     return sbuf->impl->readRemoteService(sbuf->impl);
+ }
+ 
++/* Kernel SBuf is RAW-only and cannot use the ARM64 floating-point ABI. */
++#ifndef __KERNEL__
+ bool HdfSbufWriteFloat(struct HdfSBuf *sbuf, float data)
+ {
+     HDF_SBUF_IMPL_CHECK_RETURN(sbuf, writeFloat, false);
+@@ -277,6 +281,7 @@ bool HdfSbufWriteDouble(struct HdfSBuf *sbuf, double data)
+     HDF_SBUF_IMPL_CHECK_RETURN(sbuf, writeDouble, false);
+     return sbuf->impl->writeDouble(sbuf->impl, data);
+ }
++#endif
+ 
+ bool HdfSbufWriteFileDescriptor(struct HdfSBuf *sbuf, int fd)
+ {
+@@ -490,4 +495,4 @@ struct HdfSBufImpl *HdfSbufGetImpl(struct HdfSBuf *sbuf)
+     }
+ 
+     return NULL;
+-}
+\ No newline at end of file
++}
+diff --git a/interfaces/inner_api/utils/hdf_sbuf.h b/interfaces/inner_api/utils/hdf_sbuf.h
+index 0b836e1..45f6b05 100644
+--- a/interfaces/inner_api/utils/hdf_sbuf.h
++++ b/interfaces/inner_api/utils/hdf_sbuf.h
+@@ -200,7 +200,9 @@ bool HdfSbufWriteString16(struct HdfSBuf *sbuf, const char16_t *value, uint32_t
+  *
+  * @since 1.0
+  */
++#ifndef __KERNEL__
+ bool HdfSbufWriteFloat(struct HdfSBuf *sbuf, float data);
++#endif
+ 
+ /**
+  * @brief Writes a double-precision floating-point number to a <b>SBuf</b>.
+@@ -212,7 +214,9 @@ bool HdfSbufWriteFloat(struct HdfSBuf *sbuf, float data);
+  *
+  * @since 1.0
+  */
++#ifndef __KERNEL__
+ bool HdfSbufWriteDouble(struct HdfSBuf *sbuf, double data);
++#endif
+ 
+ /**
+  * @brief Writes a file descriptor to a <b>SBuf</b>.

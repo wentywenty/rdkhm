@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<audioPolicyConfiguration version="2.0">
+    <adapters>
+        <adapter name="primary" supportSelectScene="0">
+            <pipes>
+                <pipe name="primary_output" role="output">
+                    <paProp lib="libmodule-hdi-sink.z.so" role="sink" fixed_latency="1" render_in_idle_state="1" moduleName="Speaker"/>
+                    <streamProps>
+                        <streamProp format="s16le" sampleRates="48000" channelLayout="CH_LAYOUT_STEREO" bufferSize="4096" supportDevices="Speaker_Out, Wired_Headset_Out, Wired_Headphones_Out"/>
+                    </streamProps>
+                    <attributes>
+                        <attribute name="preload" value="true"/>
+                        <attribute name="flag" value="AUDIO_OUTPUT_FLAG_NORMAL"/>
+                    </attributes>
+                </pipe>
+                <pipe name="primary_input" role="input">
+                    <paProp lib="libmodule-hdi-source.z.so" role="source" moduleName="Built_in_mic"/>
+                    <streamProps>
+                        <streamProp format="s16le" sampleRates="48000" channelLayout="CH_LAYOUT_STEREO" bufferSize="8192" supportDevices="Builtin_Mic_In, Wired_Headset_In"/>
+                    </streamProps>
+                    <attributes>
+                        <attribute name="flag" value="AUDIO_INPUT_FLAG_NORMAL"/>
+                    </attributes>
+                </pipe>
+            </pipes>
+            <devices>
+                <device name="Speaker_Out" type="DEVICE_TYPE_SPEAKER" pin="PIN_OUT_SPEAKER" role="output" supportPipes="primary_output"/>
+                <device name="Wired_Headset_Out" type="DEVICE_TYPE_WIRED_HEADSET" pin="PIN_OUT_HEADSET" role="output" supportPipes="primary_output"/>
+                <device name="Wired_Headphones_Out" type="DEVICE_TYPE_WIRED_HEADPHONES" pin="PIN_OUT_HEADPHONE" role="output" supportPipes="primary_output"/>
+                <device name="Builtin_Mic_In" type="DEVICE_TYPE_MIC" pin="PIN_IN_MIC" role="input" supportPipes="primary_input"/>
+                <device name="Wired_Headset_In" type="DEVICE_TYPE_WIRED_HEADSET" pin="PIN_IN_HS_MIC" role="input" supportPipes="primary_input"/>
+            </devices>
+        </adapter>
+    </adapters>
+    <volumeGroups><groups><group name="volume_group"><sink name="primary_out"/></group></groups></volumeGroups>
+    <interruptGroups><groups><group name="interrupt_group"><sink name="primary_out"/></group></groups></interruptGroups>
+    <globalConfigs>
+        <defaultOutput adapter="primary" pipe="primary_output" device="Speaker"/>
+        <commonConfigs>
+            <attribute name="updateRouteSupport" value="false"/>
+            <attribute name="maxRendereres" value="128"/>
+            <attribute name="maxCapturers" value="16"/>
+        </commonConfigs>
+        <paConfigs>
+            <attribute name="audioLatency" value="90"/>
+            <attribute name="sinkLatency" value="40"/>
+        </paConfigs>
+    </globalConfigs>
+</audioPolicyConfiguration>

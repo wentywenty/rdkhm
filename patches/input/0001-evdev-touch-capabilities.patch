@@ -1,0 +1,53 @@
+diff --git a/input/udriver/src/input_device_manager.cpp b/input/udriver/src/input_device_manager.cpp
+index cb7cf3e..06bf23b 100644
+--- a/input/udriver/src/input_device_manager.cpp
++++ b/input/udriver/src/input_device_manager.cpp
+@@ -230,6 +230,8 @@ int32_t InputDeviceManager::GetInputDeviceInfo(int32_t fd, InputDeviceInfo *deta
+     char buffer[DEVICE_INFO_SIZE] {};
+     struct input_id inputId {};
+     // get the abilitys.
++    (void)ioctl(fd, EVIOCGPROP(sizeof(detailInfo->abilitySet.devProp)), &detailInfo->abilitySet.devProp);
++    (void)ioctl(fd, EVIOCGBIT(0, sizeof(detailInfo->abilitySet.eventType)), &detailInfo->abilitySet.eventType);
+     (void)ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(detailInfo->abilitySet.keyCode)), &detailInfo->abilitySet.keyCode);
+     (void)ioctl(fd, EVIOCGBIT(EV_REL, sizeof(detailInfo->abilitySet.relCode)), &detailInfo->abilitySet.relCode);
+     (void)ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(detailInfo->abilitySet.absCode)), &detailInfo->abilitySet.absCode);
+@@ -258,8 +260,8 @@ int32_t InputDeviceManager::GetInputDeviceInfo(int32_t fd, InputDeviceInfo *deta
+     detailInfo->attrSet.id.vendor = inputId.vendor;
+     detailInfo->attrSet.id.version = inputId.version;
+     // ABS Info
+-    for (uint32_t i = 0; i < BITS_TO_UINT64(ABS_CNT); i++) {
+-        if (detailInfo->abilitySet.absCode[i] > 0) {
++    for (uint32_t i = 0; i < ABS_CNT; i++) {
++        if ((detailInfo->abilitySet.absCode[i / 64] & (uint64_t{1} << (i % 64))) != 0) {
+             if (ioctl(fd, EVIOCGABS(i), &detailInfo->attrSet.axisInfo[i])) {
+                 HDF_LOGE("%{public}s: get axis info failed fd = %{public}d name = %{public}s errormsg = %{public}s",
+                          __func__, fd, detailInfo->attrSet.devName, strerror(errno));
+@@ -270,9 +272,18 @@ int32_t InputDeviceManager::GetInputDeviceInfo(int32_t fd, InputDeviceInfo *deta
+     return INPUT_SUCCESS;
+ }
+ 
+-uint32_t GetInputDeviceTypeInfo(const string &devName)
++uint32_t GetInputDeviceTypeInfo(const string &devName, const InputDeviceInfo &info)
+ {
+     uint32_t type {INDEV_TYPE_UNKNOWN};
++    auto hasAbs = [&info](uint32_t code) {
++        return (info.abilitySet.absCode[code / 64] & (uint64_t{1} << (code % 64))) != 0;
++    };
++    const bool direct = (info.abilitySet.devProp[INPUT_PROP_DIRECT / 64] &
++        (uint64_t{1} << (INPUT_PROP_DIRECT % 64))) != 0;
++    if (direct && ((hasAbs(ABS_MT_POSITION_X) && hasAbs(ABS_MT_POSITION_Y)) ||
++        (hasAbs(ABS_X) && hasAbs(ABS_Y)))) {
++        return INDEV_TYPE_TOUCH;
++    }
+     if (devName.find("input_mt_wrapper") != std::string::npos) {
+         type = INDEV_TYPE_TOUCH;
+     } else if ((devName.find("Keyboard") != std::string::npos) &&
+@@ -325,7 +336,7 @@ int32_t InputDeviceManager::CreateInputDevListNode(InputDevListNode &inputDevNod
+     (void)memset_s(&inputDevNode, sizeof(inputDevNode), 0, sizeof(inputDevNode));
+     (void)GetInputDeviceInfo(fd, detailInfo.get());
+     auto sDevName = string(detailInfo->attrSet.devName);
+-    uint32_t type = GetInputDeviceTypeInfo(sDevName);
++    uint32_t type = GetInputDeviceTypeInfo(sDevName, *detailInfo);
+     if (type == INDEV_TYPE_UNKNOWN) {
+         uint64_t ownerTag = fdsan_create_owner_tag(FDSAN_OWNER_TYPE_FILE, DRIVERS_PERIPHERAL_INPUT_FDSAN_TAG);
+         fdsan_close_with_tag(fd, ownerTag);

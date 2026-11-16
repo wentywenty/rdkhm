@@ -1,0 +1,59 @@
+diff --git a/display/composer/vdi_base/include/drm_plane.h b/display/composer/vdi_base/include/drm_plane.h
+index 373d307..6675b5f 100644
+--- a/display/composer/vdi_base/include/drm_plane.h
++++ b/display/composer/vdi_base/include/drm_plane.h
+@@ -15,6 +15,7 @@
+ 
+ #ifndef DRM_PLANE_H
+ #define DRM_PLANE_H
++#include <algorithm>
+ #include <cinttypes>
+ #include <string>
+ #include <vector>
+@@ -167,6 +168,10 @@ public:
+     {
+         return mType;
+     }
++    bool SupportsFormat(uint32_t format) const
++    {
++        return std::find(mFormats.begin(), mFormats.end(), format) != mFormats.end();
++    }
+     void BindToPipe(uint32_t pipe)
+     {
+         mPipe = pipe;
+diff --git a/display/composer/vdi_base/src/drm_device.cpp b/display/composer/vdi_base/src/drm_device.cpp
+index 9809e5f..57bb39f 100644
+--- a/display/composer/vdi_base/src/drm_device.cpp
++++ b/display/composer/vdi_base/src/drm_device.cpp
+@@ -276,6 +276,12 @@ std::vector<std::shared_ptr<DrmPlane>> DrmDevice::GetDrmPlane(uint32_t pipe, uin
+ {
+     std::vector<std::shared_ptr<DrmPlane>> planes;
+     for (const auto &plane : mPlanes) {
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++        // The CPU client target and startup frame use linear BGRA_8888 (DRM AR24).
++        if (type == DRM_PLANE_TYPE_PRIMARY && !plane->SupportsFormat(DRM_FORMAT_ARGB8888)) {
++            continue;
++        }
++#endif
+         if (plane->IsIdle() && ((1 << pipe) & plane->GetPossibleCrtcs()) && (type == plane->GetType())) {
+             planes.push_back(plane);
+         }
+@@ -327,6 +333,18 @@ std::unordered_map<uint32_t, std::shared_ptr<HdiDisplay>> DrmDevice::DiscoveryDi
+     FindAllEncoder(res);
+     FindAllConnector(res);
+     FindAllPlane();
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    // Both startup and hotplug selectors use this map. Exclude YUV-only pipes.
++    for (auto it = mCrtcs.begin(); it != mCrtcs.end();) {
++        if (GetDrmPlane(it->second->GetPipe(), DRM_PLANE_TYPE_PRIMARY).empty()) {
++            DISPLAY_LOGW("exclude CRTC %{public}u pipe %{public}u: no ARGB8888 primary plane",
++                it->first, it->second->GetPipe());
++            it = mCrtcs.erase(it);
++        } else {
++            ++it;
++        }
++    }
++#endif
+     DISPLAY_LOGD();
+     // travel all connector
+     for (auto &connectorPair : mConnectors) {

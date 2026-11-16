@@ -1,0 +1,29 @@
+diff --git a/drivers/gpu/drm/verisilicon/dc/dc_proc/dc_proc.c b/drivers/gpu/drm/verisilicon/dc/dc_proc/dc_proc.c
+index db8be039a..7b4c58858 100644
+--- a/drivers/gpu/drm/verisilicon/dc/dc_proc/dc_proc.c
++++ b/drivers/gpu/drm/verisilicon/dc/dc_proc/dc_proc.c
+@@ -434,6 +434,8 @@ void dc_plane_destroy(struct vs_plane *vs_plane)
+ {
+ 	struct dc_plane *dc_plane = to_dc_plane(vs_plane);
+ 
++	/* The DC device survives DRM cleanup when component binding is deferred. */
++	list_del_init(&dc_plane->head);
+ 	__dc_proc_destroy(&dc_plane->list);
+ 	if (vs_plane->info) {
+ 		if (vs_plane->info->modifiers && vs_plane->info->num_modifiers > NUM_MODIFIERS) {
+@@ -665,6 +667,7 @@ void dc_crtc_destroy(struct vs_crtc *vs_crtc)
+ {
+ 	struct dc_crtc *dc_crtc = to_dc_crtc(vs_crtc);
+ 
++	list_del_init(&dc_crtc->head);
+ 	__dc_proc_destroy(&dc_crtc->list);
+ 
+ 	kfree(dc_crtc);
+@@ -935,6 +938,7 @@ void dc_wb_destroy(struct vs_wb *vs_wb)
+ {
+ 	struct dc_wb *dc_wb = to_dc_wb(vs_wb);
+ 
++	list_del_init(&dc_wb->head);
+ 	__dc_proc_destroy(&dc_wb->list);
+ 
+ 	kfree(dc_wb);

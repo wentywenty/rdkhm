@@ -1,0 +1,25 @@
+#!/bin/sh
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mkdir -p /dev/pts /run /tmp /var/log
+mount -t devpts devpts /dev/pts
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+echo 'RDKHM X5 BRINGUP ONLY - OpenHarmony desktop is not installed'
+uname -a
+cat /proc/cmdline
+if /bin/kernel-probe > /var/log/kernel-probe.log 2>&1; then
+    echo 'Kernel ABI smoke test completed successfully'
+else
+    echo 'Kernel ABI smoke test FAILED; see /var/log/kernel-probe.log'
+fi
+cat /var/log/kernel-probe.log
+dmesg > /var/log/dmesg-boot.log
+sync
+echo 'Serial root shell, no password. Offline development image only.'
+while true; do
+    setsid cttyhack /bin/sh
+    sleep 1
+done

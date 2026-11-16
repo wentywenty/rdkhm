@@ -1,0 +1,7 @@
+const.product.manufacturer=D-Robotics
+const.product.brand=RDKHM
+const.product.model=RDK-X5
+const.product.name=rdk_x5
+const.product.device=rdk_x5
+const.product.board=rdk_x5
+const.product.cpu.abilist=arm64-v8a

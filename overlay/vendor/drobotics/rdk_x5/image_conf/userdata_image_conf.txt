@@ -1,0 +1,5 @@
+/data
+2147483648
+--fs_type=ext4
+--encrypt=true
+--dac_config ../../build/ohos/images/mkimage/dac.txt

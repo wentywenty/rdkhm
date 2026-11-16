@@ -1,0 +1,2 @@
+# Patch context must retain upstream whitespace and CRLF bytes.
+patches/** -text -whitespace

@@ -1,0 +1,205 @@
+diff --git a/driver/bsle/ble_driver/linux/ble_host_hcc.c b/driver/bsle/ble_driver/linux/ble_host_hcc.c
+index 5bf3c1b..4a8d1c7 100644
+--- a/driver/bsle/ble_driver/linux/ble_host_hcc.c
++++ b/driver/bsle/ble_driver/linux/ble_host_hcc.c
+@@ -5,7 +5,7 @@
+ 
+ #include <net/bluetooth/bluetooth.h>
+ #include <net/bluetooth/hci_core.h>
+-#include <linux/unaligned.h>
++#include <asm/unaligned.h>
+ #include <linux/kernel.h>
+ #include <linux/skbuff.h>
+ 
+@@ -580,7 +580,9 @@ static void bt_unregister_hci_dev(void)
+     hcc_debug("exit bt_unregister_hci_dev\n");
+ }
+ 
++#if defined(CONFIG_PLAT_SUPPORT_DFR)
+ static oal_int32 ext_bluetooth_dfr_recovery(void);
++#endif
+ 
+ static oal_int32 set_bt_addr(void)
+ {
+diff --git a/driver/bsle/sle_driver/sle_dev/sle_dev.c b/driver/bsle/sle_driver/sle_dev/sle_dev.c
+index ad6ce20..7475f3e 100755
+--- a/driver/bsle/sle_driver/sle_dev/sle_dev.c
++++ b/driver/bsle/sle_driver/sle_dev/sle_dev.c
+@@ -313,13 +313,13 @@ static void sle_misc_device_deregister(void)
+     printk(KERN_INFO"sle_misc_device_deregister sle device have removed\n");
+ }
+ 
+-static void sle_remove(struct platform_device *dev)
++static int sle_remove(struct platform_device *dev)
+ {
+     printk(KERN_INFO"%s:%d in\n", __FUNCTION__, __LINE__);
+     sle_misc_device_deregister();
+     osal_spin_lock_destroy(&g_sle_dev.rx_lock);
+     wake_up_interruptible(&g_sle_dev.rx_wait);
+-    return;
++    return 0;
+ }
+ 
+ static struct platform_driver sle_platform_driver = {
+@@ -349,4 +349,4 @@ void sle_dev_exit(void)
+     printk(KERN_INFO"sle_dev_exit unregister sle soc device\n");
+     platform_driver_unregister(&sle_platform_driver);
+     printk(KERN_INFO"sle_dev_exit unregister platform sle driverce\n");
+-}
+\ No newline at end of file
++}
+diff --git a/driver/bsle/sle_driver/sle_host_register.c b/driver/bsle/sle_driver/sle_host_register.c
+index 17b21a5..7b05a96 100644
+--- a/driver/bsle/sle_driver/sle_host_register.c
++++ b/driver/bsle/sle_driver/sle_host_register.c
+@@ -1,7 +1,7 @@
+ /*
+  * Copyright (c) CompanyNameMagicTag 2020-2020. All rights reserved.
+  */
+-#include <linux/unaligned.h>
++#include <asm/unaligned.h>
+ #include "sle_dev.h"
+ #include "sle_tm_chba_proc.h"
+ #include "sle_hcc_proc.h"
+diff --git a/driver/platform/libc_sec/include/securec.h b/driver/platform/libc_sec/include/securec.h
+index b035a18..91f40dc 100644
+--- a/driver/platform/libc_sec/include/securec.h
++++ b/driver/platform/libc_sec/include/securec.h
+@@ -17,8 +17,12 @@
+ #endif
+ 
+ #if SECUREC_HAVE_STDARG_H
++#ifdef __KERNEL__
++#include <linux/stdarg.h>
++#else
+ #include <stdarg.h>
+ #endif
++#endif
+ 
+ #ifndef SECUREC_HAVE_ERRNO_H
+ #define SECUREC_HAVE_ERRNO_H 1
+diff --git a/driver/platform/osal/include/soc_osal.h b/driver/platform/osal/include/soc_osal.h
+index d9619d1..33e9f88 100644
+--- a/driver/platform/osal/include/soc_osal.h
++++ b/driver/platform/osal/include/soc_osal.h
+@@ -9,8 +9,12 @@
+ #define __SOC_OSAL_H__
+ 
+ #ifndef CONFIG_NON_OS
++#ifdef __KERNEL__
++#include <linux/stdarg.h>
++#else
+ #include <stdarg.h>
+ #endif
++#endif
+ #ifdef CONFIG_NO_SUPPORT_OSAL
+ #include <linux/vmalloc.h>
+ #include <linux/slab.h>
+diff --git a/driver/platform/osal/linux/osal_timer.c b/driver/platform/osal/linux/osal_timer.c
+index 9802b49..f77359f 100644
+--- a/driver/platform/osal/linux/osal_timer.c
++++ b/driver/platform/osal/linux/osal_timer.c
+@@ -99,7 +99,7 @@ int osal_timer_stop(osal_timer *timer)
+     }
+ 
+     time_info = (struct timer_list_info *)timer->timer;
+-    return timer_delete(&time_info->time_list);
++    return del_timer(&time_info->time_list);
+ }
+ EXPORT_SYMBOL(osal_timer_stop);
+ 
+@@ -113,7 +113,7 @@ int osal_timer_destroy(osal_timer *timer)
+     }
+ 
+     time_info = (struct timer_list_info *)timer->timer;
+-    timer_delete(&time_info->time_list);
++    del_timer(&time_info->time_list);
+     kfree(time_info);
+     timer->timer = NULL;
+     return 0;
+diff --git a/driver/platform/pm/plat_pm_board.c b/driver/platform/pm/plat_pm_board.c
+index abeedd7..e24e999 100644
+--- a/driver/platform/pm/plat_pm_board.c
++++ b/driver/platform/pm/plat_pm_board.c
+@@ -638,11 +638,11 @@ err_init:
+     return BOARD_FAIL;
+ }
+ 
+-static void pm_board_remove(struct platform_device *pdev)
++static int pm_board_remove(struct platform_device *pdev)
+ {
+     pm_board_gpio_deinit();
+ 
+-    return;
++    return 0;
+ }
+ 
+ #if defined(_PRE_OS_VERSION) && defined(_PRE_OS_VERSION_LINUX) && (_PRE_OS_VERSION_LINUX == _PRE_OS_VERSION)
+diff --git a/driver/wifi/inc/oal/oal_net.h b/driver/wifi/inc/oal/oal_net.h
+index 63781b6..3985a37 100644
+--- a/driver/wifi/inc/oal/oal_net.h
++++ b/driver/wifi/inc/oal/oal_net.h
+@@ -1364,6 +1364,7 @@ static inline td_s32 oal_nla_type(const oal_nlattr_stru *nla)
+     return nla_type(nla);
+ }
+ 
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 38))
+ static inline oal_cfg80211_registered_device_stru *oal_wiphy_to_dev(oal_wiphy_stru *wiphy)
+ {
+ #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0))
+@@ -1372,6 +1373,7 @@ static inline oal_cfg80211_registered_device_stru *oal_wiphy_to_dev(oal_wiphy_st
+     return wiphy_to_rdev(wiphy);
+ #endif
+ }
++#endif
+ 
+ static inline td_u16  oal_csum_ipv6_magic(oal_in6_addr *ipv6_s,       oal_in6_addr *ipv6_d,
+     td_u32 len, td_u16 proto, td_u32 sum)
+diff --git a/driver/wifi/inc/oal/oal_net_cfg80211.h b/driver/wifi/inc/oal/oal_net_cfg80211.h
+index 6b0f3d4..0d00ded 100644
+--- a/driver/wifi/inc/oal/oal_net_cfg80211.h
++++ b/driver/wifi/inc/oal/oal_net_cfg80211.h
+@@ -15,6 +15,7 @@
+ #include <net/ip6_checksum.h>
+ #include <net/ipv6.h>
+ #include <net/arp.h>
++#include <net/genetlink.h>
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0))
+ #include <net/sock.h>
+ #endif
+@@ -24,7 +25,6 @@
+ #else
+ #include <net/wireless.h>
+ #endif
+-#include <net/wireless/nl80211.h>
+ 
+ #include <linux/version.h>
+ #include <linux/netdevice.h>
+diff --git a/driver/wifi/wal/release/linux/wal_linux_cfg80211.c b/driver/wifi/wal/release/linux/wal_linux_cfg80211.c
+index 8d69ba7..7fb06d9 100644
+--- a/driver/wifi/wal/release/linux/wal_linux_cfg80211.c
++++ b/driver/wifi/wal/release/linux/wal_linux_cfg80211.c
+@@ -1892,7 +1892,7 @@ OAL_STATIC osal_s32 uapi_cfg80211_set_channel(oal_wiphy_stru *wiphy, oal_net_dev
+ 
+ *****************************************************************************/
+ #if defined(LINUX_VERSION_CODE) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,34))
+-OAL_STATIC osal_s32 uapi_cfg80211_set_wiphy_params(oal_wiphy_stru *wiphy, osal_s32 radio_idx, osal_u32 changed)
++OAL_STATIC osal_s32 uapi_cfg80211_set_wiphy_params(oal_wiphy_stru *wiphy, osal_u32 changed)
+ {
+     /* 通过HOSTAPD 设置RTS 门限，分片门限 uapi_witp_set_frag uapi_witp_set_rts */
+     oam_warning_log0(0, OAM_SF_CFG,
+@@ -2427,12 +2427,12 @@ OAL_STATIC osal_s32 wal_cfg80211_fill_beacon_param(oal_net_device_stru *netdev,
+ 
+ *****************************************************************************/
+ OAL_STATIC osal_s32 uapi_cfg80211_change_beacon(oal_wiphy_stru *wiphy, oal_net_device_stru *netdev,
+-    struct cfg80211_ap_update *info)
++    struct cfg80211_beacon_data *info)
+ {
+     mac_beacon_param_stru        beacon_param;  /* beacon info struct */
+     osal_s32                    l_ret;
+ 
+-    oal_beacon_data_stru *beacon_info = &info->beacon;
++    oal_beacon_data_stru *beacon_info = info;
+     wal_record_wifi_external_log(WLAN_WIFI_CFG80211_OPS, __func__);
+     oam_info_log0(0, OAM_SF_ANY, "{uapi_cfg80211_change_beacon::enter here.}");
+ #ifdef _PRE_WLAN_FEATURE_DFR

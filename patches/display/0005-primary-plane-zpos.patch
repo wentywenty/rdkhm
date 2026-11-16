@@ -1,0 +1,18 @@
+diff --git a/display/composer/vdi_base/src/hdi_drm_composition.cpp b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+index 383021c..d68ebef 100644
+--- a/display/composer/vdi_base/src/hdi_drm_composition.cpp
++++ b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+@@ -144,10 +144,13 @@ int32_t HdiDrmComposition::ApplyPlane(HdiDrmLayer &layer,
+     ret = SetSrcProperty(drmPlane, pset, bufferW, bufferH);
+     DISPLAY_CHK_RETURN((ret < 0), DISPLAY_FAILURE, DISPLAY_LOGE("set Src fialed errno : %{public}d", errno));
+ 
++#ifndef RDK_X5_SOFTWARE_COMPOSITION
+     ret = drmModeAtomicAddProperty(pset, drmPlane.GetId(), drmPlane.GetPropZposId(), layer.GetZorder());
+     DISPLAY_LOGD("set the fb planeid %{public}d, GetPropZposId %{public}d, zpos %{public}d",
+         drmPlane.GetId(), drmPlane.GetPropZposId(), layer.GetZorder());
+     DISPLAY_CHK_RETURN((ret < 0), DISPLAY_FAILURE, DISPLAY_LOGE("set the zpos fialed errno : %{public}d", errno));
++#endif
++    // X5 scans out one composed primary plane; retain its kernel-default zpos.
+ 
+     // set fb id
+     DrmGemBuffer *gemBuffer = layer.GetGemBuffer();

@@ -1,0 +1,8 @@
+{
+  "subsystem": "product_rdk_x5",
+  "parts": {
+    "product_rdk_x5": {
+      "module_list": ["//vendor/drobotics/rdk_x5:board_files"]
+    }
+  }
+}

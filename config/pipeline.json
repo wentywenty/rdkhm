@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "stages": {
+    "fetch": [["bash", "scripts/fetch-sources.sh"], ["bash", "scripts/sync-openharmony.sh"]],
+    "prepare": [["bash", "scripts/prepare-kernel.sh"], ["bash", "scripts/prepare-openharmony.sh"]],
+    "kernel": [["bash", "scripts/build-kernel.sh", "Image"], ["bash", "scripts/build-kernel.sh", "dtbs"], ["bash", "scripts/build-kernel.sh", "modules"], ["bash", "scripts/build-bringup-userspace.sh"]],
+    "userspace": [["bash", "scripts/build-openharmony.sh"]],
+    "drivers": [["python3", "scripts/prepare-accelerators.py"], ["bash", "scripts/build-accelerator-modules.sh"], ["bash", "scripts/build-nearlink.sh"], ["python3", "scripts/import-driver-firmware.py"], ["python3", "scripts/prepare-driver-bundle.py"]],
+    "image": [["bash", "scripts/make-openharmony-image.sh"]],
+    "verify": [["python3", "scripts/verify-openharmony-image.py"]]
+  },
+  "profiles": {
+    "all": ["fetch", "prepare", "kernel", "userspace", "drivers", "image", "verify"],
+    "build": ["prepare", "kernel", "userspace", "drivers", "image", "verify"],
+    "package": ["image", "verify"]
+  }
+}

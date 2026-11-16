@@ -1,0 +1,13 @@
+diff --git a/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp b/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp
+index 9346563..479baab 100644
+--- a/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp
++++ b/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp
+@@ -1353,7 +1353,7 @@ ErrCode OsAccountControlFileManager::GetAccountIndexInfo(std::string &accountInd
+     if (result != ERR_OK) {
+         return result;
+     }
+-    auto accountIndexJson = osAccountInfos.empty() ? CreateJsonNull() : CreateJson();
++    auto accountIndexJson = CreateJson();
+     for (auto account = osAccountInfos.begin(); account != osAccountInfos.end(); account++) {
+         // private account don't check name
+         if (account->GetType() == OsAccountType::PRIVATE) {

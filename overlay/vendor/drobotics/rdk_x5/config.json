@@ -1,0 +1,186 @@
+{
+  "product_name": "rdk_x5",
+  "device_company": "drobotics",
+  "device_build_path": "device/board/drobotics/rdk_x5",
+  "target_cpu": "arm64",
+  "target_os": "ohos",
+  "type": "standard",
+  "version": "3.0",
+  "board": "rdk_x5",
+  "enable_ramdisk": false,
+  "enable_absystem": false,
+  "build_selinux": true,
+  "support_jsapi": true,
+  "inherit": [
+    "productdefine/common/base/standard_system.json",
+    "productdefine/common/inherit/rich.json",
+    "productdefine/common/inherit/chipset_common.json"
+  ],
+  "subsystems": [
+    {
+      "subsystem": "resourceschedule",
+      "components": [
+        {"component": "memmgr", "features": [
+          "memmgr_purgeable_memory = false",
+          "memmgr_hyperhold_memory = false"
+        ]}
+      ]
+    },
+    {
+      "subsystem": "graphic",
+      "components": [
+        {"component": "graphic_2d", "features": [
+          "graphic_2d_feature_ace_enable_gpu = true",
+          "graphic_2d_feature_enable_opengl = false",
+          "graphic_2d_feature_enable_vulkan = false",
+          "graphic_2d_feature_parallel_render_enable = false",
+          "graphic_2d_feature_rs_enable_profiler = false"
+        ]},
+        {"component": "graphics_effect"},
+        {"component": "graphic_3d"},
+        {"component": "graphic_utils_lite"},
+        {"component": "vulkan-loader"},
+        {"component": "vulkan-headers"}
+      ]
+    },
+    {
+      "subsystem": "multimedia",
+      "components": [{"component": "video_processing_engine"}]
+    },
+    {
+      "subsystem": "castplus",
+      "components": [{"component": "sharing_framework"}, {"component": "cast_engine"}]
+    },
+    {
+      "subsystem": "tee",
+      "components": [{"component": "tee_client"}]
+    },
+    {
+      "subsystem": "global",
+      "components": [{"component": "font_manager"}]
+    },
+    {
+      "subsystem": "arkui",
+      "components": [
+        {"component": "ace_engine", "features": ["ace_engine_feature_enable_accessibility = true"]},
+        {"component": "napi"},
+        {"component": "ui_appearance"}
+      ]
+    },
+    {
+      "subsystem": "deviceprofile",
+      "components": [{"component": "device_info_manager"}]
+    },
+    {
+      "subsystem": "account",
+      "components": [{"component": "os_account"}]
+    },
+    {
+      "subsystem": "distributeddatamgr",
+      "components": [
+        {"component": "kv_store"},
+        {"component": "relational_store"},
+        {"component": "data_share"}
+      ]
+    },
+    {
+      "subsystem": "notification",
+      "components": [{"component": "common_event_service"}]
+    },
+    {
+      "subsystem": "distributedhardware",
+      "components": [{"component": "device_manager"}]
+    },
+    {
+      "subsystem": "arkcompiler",
+      "components": [
+        {"component": "runtime_core"},
+        {"component": "ets_runtime"},
+        {"component": "ets_frontend"},
+        {"component": "toolchain"}
+      ]
+    },
+    {
+      "subsystem": "sdk",
+      "components": [{"component": "sdk"}]
+    },
+    {
+      "subsystem": "security",
+      "components": [{"component": "crypto_framework"}, {"component": "asset"}]
+    },
+    {
+      "subsystem": "thirdparty",
+      "components": [
+        {"component": "rust_libc"},
+        {"component": "libusb"},
+        {"component": "lzma"},
+        {"component": "sqlite"},
+        {"component": "protobuf"},
+        {"component": "abseil-cpp"},
+        {"component": "typescript"},
+        {"component": "zlib"},
+        {"component": "optimized_routines"},
+        {"component": "pcre2"},
+        {"component": "noto-cjk"},
+        {"component": "notofonts"},
+        {"component": "tex-hyphen"},
+        {"component": "alsa-lib", "features": ["alsa_lib_feature_config_enable = true"]},
+        {"component": "wpa_supplicant", "features": ["wpa_supplicant_driver_nl80211 = true"]}
+      ]
+    },
+    {
+      "subsystem": "hdf",
+      "components": [
+        {"component": "drivers_peripheral_input", "features": [
+          "drivers_peripheral_input_feature_model = false",
+          "drivers_peripheral_input_feature_udriver = true"
+        ]},
+        {"component": "drivers_peripheral_display", "features": [
+          "drivers_peripheral_display_vdi_default = true"
+        ]},
+        {"component": "drivers_interface_lpplayer"},
+        {"component": "drivers_interface_bluetooth"},
+        {"component": "drivers_interface_audio"},
+        {"component": "drivers_interface_camera"},
+        {"component": "drivers_peripheral_audio", "features": [
+          "drivers_peripheral_audio_feature_alsa_lib = true",
+          "drivers_peripheral_audio_feature_hal_notsupport_pathselect = true"
+        ]},
+        {"component": "drivers_peripheral_camera", "features": [
+          "drivers_peripheral_camera_feature_usb = true",
+          "drivers_peripheral_camera_use_commom_usb_camera_host_config = true"
+        ]},
+        {"component": "drivers_peripheral_codec", "features": [
+          "drivers_peripheral_codec_feature_support_omx_extend_test = true",
+          "drivers_peripheral_codec_feature_support_hdi_v1 = true"
+        ]},
+        {"component": "drivers_peripheral_wlan", "features": [
+          "drivers_peripheral_wlan_feature_enable_HDF_NL80211 = false",
+          "drivers_peripheral_wlan_feature_enable_HDF_WLAN_EXTEND_VDI = false",
+          "drivers_peripheral_wlan_feature_enable_HDF_UT = false"
+        ]},
+        {"component": "hdf_core", "features": ["hdf_core_default_peripheral_config = false"]}
+      ]
+    },
+    {
+      "subsystem": "communication",
+      "components": [
+        {"component": "dsoftbus", "features": ["dsoftbus_get_devicename = false"]}
+      ]
+    },
+    {
+      "subsystem": "developtools",
+      "components": [{"component": "hdc"}, {"component": "ace_ets2bundle"}]
+    },
+    {
+      "subsystem": "ability",
+      "components": [
+        {"component": "idl_tool"},
+        {"component": "ability_base"},
+        {"component": "dmsfwk"},
+        {"component": "ability_runtime"},
+        {"component": "bundle_framework"}
+      ]
+    }
+  ]
+}

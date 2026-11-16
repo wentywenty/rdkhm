@@ -1,0 +1,163 @@
+diff --git a/display/composer/vdi_base/include/hdi_drm_composition.h b/display/composer/vdi_base/include/hdi_drm_composition.h
+index 49dfcfe..69214bc 100644
+--- a/display/composer/vdi_base/include/hdi_drm_composition.h
++++ b/display/composer/vdi_base/include/hdi_drm_composition.h
+@@ -53,7 +53,7 @@ public:
+     int32_t Init() override;
+     int32_t SetLayers(std::vector<HdiLayer *> &layers, HdiLayer &clientLayer) override;
+     int32_t Apply(bool modeSet) override;
+-    int32_t UpdateMode(std::unique_ptr<DrmModeBlock> &modeBlock);
++    int32_t UpdateMode(drmModeAtomicReqPtr pset, std::unique_ptr<DrmModeBlock> &modeBlock);
+ 
+ private:
+     int32_t ApplyPlane(HdiDrmLayer &layer, HdiLayer &hlayer, DrmPlane &drmPlane, drmModeAtomicReqPtr pset);
+diff --git a/display/composer/vdi_base/src/drm_device.cpp b/display/composer/vdi_base/src/drm_device.cpp
+index bc380eb..9809e5f 100644
+--- a/display/composer/vdi_base/src/drm_device.cpp
++++ b/display/composer/vdi_base/src/drm_device.cpp
+@@ -348,7 +348,11 @@ std::unordered_map<uint32_t, std::shared_ptr<HdiDisplay>> DrmDevice::DiscoveryDi
+         // create the display
+         std::shared_ptr<HdiDisplay> display = std::make_shared<DrmDisplay>(connector, crtc, mInstance);
+         DISPLAY_LOGD();
+-        display->Init();
++        ret = display->Init();
++        if (ret != DISPLAY_SUCCESS) {
++            DISPLAY_LOGE("display init failed for connector %{public}u: %{public}d", connector->GetId(), ret);
++            continue;
++        }
+         dispId = display->GetId();
+         connectorId = connector->GetId();
+         mDisplays.emplace(dispId, std::move(display));
+diff --git a/display/composer/vdi_base/src/drm_display.cpp b/display/composer/vdi_base/src/drm_display.cpp
+index 1b13a83..89368fc 100644
+--- a/display/composer/vdi_base/src/drm_display.cpp
++++ b/display/composer/vdi_base/src/drm_display.cpp
+@@ -105,6 +105,12 @@ int32_t DrmDisplay::GetDisplayPowerStatus(DispPowerStatus *status)
+ 
+ int32_t DrmDisplay::SetDisplayPowerStatus(DispPowerStatus status)
+ {
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    uint32_t drmPowerState;
++    int32_t ret = ConvertToDrmPowerState(status, drmPowerState);
++    DISPLAY_CHK_RETURN(ret != DISPLAY_SUCCESS, ret, DISPLAY_LOGE("invalid display power state"));
++    return mConnector->SetDpmsState(drmPowerState);
++#else
+     static int32_t fb_fd  = -1;
+     int32_t err = -1;
+     const uint32_t FBIOBLANK = 0x4611; /* arg: 0 or vesa level + 1 */
+@@ -138,6 +144,7 @@ int32_t DrmDisplay::SetDisplayPowerStatus(DispPowerStatus status)
+     }
+ 
+     return DISPLAY_SUCCESS;
++#endif
+ }
+ 
+ int32_t DrmDisplay::ConvertToHdiPowerState(uint32_t drmPowerState, DispPowerStatus &hdiPowerState)
+@@ -239,9 +246,9 @@ int32_t DrmDisplay::PushFirstFrame()
+ 
+     std::vector<HdiLayer *> layers;
+     HdiDrmComposition *drmComp = static_cast<HdiDrmComposition *>(mComposer->GetPostCompostion());
+-    drmComp->SetLayers(layers, *mClientLayer);
+-    drmComp->Apply(true);
+-    return DISPLAY_SUCCESS;
++    ret = drmComp->SetLayers(layers, *mClientLayer);
++    DISPLAY_CHK_RETURN(ret != DISPLAY_SUCCESS, ret, DISPLAY_LOGE("set first frame failed"));
++    return drmComp->Apply(true);
+ }
+ 
+ int32_t DrmDisplay::ChosePreferenceMode()
+diff --git a/display/composer/vdi_base/src/drm_vsync_worker.cpp b/display/composer/vdi_base/src/drm_vsync_worker.cpp
+index 5fd364f..feaee09 100644
+--- a/display/composer/vdi_base/src/drm_vsync_worker.cpp
++++ b/display/composer/vdi_base/src/drm_vsync_worker.cpp
+@@ -28,9 +28,10 @@ int32_t DrmVsyncWorker::Init(int fd)
+     DISPLAY_CHK_RETURN((fd < 0), DISPLAY_FAILURE, DISPLAY_LOGE("the fd is invalid"));
+     mDrmFd = fd;
+     DISPLAY_LOGD("the drm fd is %{public}d", fd);
++    // Publish the running state before the worker can inspect its exit predicate.
++    mRunning = true;
+     mThread = std::make_unique<std::thread>([this]() { WorkThread(); });
+     DISPLAY_CHK_RETURN((mThread == nullptr), DISPLAY_FAILURE, DISPLAY_LOGE("can not create thread"));
+-    mRunning = true;
+     return DISPLAY_SUCCESS;
+ }
+ 
+diff --git a/display/composer/vdi_base/src/hdi_drm_composition.cpp b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+index b5ea48c..383021c 100644
+--- a/display/composer/vdi_base/src/hdi_drm_composition.cpp
++++ b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+@@ -166,14 +166,14 @@ int32_t HdiDrmComposition::ApplyPlane(HdiDrmLayer &layer,
+     return DISPLAY_SUCCESS;
+ }
+ 
+-int32_t HdiDrmComposition::UpdateMode(std::unique_ptr<DrmModeBlock> &modeBlock)
++int32_t HdiDrmComposition::UpdateMode(drmModeAtomicReqPtr pset, std::unique_ptr<DrmModeBlock> &modeBlock)
+ {
+     // set the mode
+     DISPLAY_LOGD();
+     if (mCrtc->NeedModeSet()) {
+-        int drmFd = mDrmDevice->GetDrmFd();
+-        drmModeAtomicReqPtr pset = drmModeAtomicAlloc();
+         modeBlock = mConnector->GetModeBlockFromId(mCrtc->GetActiveModeId());
++        DISPLAY_CHK_RETURN(modeBlock == nullptr || modeBlock->GetBlockId() == DRM_INVALID_ID,
++            DISPLAY_FAILURE, DISPLAY_LOGE("invalid mode blob"));
+         if ((modeBlock != nullptr) && (modeBlock->GetBlockId() != DRM_INVALID_ID)) {
+             // set to active
+             DISPLAY_LOGD("set crtc to active");
+@@ -194,11 +194,7 @@ int32_t HdiDrmComposition::UpdateMode(std::unique_ptr<DrmModeBlock> &modeBlock)
+             DISPLAY_CHK_RETURN((ret < 0), DISPLAY_FAILURE,
+                 DISPLAY_LOGE("can not add the crtc id prop %{public}d", errno));
+ 
+-            uint32_t flags = DRM_MODE_ATOMIC_ALLOW_MODESET;
+-            ret = drmModeAtomicCommit(drmFd, pset, flags, nullptr);
+-            DISPLAY_CHK_RETURN((ret != 0), DISPLAY_FAILURE,
+-                DISPLAY_LOGE("drmModeAtomicCommit failed %{public}d errno %{public}d", ret, errno));
+-            mCrtc->ClearModeSet();
++            // Mode and primary framebuffer must become active in one transaction.
+         }
+     }
+     return DISPLAY_SUCCESS;
+@@ -267,20 +263,20 @@ int32_t HdiDrmComposition::FindPlaneAndApply(drmModeAtomicReqPtr pset)
+ 
+ int32_t HdiDrmComposition::Apply(bool modeSet)
+ {
+-    uint64_t crtcOutFence = -1;
++    int32_t crtcOutFence = -1;
+     int ret = 0;
+     std::unique_ptr<DrmModeBlock> modeBlock;
+     int drmFd = mDrmDevice->GetDrmFd();
+ 
+-    ret = UpdateMode(modeBlock);
+-    DISPLAY_CHK_RETURN((ret != DISPLAY_SUCCESS), DISPLAY_FAILURE, DISPLAY_LOGE("update mode failed"));
+-
+     DISPLAY_LOGD("mPlane size: %{public}zd mCompLayers size: %{public}zd", mPlanes.size(), mCompLayers.size());
+     DISPLAY_CHK_RETURN((mPlanes.size() < mCompLayers.size()), DISPLAY_FAILURE, DISPLAY_LOGE("plane not enough"));
+     drmModeAtomicReqPtr pset = drmModeAtomicAlloc();
+     DISPLAY_CHK_RETURN((pset == nullptr), DISPLAY_NULL_PTR,
+         DISPLAY_LOGE("drm atomic alloc failed errno %{public}d", errno));
+     AtomicReqPtr atomicReqPtr = AtomicReqPtr(pset);
++    const bool needsModeSet = mCrtc->NeedModeSet();
++    ret = UpdateMode(pset, modeBlock);
++    DISPLAY_CHK_RETURN(ret != DISPLAY_SUCCESS, ret, DISPLAY_LOGE("update mode failed"));
+ 
+     // set the outFence property
+     ret = drmModeAtomicAddProperty(atomicReqPtr.Get(), mCrtc->GetId(), mCrtc->GetOutFencePropId(),
+@@ -313,11 +309,17 @@ int32_t HdiDrmComposition::Apply(bool modeSet)
+     DISPLAY_CHK_RETURN((ret < 0), DISPLAY_FAILURE,
+         DISPLAY_LOGE("can not add the active prop errno %{public}d", errno));
+ 
+-    uint32_t flags = DRM_MODE_ATOMIC_NONBLOCK;
++    uint32_t flags = DRM_MODE_ATOMIC_ALLOW_MODESET;
++    if (!modeSet && !needsModeSet) {
++        flags |= DRM_MODE_ATOMIC_NONBLOCK;
++    }
+ 
+     ret = drmModeAtomicCommit(drmFd, atomicReqPtr.Get(), flags, nullptr);
+     DISPLAY_CHK_RETURN((ret != 0), DISPLAY_FAILURE,
+         DISPLAY_LOGE("drmModeAtomicCommit failed %{public}d errno %{public}d", ret, errno));
++    if (needsModeSet) {
++        mCrtc->ClearModeSet();
++    }
+     // set the release fence
+     for (auto layer : mCompLayers) {
+         layer->SetReleaseFence(static_cast<int>(crtcOutFence));

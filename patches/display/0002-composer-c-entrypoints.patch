@@ -1,0 +1,83 @@
+diff --git a/display/composer/vdi_base/src/display_composer_vdi_impl.cpp b/display/composer/vdi_base/src/display_composer_vdi_impl.cpp
+index b61a0c7..a14ff8d 100644
+--- a/display/composer/vdi_base/src/display_composer_vdi_impl.cpp
++++ b/display/composer/vdi_base/src/display_composer_vdi_impl.cpp
+@@ -17,10 +17,15 @@
+ #include <hdf_base.h>
+ #include "display_log.h"
+ #include "hdf_log.h"
++#include "common/include/display_vdi_adapter_interface.h"
++#include <type_traits>
+ 
+ namespace OHOS {
+ namespace HDI {
+ namespace DISPLAY {
++using OHOS::HDI::Display::Composer::V1_0::DispPowerStatus;
++using OHOS::HDI::Display::Composer::V1_0::CompositionType;
++
+ DisplayComposerVdiImpl::DisplayComposerVdiImpl()
+ {
+ }
+@@ -336,6 +341,62 @@ extern "C" void DestroyComposerVdi(IDisplayComposerVdi* vdi)
+ {
+     delete vdi;
+ }
++
++// The current composer service resolves C entry points, not the legacy factory.
++static DisplayComposerVdiImpl& GetDefaultComposer()
++{
++    static DisplayComposerVdiImpl composer;
++    return composer;
++}
++
++#define FORWARD_VDI(name, params, args) \
++    extern "C" int32_t name params { return GetDefaultComposer().name args; } \
++    static_assert(std::is_same<decltype(&name), decltype(DisplayComposerVdiAdapter::name)>::value, \
++        "Composer VDI signature mismatch: " #name)
++
++FORWARD_VDI(RegHotPlugCallback, (HotPlugCallback cb, void* data), (cb, data));
++FORWARD_VDI(GetDisplayCapability, (uint32_t id, DisplayCapability& info), (id, info));
++FORWARD_VDI(GetDisplaySupportedModes, (uint32_t id, std::vector<DisplayModeInfo>& modes), (id, modes));
++FORWARD_VDI(GetDisplayMode, (uint32_t id, uint32_t& mode), (id, mode));
++FORWARD_VDI(SetDisplayMode, (uint32_t id, uint32_t mode), (id, mode));
++FORWARD_VDI(GetDisplayPowerStatus, (uint32_t id, DispPowerStatus& status), (id, status));
++FORWARD_VDI(SetDisplayPowerStatus, (uint32_t id, DispPowerStatus status), (id, status));
++FORWARD_VDI(GetDisplayBacklight, (uint32_t id, uint32_t& level), (id, level));
++FORWARD_VDI(SetDisplayBacklight, (uint32_t id, uint32_t level), (id, level));
++FORWARD_VDI(GetDisplayProperty, (uint32_t id, uint32_t key, uint64_t& value), (id, key, value));
++FORWARD_VDI(GetDisplayCompChange, (uint32_t id, std::vector<uint32_t>& layers, std::vector<int32_t>& types),
++    (id, layers, types));
++FORWARD_VDI(SetDisplayClientCrop, (uint32_t id, const IRect& rect), (id, rect));
++FORWARD_VDI(SetDisplayClientBuffer, (uint32_t id, const BufferHandle& buffer, int32_t fence), (id, buffer, fence));
++FORWARD_VDI(SetDisplayClientDamage, (uint32_t id, std::vector<IRect>& rects), (id, rects));
++FORWARD_VDI(SetDisplayVsyncEnabled, (uint32_t id, bool enabled), (id, enabled));
++FORWARD_VDI(RegDisplayVBlankCallback, (uint32_t id, VBlankCallback cb, void* data), (id, cb, data));
++FORWARD_VDI(GetDisplayReleaseFence, (uint32_t id, std::vector<uint32_t>& layers, std::vector<int32_t>& fences),
++    (id, layers, fences));
++FORWARD_VDI(CreateVirtualDisplay, (uint32_t width, uint32_t height, int32_t& format, uint32_t& id),
++    (width, height, format, id));
++FORWARD_VDI(DestroyVirtualDisplay, (uint32_t id), (id));
++FORWARD_VDI(SetVirtualDisplayBuffer, (uint32_t id, const BufferHandle& buffer, int32_t fence), (id, buffer, fence));
++FORWARD_VDI(SetDisplayProperty, (uint32_t id, uint32_t key, uint64_t value), (id, key, value));
++FORWARD_VDI(Commit, (uint32_t id, int32_t& fence), (id, fence));
++FORWARD_VDI(CreateLayer, (uint32_t id, const LayerInfo& info, uint32_t& layer), (id, info, layer));
++FORWARD_VDI(DestroyLayer, (uint32_t id, uint32_t layer), (id, layer));
++FORWARD_VDI(PrepareDisplayLayers, (uint32_t id, bool& flush), (id, flush));
++FORWARD_VDI(SetLayerAlpha, (uint32_t id, uint32_t layer, const LayerAlpha& alpha), (id, layer, alpha));
++FORWARD_VDI(SetLayerRegion, (uint32_t id, uint32_t layer, const IRect& rect), (id, layer, rect));
++FORWARD_VDI(SetLayerCrop, (uint32_t id, uint32_t layer, const IRect& rect), (id, layer, rect));
++FORWARD_VDI(SetLayerZorder, (uint32_t id, uint32_t layer, uint32_t order), (id, layer, order));
++FORWARD_VDI(SetLayerPreMulti, (uint32_t id, uint32_t layer, bool preMul), (id, layer, preMul));
++FORWARD_VDI(SetLayerTransformMode, (uint32_t id, uint32_t layer, TransformType type), (id, layer, type));
++FORWARD_VDI(SetLayerDirtyRegion, (uint32_t id, uint32_t layer, const std::vector<IRect>& rects), (id, layer, rects));
++FORWARD_VDI(SetLayerVisibleRegion, (uint32_t id, uint32_t layer, std::vector<IRect>& rects), (id, layer, rects));
++FORWARD_VDI(SetLayerBuffer, (uint32_t id, uint32_t layer, const BufferHandle& buffer, int32_t fence),
++    (id, layer, buffer, fence));
++FORWARD_VDI(SetLayerCompositionType, (uint32_t id, uint32_t layer, CompositionType type), (id, layer, type));
++FORWARD_VDI(SetLayerBlendType, (uint32_t id, uint32_t layer, BlendType type), (id, layer, type));
++FORWARD_VDI(SetLayerMaskInfo, (uint32_t id, uint32_t layer, MaskInfo mask), (id, layer, mask));
++FORWARD_VDI(SetLayerColor, (uint32_t id, uint32_t layer, const LayerColor& color), (id, layer, color));
++#undef FORWARD_VDI
+ } // DISPLAY
+ } // HDI
+ } // OHOS

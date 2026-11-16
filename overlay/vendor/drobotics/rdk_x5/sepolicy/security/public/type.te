@@ -1,0 +1,3 @@
+type rdkhm_accel, native_system_domain, domain;
+type rdkhm_accel_exec, exec_attr, file_attr, vendor_file_attr;
+init_daemon_domain(rdkhm_accel);

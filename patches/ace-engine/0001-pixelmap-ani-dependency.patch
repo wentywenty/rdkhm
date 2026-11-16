@@ -1,0 +1,17 @@
+diff --git a/frameworks/core/interfaces/native/common/BUILD.gn b/frameworks/core/interfaces/native/common/BUILD.gn
+index 481a55ec..9c2e7f00 100644
+--- a/frameworks/core/interfaces/native/common/BUILD.gn
++++ b/frameworks/core/interfaces/native/common/BUILD.gn
+@@ -58,6 +58,12 @@ template("ace_core_interfaces_native") {
+       external_deps += [
+         "ability_runtime:app_context",
+         "webview:libnweb",
++      ]
++    }
++    if (!is_arkui_x &&
++        ((defined(config.pixel_map_support) && config.pixel_map_support) ||
++         (defined(config.web_components_support) && config.web_components_support))) {
++      external_deps += [
+         "image_framework:image_ani",
+         "image_framework:image_native",
+         "runtime_core:ani",

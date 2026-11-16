@@ -1,0 +1,86 @@
+{
+  "libdrm_package": {
+    "url": "https://ports.ubuntu.com/ubuntu-ports/pool/main/libd/libdrm/libdrm2_2.4.110-1ubuntu1_arm64.deb",
+    "sha256": "3dc30322345e50626e19740ecb1a238d4742dce6a2966c3daa3aba2cbca6b5bd",
+    "version": "2.4.110-1ubuntu1"
+  },
+  "libraries": {
+    "ld-linux-aarch64.so.1": {
+      "source": "/usr/aarch64-linux-gnu/lib/ld-linux-aarch64.so.1",
+      "sha256": "b9b0d356a67d91b3309c6b64ff654a4a42bd44301d28592952a3f87c930c7dea"
+    },
+    "libGLESv2.so.2": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libGLESv2.so.2.0.0",
+      "sha256": "c08ebceec5dbea5f1744fe5c72421547e8f38726bf2098a8aba36f448e06ff01"
+    },
+    "libc.so.6": {
+      "source": "/usr/aarch64-linux-gnu/lib/libc.so.6",
+      "sha256": "9f8be7a87463ffb5b723c525b4b527dec519716e5283c9509b8df002d7a92151"
+    },
+    "libm.so.6": {
+      "source": "/usr/aarch64-linux-gnu/lib/libm.so.6",
+      "sha256": "c59c7612710cf20b9a36ccd266e23aa3c4d13118ae9a672c7baa2241716cbd5e"
+    },
+    "libVSC.so": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libVSC.so",
+      "sha256": "43a7e3f386f60f59cbbb27f23ba89a66ecd66fa242a51c6fec52ffe2ab5a7c13"
+    },
+    "libGAL.so": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libGAL.so",
+      "sha256": "86fc1dcdc0acdf5bcd97eb599db8f9666f4f3aed30be9d0be9d422d823492072"
+    },
+    "libEGL.so.1": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libEGL.so.1.5.0",
+      "sha256": "968a6f1bf63c0c4c1b44fb05b9bc4f52c7983ab2e2322d2c683121e318a01e9b"
+    },
+    "libgbm_viv.so": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libgbm_viv.so",
+      "sha256": "10521a7e1275fabcfe1233c1e4b9b16ccfe31567e1d15900ec78d9ff9a68c6ce"
+    },
+    "libdrm.so.2": {
+      "source": "/home/robo/zhitai2/rdkhm-data/out/accelerator-downloads/libdrm2/usr/lib/aarch64-linux-gnu/libdrm.so.2.4.0",
+      "sha256": "7fcabf70dc89e8140bc1356451a505de74adf94b8549fc8657b5615a113e94d3"
+    },
+    "libgbm.so.1": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libgbm.so.1.0.0",
+      "sha256": "1da5be329213f4ea7dfa54c9f380de0f97665718aba3618cc7cfa6126e6c3f75"
+    },
+    "libdrm_vivante.so.1.0.0": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libdrm_vivante.so.1.0.0",
+      "sha256": "f66fa304bf24bd0565ad4aedc3601e6fc3060f4cd8bb55ee4b44d0a0e9def24b"
+    },
+    "libdnn.so": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-dnn/x5/usr/lib/libdnn.so",
+      "sha256": "661bac161124921eb9065fb9cd8d311144ea3f899fee28d61dfd0d7255074ace"
+    },
+    "libgcc_s.so.1": {
+      "source": "/usr/aarch64-linux-gnu/lib/libgcc_s.so.1",
+      "sha256": "020f45f8231ddd6bf3edbc925e68089dba1a0c16923a5e82afacf80d2995b14b"
+    },
+    "libstdc++.so.6": {
+      "source": "/usr/aarch64-linux-gnu/lib/libstdc++.so.6.0.30",
+      "sha256": "84567b69c610a9913481f7e676302380e9e03f0d630f9b67909751d226d08288"
+    },
+    "libalog.so.1": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libalog.so.1.0.1",
+      "sha256": "5b6ea6fb9e753cd064145ee992227d249a7b51677bc377b9fe15fbb39d3a6360"
+    },
+    "libhbrt_bayes_aarch64.so": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-dnn/x5/usr/lib/libhbrt_bayes_aarch64.so",
+      "sha256": "8b4719d147a53a4adb215f0307a732a420b4dc2ffaa893f4a8fcd02a7e88fc9a"
+    },
+    "libhbmem.so.1": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libhbmem.so.1.0.0",
+      "sha256": "7ad7dd1136d8bbaf03d8d7687a9266bada1bed55b72c6cb3024d7de69dc865f2"
+    },
+    "libcnn_intf.so.1": {
+      "source": "/home/robo/zhitai2/rdkhm-data/sources/x5-hobot-multimedia/debian/usr/hobot/lib/libcnn_intf.so.1.3.6",
+      "sha256": "db4adbf0a436be82ae4550f30f5b7248bfb9f2e1b58e14a0ad42fe4eb775f1f0"
+    }
+  },
+  "sources": {
+    "x5-hobot-drivers": "9ebc13c76c4dfe14410537b4c1b0761d51d1ab9e",
+    "x5-hobot-dnn": "b1db3ecac6bdb96070d62e104df6439167c26492",
+    "x5-hobot-multimedia": "0f297df905511c3429567202813359acee26dbb3"
+  }
+}

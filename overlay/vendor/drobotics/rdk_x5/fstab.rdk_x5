@@ -1,0 +1,2 @@
+# Bootstrap mounts vendor and userdata from the same SD device as rootfs.
+# No formatting or repartitioning occurs at boot.

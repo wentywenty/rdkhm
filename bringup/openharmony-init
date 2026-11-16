@@ -1,0 +1,39 @@
+#!/rdkhm/busybox sh
+export PATH=/rdkhm:/system/bin:/vendor/bin
+bb=/rdkhm/busybox
+fail()
+{
+    echo "RDKHM bootstrap failed: $*" >/dev/console
+    while :; do "$bb" setsid "$bb" cttyhack "$bb" sh; done
+}
+"$bb" mount -t proc proc /proc || fail proc
+"$bb" mount -t sysfs sysfs /sys || fail sysfs
+for name in binder hwbinder vndbinder; do
+    [ -c "/dev/$name" ] || fail "missing Binder character device /dev/$name"
+done
+echo 'RDKHM: Binder character devices present' >/dev/console
+root_device=
+while read -r mount_id parent device mount_root mount_point rest; do
+    if [ "$mount_point" = / ]; then root_device=$device; fi
+done </proc/self/mountinfo
+block=$("$bb" readlink "/sys/dev/block/$root_device") || fail 'root block device'
+block=${block##*/}
+case "$block" in
+    mmcblk*p2) disk=${block%p2} ;;
+    *) fail "unexpected root device $block" ;;
+esac
+"$bb" mkdir -p /vendor /data
+"$bb" mount -t ext4 -o ro "/dev/${disk}p3" /vendor || fail vendor
+"$bb" mount -t ext4 -o nosuid,nodev "/dev/${disk}p4" /data || fail userdata
+"$bb" sh /rdkhm/load-drivers.sh || echo 'RDKHM: some drivers unavailable; continuing boot' >/dev/console
+for name in sys_prod chip_prod eng_system eng_chipset; do
+    [ -f "/rdkhm/$name.img" ] || continue
+    "$bb" mkdir -p "/$name"
+    "$bb" mount -t ext4 -o loop,ro "/rdkhm/$name.img" "/$name" || fail "$name"
+done
+# OpenHarmony init mounts proc/sysfs itself. Keep vendor and data mounted.
+"$bb" sh /rdkhm/capture-hilog.sh </dev/null >/dev/console 2>&1 &
+"$bb" umount /proc
+"$bb" umount /sys
+if [ -x /init ]; then exec /init; fi
+exec /system/bin/init

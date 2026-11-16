@@ -1,0 +1,26 @@
+diff --git a/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh b/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh
+index 40b9718..0e6013d 100755
+--- a/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh
++++ b/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh
+@@ -53,7 +53,7 @@ compile()
+     -DOHOS_NDK=${LLVM_DIR} -DCMAKE_TOOLCHAIN_FILE=$WORKING_DIR/shader.compile.toolchain.cmake \
+     -G Ninja
+ #-DCMAKE_SYSROOT=$LLVM_DIR/lib/x86_64-unknow-linux-gnu
+-    ninja -C $PROJECT_DIR  -f build.ninja
++    ninja -C $PROJECT_DIR -f build.ninja -j"${RDKHM_TOOL_JOBS:-8}"
+ 
+     chmod 775 $PROJECT_DIR/LumeShaderCompiler
+     cp -r $PROJECT_DIR/LumeShaderCompiler $PROJECT_DIR/Strip
+diff --git a/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake b/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake
+index dcbfb95..3b070bf 100644
+--- a/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake
++++ b/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake
+@@ -38,7 +38,7 @@ set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "GNU")
+ set(CMAKE_C_STANDARD_LIBRARIES_INIT "-latomic -lm")
+ set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
+ 
+-set(CMAKE_CXX_FLAGS           "-fuse-ld=lld -isystem ${OHOS_NDK}/include/c++/v1 ${CMAKE_CXX_FLAGS}")
++set(CMAKE_CXX_FLAGS           "-fuse-ld=lld -stdlib=libc++ -isystem ${OHOS_NDK}/include/c++/v1 ${CMAKE_CXX_FLAGS}")
+ set(CMAKE_C_COMPILER        "${OHOS_NDK}/bin/clang")
+ set(CMAKE_CXX_COMPILER      "${OHOS_NDK}/bin/clang++")
+ set(STD_LINKER_FLAGS "-L ${OHOS_NDK}/lib/x86_64-unknown-linux-gnu -Wl,-rpath,${OHOS_NDK}/lib/x86_64-unknown-linux-gnu -lc++")

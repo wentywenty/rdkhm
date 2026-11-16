@@ -1,0 +1,11 @@
+{
+  "adapterNum": 1,
+  "adapters": [{
+    "name": "primary",
+    "portnum": 2,
+    "port": [
+      {"dir": "PORT_OUT", "id": 0, "name": "AOP"},
+      {"dir": "PORT_IN", "id": 0, "name": "AIP"}
+    ]
+  }]
+}

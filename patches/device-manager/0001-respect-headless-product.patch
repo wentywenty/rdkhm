@@ -1,0 +1,32 @@
+diff --git a/BUILD.gn b/BUILD.gn
+index 8591cae..f42e5cd 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -44,6 +44,8 @@ if (defined(ohos_lite)) {
+     }
+   }
+ } else {
++  import("//build/ohos_var.gni")
++
+   if (defined(harmony_industry_project) &&
+       harmony_industry_project == "MINE_HARMONY") {
+   }
+@@ -56,7 +58,8 @@ if (defined(ohos_lite)) {
+       "services/service:devicemanagerservice",
+       "services/softbuscache:dmdevicecache",
+     ]
+-    if (!is_lite_system && product_name != "qemu-arm-linux-min") {
++    if (load_test_config && !is_lite_system &&
++        product_name != "qemu-arm-linux-min") {
+       deps += [
+         "commondependency:devicemanagerdependencytest",
+         "radar:devicemanagerradartest",
+@@ -64,7 +67,7 @@ if (defined(ohos_lite)) {
+         "utils:devicemanagerutilstest",
+       ]
+     }
+-    if (product_name != "qemu-arm-linux-min") {
++    if (support_jsapi && product_name != "qemu-arm-linux-min") {
+       deps += [ "display/entry:DeviceManager_UI" ]
+     }
+   }

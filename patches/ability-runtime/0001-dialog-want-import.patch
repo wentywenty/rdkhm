@@ -1,0 +1,19 @@
+diff --git a/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets b/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets
+index 06e0198..da5f09e 100644
+--- a/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets
++++ b/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets
+@@ -19,6 +19,7 @@ import insightIntentDriver from '@ohos.app.ability.insightIntentDriver';
+ import insightIntent from '@ohos.app.ability.insightIntent';
+ import { format, jsClone, addArrayParams, removeArrayParams, romoveFormData } from './format';
+ import common from '@ohos.app.ability.common';
++import Want from '@ohos.app.ability.Want';
+ 
+ interface propertiesInfo {
+   name: string
+@@ -851,4 +852,4 @@ export struct IntentDetailPage {
+     .backgroundColor($r('app.color.background_cont'))
+     .clip(true)
+   }
+-}
+\ No newline at end of file
++}

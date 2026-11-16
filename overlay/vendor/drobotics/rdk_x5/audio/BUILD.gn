@@ -1,0 +1,21 @@
+import("//build/ohos.gni")
+
+group("audio_config") {
+  deps = [ ":audio_adapter.json", ":alsa_adapter.json", ":audio_policy_config.xml" ]
+}
+
+foreach(name, [ "audio_adapter.json", "alsa_adapter.json" ]) {
+  ohos_prebuilt_etc(name) {
+    source = name
+    relative_install_dir = "hdfconfig"
+    part_name = "product_rdk_x5"
+    install_images = [ "vendor" ]
+  }
+}
+
+ohos_prebuilt_etc("audio_policy_config.xml") {
+  source = "audio_policy_config.xml"
+  relative_install_dir = "audio"
+  part_name = "product_rdk_x5"
+  install_images = [ "vendor" ]
+}
