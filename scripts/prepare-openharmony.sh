@@ -71,6 +71,20 @@ bash build/prebuilts_download.sh --disable-rich \
     --tool-repo https://mirrors.huaweicloud.com \
     --pypi-url https://repo.huaweicloud.com/repository/pypi/simple \
     2>&1 | tee "$workspace/out/logs/openharmony-prebuilts.log"
+# ace_ets2bundle's compiler imports the OpenHarmony-patched TypeScript package.
+# Upstream setup does not consistently install this link on a reused checkout.
+compiler_node_modules="$tree/developtools/ace_ets2bundle/compiler/node_modules"
+typescript_source="$tree/third_party/typescript"
+if [[ -d "$typescript_source/lib" && -f "$typescript_source/lib/typescript.js" ]]; then
+    mkdir -p "$compiler_node_modules"
+    if [[ -e "$compiler_node_modules/typescript" || -L "$compiler_node_modules/typescript" ]]; then
+        rm -rf "$compiler_node_modules/typescript"
+    fi
+    ln -s "$typescript_source" "$compiler_node_modules/typescript"
+else
+    echo "Missing OpenHarmony TypeScript source; cannot build ace_ets2bundle" >&2
+    exit 1
+fi
 bash "$workspace/scripts/link-product.sh"
 chmod +x "$tree/prebuilts/tool/command-line-tools/ohpm/bin/ohpm" \
     "$tree/prebuilts/tool/command-line-tools/ohpm/bin/init" \
