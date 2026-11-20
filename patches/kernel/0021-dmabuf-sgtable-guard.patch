@@ -1,0 +1,182 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0021-dmabuf-sgtable-guard.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/drivers/gpu/drm/drm_prime.c
++++ b/drivers/gpu/drm/drm_prime.c
+@@ -633,6 +633,17 @@ struct sg_table *drm_gem_map_dma_buf(struct dma_buf_attachment *attach,
+ 	sgt = obj->funcs->get_sg_table(obj);
+ 	if (IS_ERR(sgt))
+ 		return sgt;
++	if (sgt == NULL) {
++		DRM_ERROR("missing sg_table from exporter\n");
++		return ERR_PTR(-EINVAL);
++	}
++	if (sgt->sgl == NULL || sgt->orig_nents == 0) {
++		DRM_ERROR("malformed sg_table from exporter\n");
++		if (sgt->sgl != NULL)
++			sg_free_table(sgt);
++		kfree(sgt);
++		return ERR_PTR(-EINVAL);
++	}
+ 
+ 	ret = dma_map_sgtable(attach->dev, sgt, dir,
+ 			      DMA_ATTR_SKIP_CPU_SYNC);
+--- a/drivers/gpu/drm/verisilicon/vs_gem.c
++++ b/drivers/gpu/drm/verisilicon/vs_gem.c
+@@ -39,6 +39,30 @@ static const struct drm_gem_object_funcs vs_gem_default_funcs;
+ #ifdef CONFIG_VERISILICON_GEM_ION
+ #define ION_ALIGN 0x10
+ 
++static struct sg_table *vs_gem_dup_sg_table(const struct sg_table *table)
++{
++	struct sg_table *copy;
++	struct scatterlist *sg, *newSg;
++	int i;
++
++	copy = kzalloc(sizeof(*copy), GFP_KERNEL);
++	if (copy == NULL)
++		return ERR_PTR(-ENOMEM);
++
++	if (sg_alloc_table(copy, table->orig_nents, GFP_KERNEL) != 0) {
++		kfree(copy);
++		return ERR_PTR(-ENOMEM);
++	}
++
++	newSg = copy->sgl;
++	for_each_sgtable_sg((struct sg_table *)table, sg, i) {
++		memcpy(newSg, sg, sizeof(*sg));
++		newSg->dma_address = 0;
++		newSg = sg_next(newSg);
++	}
++	return copy;
++}
++
+ static int vs_gem_alloc_buf(struct vs_gem_object *vs_obj)
+ {
+ 	struct drm_device *dev	    = vs_obj->base.dev;
+@@ -60,9 +84,30 @@ static int vs_gem_alloc_buf(struct vs_gem_object *vs_obj)
+ 		DRM_DEV_DEBUG_KMS(dev->dev, "vs ion alloc failed!\n");
+ 		return ret;
+ 	}
+-	vs_obj->sgt = vs_obj->handle->buffer->hb_sg_table;
++	struct sg_table *ionSgt = vs_obj->handle->buffer->hb_sg_table;
+ 
+-	ion_phys(priv->client, vs_obj->handle->id, &vs_obj->dma_addr, &len);
++	if (ionSgt == NULL || ionSgt->sgl == NULL || ionSgt->orig_nents == 0) {
++		DRM_DEV_ERROR(dev->dev, "invalid ION sg table.\n");
++		ion_free(priv->client, vs_obj->handle);
++		vs_obj->handle = NULL;
++		return -EINVAL;
++	}
++	/* Do not alias the ION buffer's table: it can be freed/replaced while the
++	 * GEM object is still alive. Keep an owned copy for IOMMU and dma-buf export. */
++	vs_obj->sgt = vs_gem_dup_sg_table(ionSgt);
++	if (IS_ERR(vs_obj->sgt)) {
++		int error = PTR_ERR(vs_obj->sgt);
++		vs_obj->sgt = NULL;
++		ion_free(priv->client, vs_obj->handle);
++		vs_obj->handle = NULL;
++		return error;
++	}
++
++	ret = ion_phys(priv->client, vs_obj->handle->id, &vs_obj->dma_addr, &len);
++	if (ret != 0) {
++		DRM_DEV_ERROR(dev->dev, "vs ion phys failed: %d\n", ret);
++		goto err_release;
++	}
+ 
+ 	/** do lite-mmu mapping.*/
+ 	phys  = sg_phys(vs_obj->sgt->sgl);
+@@ -71,10 +116,19 @@ static int vs_gem_alloc_buf(struct vs_gem_object *vs_obj)
+ 
+ 	ret = iommu_map(priv->domain, start, phys, len, 0);
+ 	if (ret != 0) {
+-		DRM_DEV_DEBUG_KMS(dev->dev, "vs gem iommu_map failed!\n");
++		DRM_DEV_ERROR(dev->dev, "vs gem iommu_map failed: %d\n", ret);
++		goto err_release;
+ 	}
+ 
+ 	return 0;
++
++err_release:
++	sg_free_table(vs_obj->sgt);
++	kfree(vs_obj->sgt);
++	vs_obj->sgt = NULL;
++	ion_free(priv->client, vs_obj->handle);
++	vs_obj->handle = NULL;
++	return ret;
+ }
+ 
+ static void vs_gem_free_buf(struct vs_gem_object *vs_obj)
+@@ -97,19 +151,25 @@ static void vs_gem_free_buf(struct vs_gem_object *vs_obj)
+ 
+ 	iommu_unmap(priv->domain, start, len);
+ 
++	if (vs_obj->sgt != NULL) {
++		sg_free_table(vs_obj->sgt);
++		kfree(vs_obj->sgt);
++		vs_obj->sgt = NULL;
++	}
+ 	ion_free(priv->client, vs_obj->handle);
++	vs_obj->handle = NULL;
+ }
+ 
+ struct sg_table *vs_gem_prime_get_sg_table(struct drm_gem_object *obj)
+ {
+ 	const struct vs_gem_object *vs_obj = to_vs_gem_object(obj);
+ 
+-	if (!vs_obj->sgt) {
+-		DRM_DEV_ERROR(obj->dev->dev, "failed to get sgtable.\n");
+-		return ERR_PTR(-ENXIO);
++	if (vs_obj->sgt == NULL || vs_obj->sgt->sgl == NULL || vs_obj->sgt->orig_nents == 0) {
++		DRM_DEV_ERROR(obj->dev->dev, "invalid sgtable.\n");
++		return ERR_PTR(-EINVAL);
+ 	}
+ 
+-	return vs_obj->sgt;
++	return vs_gem_dup_sg_table(vs_obj->sgt);
+ }
+ 
+ static int vs_gem_mmap_obj(struct drm_gem_object *obj, struct vm_area_struct *vma)
+@@ -185,8 +245,14 @@ struct sg_table *vs_gem_prime_get_sg_table(struct drm_gem_object *obj)
+ 				    vs_obj->size, vs_obj->dma_attrs);
+ 	if (ret) {
+ 		DRM_DEV_ERROR(obj->dev->dev, "failed to get sgtable.\n");
++		kfree(sgt);
+ 		return ERR_PTR(ret);
+ 	}
++	if (sgt->sgl == NULL || sgt->orig_nents == 0) {
++		DRM_DEV_ERROR(obj->dev->dev, "empty sgtable.\n");
++		kfree(sgt);
++		return ERR_PTR(-EINVAL);
++	}
+ 
+ 	return sgt;
+ }
+@@ -280,6 +346,7 @@ struct vs_gem_object *vs_gem_create_object(struct drm_device *dev, size_t size)
+ 
+ 	ret = vs_gem_alloc_buf(vs_obj);
+ 	if (ret) {
++		pm_runtime_put(dev->dev);
+ 		drm_gem_object_release(&vs_obj->base);
+ 		kfree(vs_obj);
+ 		return ERR_PTR(ret);
+--- a/drivers/misc/verisilicon/gc8000l/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_dmabuf.c
++++ b/drivers/misc/verisilicon/gc8000l/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_dmabuf.c
+@@ -224,8 +224,13 @@ static gceSTATUS _DmabufAttach(gckALLOCATOR Allocator, gcsATTACH_DESC_PTR Desc,
+ 		gcmkONERROR(gcvSTATUS_NOT_SUPPORTED);
+ 	}
+ 
+-	if (!sgt)
++	if (sgt == NULL || sgt->sgl == NULL || sgt->orig_nents == 0 || sgt->nents == 0) {
++		/* Malformed exporter table: do not call dma_unmap on a null sgl. */
++		if (sgt != NULL && sgt->sgl != NULL)
++			dma_buf_unmap_attachment(attachment, sgt, DMA_BIDIRECTIONAL);
++		sgt = NULL;
+ 		gcmkONERROR(gcvSTATUS_NOT_SUPPORTED);
++	}
+ 
+ 	if (os->device->args.enableMmu == 0 && os->iommu == gcvNULL && sgt->nents != 1)
+ 		gcmkONERROR(gcvSTATUS_NOT_SUPPORTED);

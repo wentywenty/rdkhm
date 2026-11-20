@@ -1,0 +1,668 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] qemu: align product configs with the 6.0 component tree
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+--- a/qemu_arm64_linux_min/config.json
++++ b/qemu_arm64_linux_min/config.json
+@@ -10,92 +10,324 @@
+     "support_jsapi": false,
+     "device_build_path": "device/qemu/arm_virt/linux",
+     "subsystems": [
+-      {
+-        "subsystem": "build",
+-        "components": [
+-          { "component": "build_framework", "features":[] }
+-        ]
+-      },
+-      {
+-        "subsystem": "startup",
+-        "components": [
+-          { "component": "startup_l2", "features":[] },
+-          { "component": "init", "features":[] }
+-        ]
+-      },
+-      {
+-        "subsystem": "hiviewdfx",
+-        "components": [
+-          { "component": "hilog", "features":[] },
+-          { "component": "hitrace", "features":[] },
+-          { "component": "faultloggerd", "features":[] },
+-          { "component": "hisysevent", "features":[] },
+-          { "component": "hichecker", "features":[ "hichecker_support_asan=false" ] }
+-        ]
+-      },
+-      {
+-        "subsystem": "distributedhardware",
+-        "components": [
+-          { "component": "device_manager", "features": [] }
+-        ]
+-      },
+-      {
+-        "subsystem": "security",
+-        "components": [
+-          { "component": "device_auth", "features":[] },
+-          { "component": "access_token", "features":[] },
+-          { "component": "huks", "features": [] }
+-        ]
+-      },
+-      {
+-        "subsystem": "commonlibrary",
+-        "components": [
+-          { "component": "c_utils", "features": [] }
+-        ]
+-      },
+-      {
+-        "subsystem": "communication",
+-        "components": [
+-          { "component": "ipc", "features":[] },
+-          { "component": "dsoftbus", "features":["dsoftbus_get_devicename=false"] }
+-        ]
+-      },
+-      {
+-        "subsystem": "notification",
+-        "components": [
+-          { "component": "eventhandler", "features":[] }
+-        ]
+-      },
+-      {
+-        "subsystem": "systemabilitymgr",
+-        "components": [
+-          { "component": "samgr", "features":[] },
+-          { "component": "safwk", "features":[] }
+-        ]
+-      },
+-      {
+-        "subsystem": "developtools",
+-        "components": [
+-          { "component": "hdc", "features":[] }
+-        ]
+-      },
+-      {
+-        "subsystem": "securec",
+-        "components": [
+-          { "component": "thirdparty_bounds_checking_function", "features":[] }
+-        ]
+-      },
+-      {
+-        "subsystem": "device_arm_virt",
+-        "components": [
+-          { "component": "qemu_arm_linux_chipset", "features":[] }
+-        ]
+-      },
+-      {
+-        "subsystem": "ability",
+-        "components": [
+-          { "component": "idl_tool", "features":[] }
+-        ]
+-      }
++        {
++            "subsystem": "build",
++            "components": [
++                {
++                    "component": "build_framework",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "thirdparty",
++            "components": [
++                {
++                    "component": "lzma",
++                    "features": []
++                },
++                {
++                    "component": "libunwind",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "startup",
++            "components": [
++                {
++                    "component": "init",
++                    "features": [
++                        "init_appspawn_client_module=false"
++                    ]
++                }
++            ]
++        },
++        {
++            "subsystem": "graphic",
++            "components": [
++                {
++                    "component": "graphic_surface",
++                    "features": []
++                },
++                {
++                    "component": "graphics_effect",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "hiviewdfx",
++            "components": [
++                {
++                    "component": "hilog",
++                    "features": []
++                },
++                {
++                    "component": "hitrace",
++                    "features": []
++                },
++                {
++                    "component": "faultloggerd",
++                    "features": []
++                },
++                {
++                    "component": "hisysevent",
++                    "features": []
++                },
++                {
++                    "component": "hichecker",
++                    "features": [
++                        "hichecker_support_asan=false"
++                    ]
++                }
++            ]
++        },
++        {
++            "subsystem": "distributedhardware",
++            "components": [
++                {
++                    "component": "device_manager",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "security",
++            "components": [
++                {
++                    "component": "device_auth",
++                    "features": []
++                },
++                {
++                    "component": "access_token",
++                    "features": []
++                },
++                {
++                    "component": "huks",
++                    "features": [
++                        "huks_qemu_enabled = true"
++                    ]
++                },
++                {
++                    "component": "dataclassification",
++                    "features": []
++                },
++                {
++                    "component": "device_security_level",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "commonlibrary",
++            "components": [
++                {
++                    "component": "c_utils",
++                    "features": []
++                },
++                {
++                    "component": "ylong_runtime",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "communication",
++            "components": [
++                {
++                    "component": "ipc",
++                    "features": []
++                },
++                {
++                    "component": "dsoftbus",
++                    "features": [
++                        "dsoftbus_get_devicename=false"
++                    ]
++                }
++            ]
++        },
++        {
++            "subsystem": "notification",
++            "components": [
++                {
++                    "component": "eventhandler",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "systemabilitymgr",
++            "components": [
++                {
++                    "component": "samgr",
++                    "features": []
++                },
++                {
++                    "component": "safwk",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "developtools",
++            "components": [
++                {
++                    "component": "hdc",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "securec",
++            "components": []
++        },
++        {
++            "subsystem": "resourceschedule",
++            "components": [
++                {
++                    "component": "ffrt",
++                    "features": []
++                },
++                {
++                    "component": "frame_aware_sched",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "arkcompiler",
++            "components": [
++                {
++                    "component": "ets_frontend",
++                    "features": []
++                },
++                {
++                    "component": "ets_runtime",
++                    "features": []
++                },
++                {
++                    "component": "toolchain",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "device_qemu-arm-linux",
++            "components": [
++                {
++                    "component": "qemu_arm_linux_chipset",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "customization",
++            "components": [
++                {
++                    "component": "config_policy",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "ability",
++            "components": [
++                {
++                    "component": "idl_tool",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "thirdparty",
++            "components": [
++                {
++                    "component": "libuv",
++                    "features": []
++                },
++                {
++                    "component": "sqlite",
++                    "features": []
++                },
++                {
++                    "component": "libusb",
++                    "features": []
++                },
++                {
++                    "component": "protobuf",
++                    "features": []
++                },
++                {
++                    "component": "abseil-cpp",
++                    "features": []
++                },
++                {
++                    "component": "pcre2",
++                    "features": []
++                },
++                {
++                    "component": "astc-encoder",
++                    "features": []
++                },
++                {
++                    "component": "rust_libc",
++                    "features": []
++                },
++                {
++                    "component": "optimized_routines",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "hdf",
++            "components": [
++                {
++                    "component": "drivers_interface_bluetooth",
++                    "features": []
++                },
++                {
++                    "component": "hdf_core",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "sdk",
++            "components": [
++                {
++                    "component": "sdk",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "developtools",
++            "components": [
++                {
++                    "component": "ace_ets2bundle",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "thirdparty",
++            "components": [
++                {
++                    "component": "typescript",
++                    "features": []
++                }
++            ]
++        },
++        {
++            "subsystem": "deviceprofile",
++            "components": [
++                {
++                    "component": "device_info_manager",
++                    "features": []
++                }
++            ]
++        }
+     ]
+-  }
++}
+--- a/qemu_arm_linux_headless/config.json
++++ b/qemu_arm_linux_headless/config.json
+@@ -18,7 +18,7 @@
+       {
+         "subsystem": "startup",
+         "components": [
+-          { "component": "appspawn", "features":[] },
++          { "component": "appspawn", "features":["appspawn_support_nweb=false"] },
+           { "component": "init", "features":[] }
+         ]
+       },
+@@ -30,14 +30,17 @@
+           { "component": "hichecker", "features":[ "hichecker_support_asan=false" ] },
+           { "component": "faultloggerd", "features":[] },
+           { "component": "hisysevent", "features":[] },
+-          { "component": "hicollie_native", "features":[] },
++          { "component": "hiappevent", "features":[] },
++          { "component": "hiview", "features":[] },
++          { "component": "hicollie", "features":[] },
+           { "component": "hidumper", "features":[] }
+         ]
+       },
+       {
+         "subsystem": "distributedhardware",
+         "components": [
+-          { "component": "device_manager", "features": [ "device_manager_no_interaction_auth=true" ] }
++          { "component": "device_manager", "features": [ "device_manager_no_interaction_auth=true" ] },
++          { "component": "distributed_hardware_fwk", "features": [] }
+         ]
+       },
+       {
+@@ -48,7 +51,10 @@
+           { "component": "huks", "features": [] },
+           { "component": "device_security_level", "features": [] },
+           { "component": "dataclassification", "features": [] },
+-          { "component": "permission_standard", "features": [] },
++          { "component": "asset", "features": [] },
++          { "component": "certificate_manager", "features": [] },
++          { "component": "code_signature", "features": [] },
++          { "component": "security_guard", "features": [] },
+           { "component": "appverify", "features": [] }
+         ]
+       },
+@@ -61,7 +67,10 @@
+       {
+         "subsystem": "commonlibrary",
+         "components": [
+-          { "component": "c_utils", "features": [] }
++          { "component": "c_utils", "features": [] },
++          { "component": "memory_utils", "features": [] },
++          { "component": "ylong_runtime", "features": [] },
++          { "component": "ylong_json", "features": [] }
+         ]
+       },
+       {
+@@ -70,32 +79,22 @@
+           { "component": "ipc", "features":[] },
+           { "component": "dsoftbus", "features":[] },
+           { "component": "dhcp", "features":[] },
+-          { "component": "netmanager_base", "features":[] }
++          { "component": "netmanager_base", "features":[] },
++          { "component": "wifi", "features":[] }
+         ]
+       },
+       {
+         "subsystem": "ability",
+         "components": [
+           { "component": "ability_runtime", "features":[ "ability_runtime_power=false", "ability_runtime_graphics=false" ] },
+-          { "component": "ability_tools", "features":[] },
+           { "component": "ability_base", "features":[] },
+           { "component": "idl_tool", "features":[] },
+           { "component": "dmsfwk", "features":[ "dmsfwk_mission_manager=false", "dmsfwk_standard_form_share=false" ] }
+         ]
+       },
+-      {
+-        "subsystem": "appexecfwk",
+-        "components": [
+-          { "component": "bundle_framework", "features":[ "bundle_framework_graphics=false" ] },
+-          { "component": "appexecfwk_standard", "features":[] },
+-          { "component": "appexecfwk_core", "features":[] },
+-          { "component": "bundle_tool", "features":[] }
+-        ]
+-      },
+       {
+         "subsystem": "bundlemanager",
+         "components": [
+-          { "component": "appexecfwk_core", "features":[] },
+           { "component": "bundle_tool", "features":[] },
+           { "component": "bundle_framework", "features":[ "bundle_framework_graphics=false" ] },
+           { "component": "distributed_bundle_framework","features": []}
+@@ -110,7 +109,7 @@
+       {
+         "subsystem": "arkcompiler",
+         "components": [
+-          { "component": "runttime_core", "features": [] },
++          { "component": "runtime_core", "features": [] },
+           { "component": "ets_runtime", "features": [] },
+           { "component": "ets_frontend", "features": [] },
+           { "component": "toolchain", "features": [] }
+@@ -141,11 +140,9 @@
+         "components": [
+           { "component": "datamgr_service", "features":[] },
+           { "component": "kv_store", "features":[] },          
+-          { "component": "distributedfilejs", "features":[] },
+           { "component": "relational_store", "features":[] },
+           { "component": "preferences", "features":[] },
+           { "component": "data_share", "features":[] },
+-          { "component": "native_appdatamgr", "features":[ "native_appdatamgr_rdb_support_icu=false" ] },
+           { "component": "data_object", "features":[] }
+         ]
+       },
+@@ -163,17 +160,59 @@
+         ]
+       },
+       {
+-        "subsystem": "device_arm_virt",
++        "subsystem": "device_qemu-arm-linux",
+         "components": [
+           { "component": "qemu_arm_linux_chipset", "features":[] }
+         ]
+       },
++      {
++        "subsystem": "resourceschedule",
++        "components": [
++          { "component": "ffrt", "features":[] },
++          { "component": "memmgr", "features":[] },
++          { "component": "frame_aware_sched", "features":[] }
++        ]
++      },
++      {
++        "subsystem": "customization",
++        "components": [
++          { "component": "config_policy", "features":[] }
++        ]
++      },
++      {
++        "subsystem": "sdk",
++        "components": [
++          { "component": "sdk", "features":[] }
++        ]
++      },
++      {
++        "subsystem": "thirdparty",
++        "components": [
++          { "component": "libuv", "features":[] },
++          { "component": "sqlite", "features":[] },
++          { "component": "libusb", "features":[] },
++          { "component": "protobuf", "features":[] },
++          { "component": "abseil-cpp", "features":[] },
++          { "component": "pcre2", "features":[] },
++          { "component": "astc-encoder", "features":[] },
++          { "component": "rust_libc", "features":[] },
++          { "component": "lzma", "features":[] },
++          { "component": "typescript", "features":[] },
++          { "component": "grpc", "features":[] },
++          { "component": "vulkan-loader", "features":[] },
++          { "component": "vulkan-headers", "features":[] },
++          { "component": "optimized_routines", "features":[] }
++        ]
++      },
+       {
+         "subsystem": "developtools",
+         "components": [
+           { "component": "hiprofiler", "features":["hiprofiler_SmartPerf=false"] },
+           { "component": "hdc", "features":[] },
+-          { "component": "syscap_codec", "features":[] }
++          { "component": "syscap_codec", "features":[] },
++          { "component": "ace_ets2bundle", "features":[] },
++          { "component": "global_resource_tool", "features":[] },
++          { "component": "packing_tool", "features":[] }
+         ]
+       },
+       {
+@@ -183,15 +222,56 @@
+         ]
+       },
+       {
+-        "subsystem": "procrank",
++        "subsystem": "graphic",
++        "components": [
++          { "component": "graphic_surface", "features":[] },
++          { "component": "graphic_2d", "features":[] },
++          { "component": "graphics_effect", "features":[] }
++        ]
++      },
++      {
++        "subsystem": "tee",
++        "components": [
++          { "component": "tee_client", "features":[] }
++        ]
++      },
++      {
++        "subsystem": "sensors",
++        "components": [
++          { "component": "sensor", "features":[] }
++        ]
++      },
++      {
++        "subsystem": "powermgr",
+         "components": [
+-          { "component": "procrank", "features":[] }
++          { "component": "thermal_manager", "features":[] },
++          { "component": "battery_manager", "features":[] }
+         ]
+       },
+       {
+         "subsystem": "hdf",
+         "components": [
+-          { "component": "hdf_core", "features":[] }
++          { "component": "hdf_core", "features":[] },
++          { "component": "drivers_interface_wlan", "features":[] },
++          { "component": "drivers_interface_memorytracker", "features":[] },
++          { "component": "drivers_interface_fingerprint_auth", "features":[] },
++          { "component": "drivers_interface_face_auth", "features":[] },
++          { "component": "drivers_interface_camera", "features":[] },
++          { "component": "drivers_interface_pin_auth", "features":[] },
++          { "component": "drivers_interface_sensor", "features":[] },
++          { "component": "drivers_interface_thermal", "features":[] },
++          { "component": "drivers_interface_battery", "features":[] },
++          { "component": "drivers_interface_bluetooth", "features":[] },
++          { "component": "drivers_interface_audio", "features":[] }
++        ]
++      },
++      {
++        "subsystem": "useriam",
++        "components": [
++          { "component": "user_auth_framework", "features":[] },
++          { "component": "pin_auth", "features":[] },
++          { "component": "face_auth", "features":[] },
++          { "component": "fingerprint_auth", "features":[] }
+         ]
+       },
+       {
+--- a/qemu_arm_linux_min/config.json
++++ b/qemu_arm_linux_min/config.json
+@@ -121,6 +121,12 @@
+           { "component": "qemu_arm_linux_chipset", "features":[] }
+         ]
+       },
++      {
++        "subsystem": "customization",
++        "components": [
++          { "component": "config_policy", "features":[] }
++        ]
++      },
+       {
+         "subsystem": "ability",
+         "components": [

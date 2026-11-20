@@ -1,0 +1,50 @@
+From: rdkhm <rdkhm@localhost>
+Subject: [PATCH] galcore: reject ERR_PTR from dma-buf attach and map
+Signed-off-by: rdkhm <rdkhm@localhost>
+
+---
+--- a/drivers/misc/verisilicon/gc8000l/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_dmabuf.c
++++ b/drivers/misc/verisilicon/gc8000l/hal/os/linux/kernel/allocator/default/gc_hal_kernel_allocator_dmabuf.c
+@@ -55,6 +55,7 @@
+ #include "gc_hal_kernel_linux.h"
+ #include "gc_hal_kernel_allocator.h"
+ 
++#include <linux/err.h>
+ #include <linux/pagemap.h>
+ #include <linux/seq_file.h>
+ #include <linux/mman.h>
+@@ -208,11 +209,21 @@ static gceSTATUS _DmabufAttach(gckALLOCATOR Allocator, gcsATTACH_DESC_PTR Desc,
+ 	get_dma_buf(dmabuf);
+ 	attachment = dma_buf_attach(dmabuf, &os->device->platform->device->dev);
+ 
++	if (IS_ERR(attachment)) {
++		attachment = NULL;
++		gcmkONERROR(gcvSTATUS_NOT_SUPPORTED);
++	}
++
+ 	if (!attachment)
+ 		gcmkONERROR(gcvSTATUS_NOT_SUPPORTED);
+ 
+ 	sgt = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
+ 
++	if (IS_ERR(sgt)) {
++		sgt = NULL;
++		gcmkONERROR(gcvSTATUS_NOT_SUPPORTED);
++	}
++
+ 	if (!sgt)
+ 		gcmkONERROR(gcvSTATUS_NOT_SUPPORTED);
+ 
+@@ -267,6 +278,12 @@ static gceSTATUS _DmabufAttach(gckALLOCATOR Allocator, gcsATTACH_DESC_PTR Desc,
+ 	if (sgt)
+ 		dma_buf_unmap_attachment(attachment, sgt, DMA_BIDIRECTIONAL);
+ 
++	if (attachment)
++		dma_buf_detach(dmabuf, attachment);
++
++	if (dmabuf)
++		dma_buf_put(dmabuf);
++
+ 	gcmkFOOTER();
+ 	return status;
+ }

@@ -157,6 +157,20 @@ static int pixel_close(const unsigned char *pixel, uint32_t expected, int tolera
 
 int main(int argc, char **argv)
 {
+    const char *allow = getenv("RDKHM_GPU_COMPOSE_TEST");
+
+    /* This probe imports dma-bufs directly, bypassing the daemon's COMPOSE
+     * switch. Refuse by default so a stale/broken kernel cannot be crashed by
+     * an accidental invocation. */
+    if (allow == NULL || strcmp(allow, "1") != 0) {
+        fprintf(stderr,
+                "gpu-compose-test: refusing direct dma-buf import.\n"
+                "This bypasses the accelerator daemon and requires a kernel with "
+                "the dmabuf sg_table fix.\n"
+                "Set RDKHM_GPU_COMPOSE_TEST=1 to acknowledge and run.\n");
+        return 2;
+    }
+
     const char *node = argc > 1 ? argv[1] : "/dev/dri/card0";
     int fd = open(node, O_RDWR | O_CLOEXEC);
     if (fd < 0) { perror(node); return 1; }

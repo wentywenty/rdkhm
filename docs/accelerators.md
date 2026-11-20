@@ -221,7 +221,8 @@ current software RenderService path stays enabled until a hardware-rendered OH
 frame is shown. Feasibility and the proposed out-of-process compositor are
 documented in [hardware-composition.md](hardware-composition.md). The
 composer-side `COMPOSE` path is implemented in `display/0009` and builds, but
-is not deployed or board-tested yet.
+is disabled by default after the 2026-11-20 dma-buf sg_table kernel panic;
+enable it only after `kernel/0021-dmabuf-sgtable-guard.patch` is flashed.
 
 BPU: validate memory allocation and a known model on X5, then extend the service
 protocol from capability checks to bounded inference requests and register

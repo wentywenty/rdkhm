@@ -1,0 +1,21 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] samgr: install libsamgr_common into the system image
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+--- a/interfaces/innerkits/common/BUILD.gn
++++ b/interfaces/innerkits/common/BUILD.gn
+@@ -80,6 +80,13 @@ ohos_shared_library("samgr_common") {
+   }
+ 
+   innerapi_tags = [ "platformsdk" ]
++  # samgr links this library dynamically and the loader resolves it from the
++  # system image; without install_images the library is built but never
++  # packaged, and samgr exits 127 at boot.
++  install_images = [
++    system_base_dir,
++    updater_base_dir,
++  ]
+   subsystem_name = "systemabilitymgr"
+ }
+ ################################################################################

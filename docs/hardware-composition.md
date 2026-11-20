@@ -164,7 +164,11 @@ response: status, elapsed_ms, layers；输出 fence fd 随 SCM_RIGHTS 返回
 - 探针：`bringup/probes/gpu-compose-test.c`，暂存为 runtime 内的
   `gpu-compose-test`，wrapper 入口 `rdkhm-accelerator --gpu-compose`
   （源码已入库；当前已刷镜像尚未包含，需下次镜像构建或临时推送）。
-- 测试方法：64x64 target dma-buf；背景左绿右蓝；32x32 半透明红色前景；
+- 安全门：该探针绕过 daemon 的 COMPOSE 开关直接 import dma-buf，默认拒绝
+  运行；只有显式设置 `RDKHM_GPU_COMPOSE_TEST=1` 才继续，且必须确认当前
+  内核已包含 `0021-dmabuf-sgtable-guard.patch`。
+- 测试方法：`RDKHM_GPU_COMPOSE_TEST=1 rdkhm-accelerator --gpu-compose`；
+  64x64 target dma-buf；背景左绿右蓝；32x32 半透明红色前景；
   EGLImage 导入两个 layer，渲染到 target；读回三个采样点；测试
   `EGL_KHR_fence_sync` 和 native fence；记录合成耗时。
 - 结果：
@@ -200,12 +204,16 @@ response: status, elapsed_ms, layers；输出 fence fd 随 SCM_RIGHTS 返回
   - `fence_ok=1 input_fence_ok=1 pixels_ok=1`
   - `GPU_COMPOSE_WIRE_PASS`
   - daemon 侧：冷启动首帧约 6–7ms，热帧约 1ms（64x64，两层）
-- 当前 daemon 是“一连接一帧”模型；P2 接 composer 时需要改成持久连接或连接池。
+- daemon 已改为在同一连接上循环处理请求；composer 复用持久连接，空闲 2s
+  超时后重连，发送失败会自动重试一次。
 - 证据：`out/board-logs/20261120-gpu/gpu-compose-wire-20261120.log`。
 - 当前已刷镜像里的 daemon 仍是旧版；新 daemon/client 已进入
   `out/accelerator-runtime` 和 `out/driver-bundle`，下次镜像生效。
+- 2026-11-20 起 daemon 默认关闭 COMPOSE；只有创建
+  `/vendor/etc/rdkhm-gpu-compose.enable` 后才进入 GPU 路径，避免在
+  `kernel/0021` 未生效的镜像上再次触发 dma-buf panic。
 
-### P2：Composer 接入（L，源码已完成，未板测）
+### P2：Composer 接入（L，源码已完成；2026-11-20 起默认禁用）
 
 - 新增 composer 侧客户端 `gpu_compose_client.{h,cpp}`，直接用 musl socket +
   SCM_RIGHTS 调用 `rdkhm_accel`，不加载厂商库。
@@ -223,14 +231,24 @@ response: status, elapsed_ms, layers；输出 fence fd 随 SCM_RIGHTS 返回
 - 构建：`scripts/build-target.sh
   drivers/peripheral/display/composer/vdi_base:display_composer_vdi_impl_default`
   成功；`check-composer-abi.py` 通过（40 个 mandatory export）。
+- 板端验证（2026-11-20，kernel `6.1.83-rdkhm #12` + `kernel/0021`，
+  临时创建 `/vendor/etc/rdkhm-gpu-compose.enable`）：
+  - 直接探针：`GPU_COMPOSE_PASS`，`compose_ms=1.562`，fence 正常，
+    无 Oops。
+  - daemon 协议：`GPU_COMPOSE_WIRE_PASS`，输出/输入 fence 正常。
+  - composer：`hilog` 出现 `DISP: [Compose] gpu compose ...`，HDMI 保持
+    `connected`，无 panic。
+  - soak：100 次 wire + 50 次直接 import，`wire_fail=0`、`direct_fail=0`，
+    composer fd 数保持 23，`dmesg` 无 Oops/panic 新增。
+  - 证据：`out/board-logs/20261120-gpu/gpu-direct-kernel0021.log`、
+    `gpu-wire-kernel0021.log`、`gpu-soak-serial.log`。
+  - 持久连接和帧统计是后续源码改动，尚未进入已刷镜像，需要重新构建和板测。
 - 当前限制：
   - 只有“全部 DEVICE”的帧走 GPU；混合 CLIENT 层仍走 CPU。
   - target 目前使用 client layer 的单个 buffer（首帧或 RenderService 提供），
     没有双缓冲，可能有 tearing。
-  - daemon 仍是“一连接一帧”，每帧新建连接。
-  - GPU 路径尚未在板端 composer 中启用；需要部署新 composer 库和新 daemon。
-- 板端验证前需要：新 daemon 进入 `/vendor`、composer 重启、并先解决
-  account/hmdfs 冷启动问题。
+  - daemon 已支持持久连接；每 120 帧输出 `gpu compose stats`（帧数、失败数、平均耗时）。
+  - 镜像默认仍不创建 enable 文件；本次板端 enable 文件只用于验证。
 
 ### P3：性能与验收（L）
 
@@ -238,6 +256,48 @@ response: status, elapsed_ms, layers；输出 fence fd 随 SCM_RIGHTS 返回
 - 验证无泄漏、无 AVC、无 GPU hang。
 - 明确“硬件合成已启用”的日志和计数。
 - 保留关闭开关。
+
+## 2026-11-20 dma-buf panic and temporary disable
+
+The first image carrying the composer GPU path panic-looped at about 39 s:
+
+```text
+eglCreateImageKHR(EGL_LINUX_DMA_BUF_EXT)
+  -> galcore _DmabufAttach
+  -> dma_buf_map_attachment
+  -> drm_gem_map_dma_buf
+  -> dma_map_sgtable
+```
+
+The vs-drm ION GEM exporter returned an sg_table with `orig_nents != 0` but
+`sgl == NULL`; galcore mapped it without validating `sgl`. This is a kernel
+exporter bug, not an ERR_PTR case.
+
+Mitigations in the tree:
+
+- `patches/kernel/0021-dmabuf-sgtable-guard.patch`:
+  - `vs_gem_alloc_buf` no longer aliases ION's `hb_sg_table`: it keeps an
+    owned duplicate for IOMMU and dma-buf export, and frees it with the GEM
+    object. This removes the ION table lifetime from the export path.
+  - `vs_gem_prime_get_sg_table` validates the table, returns `-EINVAL` for a
+    malformed one, and returns a **duplicate** so the caller owns it.
+  - `drm_gem_map_dma_buf` rejects null/empty sg_tables before mapping.
+  - galcore `_DmabufAttach` rejects malformed tables after mapping and avoids
+    unmapping a null `sgl`.
+  - `vs_gem_alloc_buf` validates the ION table before the existing `sg_phys`.
+- `accelerator-daemon` now has a temporary switch: `COMPOSE` returns
+  `NOT_SUPPORT` and `GPU_COMPOSE_CHECK` returns `GPU_COMPOSE_UNAVAILABLE`
+  unless `/vendor/etc/rdkhm-gpu-compose.enable` exists (or
+  `RDKHM_GPU_COMPOSE=1`).
+- Composer therefore stays on the software path until the file exists.
+- `gpu-compose-test` now refuses to run unless `RDKHM_GPU_COMPOSE_TEST=1` is
+  set, because it bypasses the daemon gate and imports dma-bufs directly.
+- Do **not** run `accel-compose-client` against a kernel without `0021`; the
+  daemon gate protects the boot path, but the client intentionally exercises
+  the COMPOSE path.
+- The kernel patch is source-only until a new kernel/image is built and
+  flashed. Do not enable COMPOSE or run the direct import probes on a board
+  still booting the unfixed kernel; that image panic-loops at composer start.
 
 ## 验收标准
 

@@ -2,6 +2,7 @@
 """Check the isolated ARM64 runtime without opening an accelerator or loading a model."""
 import json
 from pathlib import Path
+import os
 import re
 import subprocess
 
@@ -57,6 +58,14 @@ version = [re.search(r'#define gcvVERSION_' + name + r'\s+(\d+)', header)[1]
 marker = f'$VERSION${".".join(version[:3])}:{version[3]}$'.encode()
 if marker not in gal:
     raise RuntimeError('GPU kernel/userspace version marker mismatch')
+guard_env = dict(os.environ)
+guard_env.pop('RDKHM_GPU_COMPOSE_TEST', None)
+guard = subprocess.run(
+    ['qemu-aarch64-static', str(runtime / 'ld-linux-aarch64.so.1'), '--inhibit-cache',
+     '--library-path', str(runtime), str(runtime / 'gpu-compose-test'), '/dev/null'],
+    capture_output=True, text=True, timeout=30, env=guard_env)
+if guard.returncode != 2 or 'refusing direct dma-buf import' not in guard.stderr:
+    raise RuntimeError('gpu-compose-test must refuse to bypass the daemon gate by default')
 print('PASS: private dependency closure, ARM64 library loading, DNN version and GPU version markers')
 print('PASS: accelerator daemon executable is staged (socket behavior tested separately)')
 print('NOT TESTED: hardware rendering, model execution, OH RenderService or NNRT integration')

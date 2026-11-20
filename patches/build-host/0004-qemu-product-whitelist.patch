@@ -1,0 +1,16 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] build: whitelist arm64 and headless qemu products
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+--- a/subsystem_components_whitelist.json
++++ b/subsystem_components_whitelist.json
+@@ -27,6 +27,8 @@
+   "hdf": "hdf",
+   "device_qemu-arm-linux": "device_qemu-arm-linux",
+   "product_qemu-arm-linux-min": "product_qemu-arm-linux-min",
++  "product_qemu-arm64-linux-min": "product_qemu-arm64-linux-min",
++  "product_qemu-arm-linux-headless": "product_qemu-arm-linux-headless",
+   "device_qemu-riscv64-linux": "device_qemu-riscv64-linux",
+   "product_qemu-riscv64-linux-min": "product_qemu-riscv64-linux-min",
+   "device_arm64": "device_arm64",

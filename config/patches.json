@@ -81,6 +81,14 @@
       {
         "repo": "sources/oh/openharmony/drivers/hdf_core",
         "patch": "kernel/hdf-core/0001-arm64-kernel-build.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0020-galcore-dmabuf-errptr.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0021-dmabuf-sgtable-guard.patch"
       }
     ],
     "kernel-rt": [
@@ -510,6 +518,33 @@
       {
         "repo": "sources/oh/openharmony-full/drivers/peripheral",
         "patch": "nnrt/0001-x5-nnrt-hdi-service.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/device/qemu",
+        "patch": "qemu/0001-device-subsystem-and-foundation-profile.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/vendor/ohemu",
+        "patch": "qemu/0002-product-configs.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/build",
+        "patch": "build-host/0004-qemu-product-whitelist.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/hdf_core",
+        "patch": "hdf-core/0001-optional-rk3566-audio.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/systemabilitymgr/samgr",
+        "patch": "samgr/0001-install-samgr-common.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/third_party/ffmpeg",
+        "patch": "ffmpeg/0001-disable-vulkan-cplat.patch"
       }
     ]
   },

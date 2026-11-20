@@ -1,0 +1,71 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] qemu: align device subsystem and add minimal foundation profile
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+diff --git a/arm_virt/linux/ohos.build b/arm_virt/linux/ohos.build
+index e1daeca..d89f393 100644
+--- a/arm_virt/linux/ohos.build
++++ b/arm_virt/linux/ohos.build
+@@ -1,5 +1,5 @@
+ {
+-  "subsystem": "device_arm_virt",
++  "subsystem": "device_qemu-arm-linux",
+   "parts": {
+     "qemu_arm_linux_chipset": {
+       "module_list": [
+diff --git a/arm_virt/linux/rootfs/BUILD.gn b/arm_virt/linux/rootfs/BUILD.gn
+index c9a8b83..b2317f9 100644
+--- a/arm_virt/linux/rootfs/BUILD.gn
++++ b/arm_virt/linux/rootfs/BUILD.gn
+@@ -46,9 +46,21 @@ ohos_prebuilt_para("default_param") {
+   part_name = "qemu_arm_linux_chipset"
+ }
+ 
++# The minimal product has no component that contributes a foundation-process
++# SA profile, so the merged profile is absent. safwk's init entry still starts
++# /system/bin/sa_main with this path; an empty profile keeps the process
++# resident instead of looping as a critical service.
++ohos_prebuilt_etc("foundation_profile") {
++  source = "foundation.json"
++  install_images = [ "system" ]
++  module_install_dir = "profile"
++  part_name = "qemu_arm_linux_chipset"
++}
++
+ group("rootfs_files") {
+   deps = [
+     ":default_param",
++    ":foundation_profile",
+     ":qemu.arm.linux.init.cfg",
+     ":qemu.arm.linux.updater.cfg",
+     ":qemu.arm.linux.usb.cfg",
+diff --git a/arm_virt/linux/rootfs/foundation.json b/arm_virt/linux/rootfs/foundation.json
+new file mode 100644
+index 0000000..31d4fd0
+--- /dev/null
++++ b/arm_virt/linux/rootfs/foundation.json
+@@ -0,0 +1,5 @@
++{
++    "process": "foundation",
++    "systemability": [
++    ]
++}
+diff --git a/arm_virt/ohos.build b/arm_virt/ohos.build
+index a0e0d41..a37378c 100644
+--- a/arm_virt/ohos.build
++++ b/arm_virt/ohos.build
+@@ -1,10 +1,10 @@
+ {
+   "parts": {
+-    "device_arm_virt": {
++    "device_qemu-arm-linux": {
+       "module_list": [
+         "//device/qemu/arm_virt:arm_virt"
+       ]
+     }
+   },
+-  "subsystem": "device_arm_virt"
++  "subsystem": "device_qemu-arm-linux"
+ }
+\ No newline at end of file

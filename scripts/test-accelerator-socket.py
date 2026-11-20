@@ -49,6 +49,16 @@ with tempfile.TemporaryDirectory(prefix='rdkhm-socket-') as directory:
                 assert process.poll() is None
                 time.sleep(.02)
         request([b'PI', b'NG\n'], b'PONG\n')
+        with connect() as client:
+            for text_command, expected in ((b'PING\n', b'PONG\n'),
+                                           (b'GPU_COMPOSE_CHECK\n', b'GPU_COMPOSE_UNAVAILABLE\n')):
+                client.sendall(text_command)
+                data = b''
+                while not data.endswith(b'\n'):
+                    chunk = client.recv(256)
+                    assert chunk, data
+                    data += chunk
+                assert data == expected, data
         request([b'PING\r\n'], b'PONG\n')
         request([b'PING\0\n'], b'ERROR invalid-frame\n')
         request([b'x' * 128], b'ERROR invalid-frame\n')
@@ -102,7 +112,7 @@ with tempfile.TemporaryDirectory(prefix='rdkhm-socket-') as directory:
                 assert struct.unpack('<I', body)[0] == 31, body
         finally:
             os.close(model)
-        request([b'GPU_COMPOSE_CHECK\n'], b'GPU_COMPOSE_READY\n')
+        request([b'GPU_COMPOSE_CHECK\n'], b'GPU_COMPOSE_UNAVAILABLE\n')
         request([b'NNRT_BACKEND\n'], b'NNRT_BACKEND_RUNTIME_READY\n')
         with connect() as idle:
             assert idle.recv(256) == b'ERROR timeout\n'

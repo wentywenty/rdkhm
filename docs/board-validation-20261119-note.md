@@ -164,7 +164,7 @@ Current Note artifact:
 
 ```text
 out/haps/notes.hap
-SHA256 036227c0f6309871b25cf1b82af3a335edc925b7bf08b38c18c2fea025bda85d
+SHA256 39945345e7837fb870fca139fb6e6116e0fde08eb3313bc3c2df2538fc813ee9
 ```
 
 Static checks passed:
@@ -198,17 +198,59 @@ Evidence: `out/board-logs/now2.jpeg`
 
 ## On-board repair attempt
 
-The board was not rebooted. `accountmgr` (pid `953`) was killed so init could
-restart it. The replacement process (`4174`) logged `ActivateDefaultOsAccount`,
-the user-100 start event and `SendToAMSAccountStart`, but the failure below
-persisted:
+The board was rebooted with approval. It came back as boot_id
+`3b91290f-1ecb-4c81-a1df-f89deead9891`; the screen is still black.
+
+The account index was an old empty object while the account list already had
+user 100:
 
 ```text
-AccountMgr: service ptr is null!
-BMS: GetForegroundOsAccountLocalId failed ret:4194341
+account_index_info.json = {}
+account_list.json = {"AccountList":["100"], ...}
 ```
 
-Manual Launcher install/start also failed:
+The index was backed up to `/data/local/tmp/account_index_info.json.bak`,
+removed, and `accountmgr` was restarted. It rebuilt correctly:
+
+```text
+account_index_info.json = {"100":{"localName":"user","shortName":""}}
+```
+
+The next failure was in StorageDaemon:
+
+```text
+StorageDaemon: StartUser: start user 100
+StorageDaemon: GetParameter hmdfsEnable true
+StorageDaemon: HmdfsMount: failed to mount hmdfs, err 19
+StorageDaemon: StartUser failed, please check
+AccountMgrService: PrepareStartUser end, errCode 13600721
+```
+
+`/mnt/hmdfs/100/{account,non_account,cloud}` was also missing, so those
+directories were created (0711). The mount then changed from `ENOENT` to
+`ENODEV` (`err 19`), confirming that hmdfs itself is unavailable. Loading the
+host-built module was attempted:
+
+```text
+insmod /data/local/tmp/hmdfs.ko
+dmesg: hmdfs: Unknown symbol filemap_remove_folio (err -2)
+```
+
+`const.distributed_file_property.enabled` is `true`; it cannot be changed at
+runtime (`param set` fails with errNum 107). Therefore StorageDaemon cannot start
+the user, AMS cannot foreground user 100, and BMS cannot associate bundles with
+the user.
+
+The BMS state is:
+
+```text
+bootevent.bms.main.bundles.ready = true
+installed_bundle rows = 37
+preinstalled_bundle rows = 38
+bundle_user_info.json is empty
+```
+
+Manual Launcher install/start also fails:
 
 ```text
 bm install -p /system/app/com.ohos.launcher/Launcher.hap -u 100
@@ -221,26 +263,48 @@ aa start -b com.ohos.launcher -a com.ohos.launcher.MainAbility -U 100
 10104001 The specified ability does not exist
 ```
 
-The BMS state explains the install failure:
+This is not solvable with the current board-only commands. The image needs
+either a working hmdfs (`CONFIG_HMDFS_FS`, compatible symbols and packaged
+module) or `const.distributed_file_property.enabled=false` so StorageDaemon
+skips the hmdfs mount. The current kernel config has `CONFIG_HMDFS_FS=m`, but
+the module is not in the image and the host-built module rejects on an unknown
+symbol.
+
+## hmdfs image packaging attempt
+
+After the on-board failures, the kernel and module were rebuilt against the
+current configuration:
 
 ```text
-bootevent.bms.main.bundles.ready = true
-installed_bundle rows = 37
-preinstalled_bundle rows = 38
-bundle_user_info.json is empty
+out/kernel/obj/arch/arm64/boot/Image   2026-11-20 12:26
+out/kernel/obj/fs/hmdfs/hmdfs.ko       2026-11-20 12:27
+out/driver-bundle/lib/modules/6.1.83-rdkhm/hmdfs.ko
 ```
 
-BMS has the system bundle records, but no user bundle association and no
-foreground user. Only SystemUI is running. The current image also has no
-`com.ohos.sceneboard` directory or process, but the earlier recovery image and
-the previous image also lacked it, so SceneBoard absence is not sufficient by
-itself to explain this boot.
+`modules.load` lists `hmdfs.ko` first. A new image was assembled:
 
-This cannot be repaired by the current board-only install commands because
-`bm` only accepts the current foreground user or user 0, and the foreground
-user lookup fails. A reboot may give BMS a second preinstall pass now that the
-user-100 account exists, but that needs explicit approval. Otherwise the image
-needs a BMS/account first-boot fix and a cold-boot retry.
+```text
+out/images/rdkhm-x5-openharmony-dev.img
+SHA256 ead0919e7b8b3da4be5e8976d07bf4f9aa55677829f7f68cf6bca9fb7df81885
+```
+
+The vendor partition now contains the module and load list:
+
+```text
+/lib/modules/6.1.83-rdkhm/hmdfs.ko
+/lib/modules/6.1.83-rdkhm/modules.load
+```
+
+The first assembly exposed a stale SELinux policy. `system_image` was then
+rebuilt successfully (`2026-11-20 12:45`) and the full image was reassembled.
+The final image passes verification:
+
+```text
+PASS: MBR, checksum, four filesystems and 224 packaged artifact comparisons
+```
+
+The image was **not flashed**. The board is still running the older kernel and
+image, so hmdfs loading and cold boot remain unverified.
 
 ## Known limitations
 

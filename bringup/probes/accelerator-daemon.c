@@ -73,6 +73,15 @@ static void stop_handler(int signal_number)
     }
 }
 
+static int gpu_compose_enabled(void)
+{
+    const char *value = getenv("RDKHM_GPU_COMPOSE");
+    if (value != NULL && strcmp(value, "1") == 0) {
+        return 1;
+    }
+    return access("/vendor/etc/rdkhm-gpu-compose.enable", F_OK) == 0;
+}
+
 static int load_library(const char *name)
 {
     void *handle = dlopen(name, RTLD_NOW | RTLD_LOCAL);
@@ -992,6 +1001,10 @@ static void handle_binary(int client)
                 status = RDKHM_STATUS_INVALID_PARAMETER;
                 break;
             }
+            if (!gpu_compose_enabled()) {
+                status = RDKHM_STATUS_NOT_SUPPORT;
+                break;
+            }
             const struct rdkhm_compose_request *request =
                 (const struct rdkhm_compose_request *)payload;
             long long compose_start = milliseconds();
@@ -1034,6 +1047,16 @@ static void handle_binary(int client)
 /* ------------------------------------------------------------------ */
 /* text probes                                                        */
 
+static void drain_pending_line(int client)
+{
+    char discard[64];
+    for (;;) {
+        ssize_t length = recv(client, discard, sizeof(discard), MSG_DONTWAIT);
+        if (length <= 0) return;
+        if (memchr(discard, '\n', (size_t)length) != NULL) return;
+    }
+}
+
 static void handle_text(int client)
 {
     char command[128] = {0};
@@ -1052,6 +1075,7 @@ static void handle_text(int client)
         if (length <= 0) return;
         if (byte == '\n') break;
         if (byte == '\0' || used == sizeof(command) - 1) {
+            drain_pending_line(client);
             reply(client, "ERROR invalid-frame\n"); return;
         }
         command[used++] = byte;
@@ -1063,7 +1087,7 @@ static void handle_text(int client)
         return;
     }
     if (strcmp(command, "GPU_COMPOSE_CHECK") == 0) {
-        reply(client, "GPU_COMPOSE_READY\n");
+        reply(client, gpu_compose_enabled() ? "GPU_COMPOSE_READY\n" : "GPU_COMPOSE_UNAVAILABLE\n");
         return;
     }
     if (strcmp(command, "GPU_CHECK") == 0) {
@@ -1088,14 +1112,17 @@ static void handle_text(int client)
 
 static void handle_client(int client)
 {
-    long long deadline = milliseconds() + 2000;
-    int binary = peek_binary(client, deadline);
-    if (binary < 0) {
-        reply(client, "ERROR timeout\n");
-        return;
+    /* Keep the connection for compositor clients. Text probes and one-shot
+     * clients still work because EOF/timeouts terminate the loop. */
+    while (running) {
+        int binary = peek_binary(client, milliseconds() + 2000);
+        if (binary < 0) {
+            (void)reply(client, "ERROR timeout\n");
+            return;
+        }
+        if (binary) handle_binary(client);
+        else handle_text(client);
     }
-    if (binary) handle_binary(client);
-    else handle_text(client);
 }
 
 int main(int argc, char **argv)

@@ -181,6 +181,9 @@ if [[ -f "$stage/vendor.img" ]]; then
     for name in libdisplay_buffer_vdi_impl_default.z.so libdisplay_buffer_vdi_impl.z.so; do
         inject_into "$stage/vendor.img" "$buffer_vdi" "/lib64/$name" 0100644
     done
+    composer_vdi="$workspace/sources/oh/openharmony-full/out/rdk_x5/hdf/drivers_peripheral_display/libdisplay_composer_vdi_impl_default.z.so"
+    [[ -f "$composer_vdi" ]] || { echo "Missing composed composer VDI: $composer_vdi" >&2; exit 1; }
+    inject_into "$stage/vendor.img" "$composer_vdi" "/lib64/libdisplay_composer_vdi_impl_default.z.so" 0100644
     python3 "$workspace/scripts/inject-driver-bundle.py" "$stage/vendor.img"
     e2fsck -fn "$stage/vendor.img"
 fi

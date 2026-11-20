@@ -1,0 +1,15 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] ffmpeg: disable vulkan in the non-aarch64 configuration
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+--- a/ohos_config.sh
++++ b/ohos_config.sh
+@@ -163,6 +163,7 @@ FF_CONFIG_OPTIONS="
+     --disable-sdl2
+     --disable-bzlib
+     --disable-lzma
++    --disable-vulkan
+     --enable-demuxer=mp3,aac,ape,flac,ogg,wav,mov,mpegts,amr,amrnb,amrwb,matroska,flv,mpegps,asf,asf_o,srt,h264,webvtt,av3a,avi,mpegvideo,ac3
+     --enable-muxer=mp4,h264,ipod,amr,mpegts,mp3,wav,flac,av3a,adts
+     --enable-parser=h263,h264,mpeg4video,vp8,vp9,mpegvideo

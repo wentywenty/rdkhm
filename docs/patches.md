@@ -298,6 +298,25 @@ All files are registered, and `check-patch-format.py` / `check-patch-coverage.py
 | `window-manager/0001-input-window-display-id.patch` | `window_manager` | input window display id |
 | `window-manager/0002-input-display-binding-test.patch` | `window_manager` | input display binding test |
 
+## QEMU product support (2026-11-20)
+
+These patches make the in-tree QEMU products buildable with the 6.0 component
+tree. They are not used by the X5 image.
+
+| Patch | Repo | Purpose |
+| --- | --- | --- |
+| `qemu/0001-device-subsystem-and-foundation-profile.patch` | `device/qemu` | align the device subsystem name with the board, add the minimal foundation profile |
+| `qemu/0002-product-configs.patch` | `vendor/ohemu` | align min/arm64/headless product configs with 6.0 components |
+| `build-host/0004-qemu-product-whitelist.patch` | `build` | whitelist `product_qemu-arm64-linux-min` and `product_qemu-arm-linux-headless` |
+| `hdf-core/0001-optional-rk3566-audio.patch` | `drivers/hdf_core` | only descend into the kaihong audio dir when it exists |
+| `samgr/0001-install-samgr-common.patch` | `foundation/systemabilitymgr/samgr` | install `libsamgr_common.z.so` into the image |
+| `ffmpeg/0001-disable-vulkan-cplat.patch` | `third_party/ffmpeg` | disable Vulkan in the non-aarch64 configuration |
+
+Build-time settings that are not patches:
+
+- `--gn-args 'linux_kernel_version="linux-5.10" load_test_config=false'`
+- host GCC 12 C++ header/static-libstdc++ symlinks for the prebuilt clang.
+
 ## Globbed and optional
 
 - `nearlink-bsp` → `sources/rdk/ws73-bsp-94a02d3a`

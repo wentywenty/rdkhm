@@ -9,6 +9,24 @@ See [board-validation-20261119.md](docs/board-validation-20261119.md).
 
 ### 2026-11-20 SLE userspace probe
 
+- 2026-11-20 13:00 full image: `rdkhm-x5-openharmony-dev.img`
+  SHA256 `a8248fa2c812f2b5c6819488587a21d152ca3f1703d4abafcd192e506a83500c`;
+  built from the new kernel Image (`15187353...`) and all OH images. Verification
+  passed (MBR, four filesystems, 224 artifact comparisons). The final system
+  partition contains `/boot/Image` `15187353...`; vendor contains `hmdfs.ko`
+  `59f3c5aa...`, autoloaded first. `distributed_file_property.enabled=false`, so
+  account activation uses `LocalMount`; hmdfs cold boot is still unverified and
+  the image is not flashed.
+- 2026-11-20 system_image rebuild: `system_image` completed successfully;
+  full image `ead0919e...` passes verification with 224 artifact comparisons.
+  `hmdfs.ko` is packaged under `/lib/modules/6.1.83-rdkhm/` and listed first in
+  `modules.load`. The image is not flashed; hmdfs cold-boot is unverified.
+- 2026-11-20 galcore DMA-BUF panic fix: `galcore` now rejects `ERR_PTR` from
+  `dma_buf_attach` / `dma_buf_map_attachment` and cleans up on error. Kernel
+  module and driver bundle rebuilt; image `582d2b1e...` passes verification
+  (224 comparisons); the final image reuses the signed HAP set because the
+  post-deps_guard HAP rebuild hit SDK API mismatches. The image is not flashed; serial cold-boot verification
+  is pending. See [galcore panic record](docs/galcore-dmabuf-errptr-20261120.md).
 - All 22 HAPs were rebuilt; 25 image HAPs passed official-key verification and
   were injected. The re-signed allowlist bundles were updated to the official
   leaf fingerprint.
@@ -29,9 +47,9 @@ See [board-validation-20261119.md](docs/board-validation-20261119.md).
   (`#5`, 2026-11-19 16:13 CST).
 - Board image SHA256 was not captured from the running system. The current
   local `out/images/rdkhm-x5-openharmony-dev.img.sha256` is
-  `db0a75bbda4bf3ccc61e57d4cb90699624144b6824cd0d1ca09e4901439dbd78`;
-  earlier `4368578f...`, `883c8123...` and `8f1f4ea9...` references are
-  historical.
+  `582d2b1e2bb74f3db281ddc7c394fba61aa2ef0b75d9f8b87e514433fb61d4d5`;
+  earlier `db0a75bb...`, `4368578f...`, `883c8123...` and `8f1f4ea9...`
+  references are historical.
 - Current 20:54 image boot: display is black; Launcher is not running and BMS
   has no installed bundle information. SystemUI status/navigation windows
   exist, but WindowManager reports `Focus window: 0`. This boot is not yet

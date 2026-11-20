@@ -132,7 +132,9 @@ buffer metadata 兼容、五个可选库 stub、tracefs/PSI/RTG/QoS、hardware-s
     `libGLSLC.so`。staging/lock 已加入，离屏 pbuffer 和 GBM window 在板端已通过
     （GC8000L / ES 3.1），当前已刷镜像仍未包含，需要重建镜像后再做冷启动验收。
     硬件合成路线见 `docs/hardware-composition.md`；`display/0009` 已实现
-    composer 侧 COMPOSE 接入，构建/ABI 通过，尚未部署到板端。
+    composer 侧 COMPOSE 接入，但 2026-11-20 板端在 dma-buf 导入处 panic，
+    `kernel/0021` 已加 sg_table 防护，daemon 的 COMPOSE 默认关闭；需要
+    新内核/镜像验证后再打开。
 11. HAP：镜像注入统一由 `config/build/haps.json` 的 `image` 段驱动
     （`scripts/image_haps.py`），已接入全部有明确上游目录的构建产物，
     包括 contacts/mms/call/filepicker、Settings/SystemUI/ScreenLock/Notes/

@@ -197,12 +197,14 @@ never part of the integration commit boundary and can be rebuilt or re-fetched.
 - [Engineering handoff](docs/handoff.md)
 - [Latest board validation (2026-11-19)](docs/board-validation-20261119.md)
 - [Note local persistence validation (2026-11-19)](docs/board-validation-20261119-note.md)
+- [galcore DMA-BUF panic fix (2026-11-20)](docs/galcore-dmabuf-errptr-20261120.md)
 - [Earlier board validation (2026-11-17)](docs/board-validation-20261117.md)
 - [X5 NNRT backend integration](docs/nnrt-backend.md)
 - [X5 model conversion](docs/model-conversion.md)
 - [HAP build task breakdown](docs/hap-tasks.md)
 - [Patch inventory](docs/patches.md)
 - [Image build preparation](docs/image-build.md)
+- [QEMU validation plan](docs/qemu-validation.md)
 - [40-pin GPIO and PinTool](docs/gpio.md)
 
 ## Storage

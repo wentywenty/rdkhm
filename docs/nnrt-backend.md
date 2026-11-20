@@ -6,8 +6,10 @@ Status of the OpenHarmony Neural Network Runtime (NNRt) path on the X5 BPU.
 | --- | --- |
 | Source and patch | present |
 | Component build | passed (2026-11-19) |
-| Installed in an image | not yet |
-| HDF host enabled | no |
+| Installed in vendor.img | yes (verified by debugfs) |
+| vendor_image target | aborted by unrelated deps_guard |
+| HDF host enabled | yes on 0021 cold boot (`nnrt_host`) |
+| OH NNRT C API | X5-BPU found; offline `.bin` build rejected by NNRt core |
 | Board inference | passed via private daemon (MobileNetV2, ResNet18) |
 | ONNX conversion | passed (ResNet18, 2026-11-20) |
 | Real X5 models | MobileNetV2 + converted ResNet18 |
@@ -207,7 +209,96 @@ The class and score match the private-daemon result exactly (`top=892`,
 `out/board-logs/20261120-npu/npu.log`.
 
 This is still the vendor tool plus the private daemon; the OH NNRT HDI service
-is not enabled in an image.
+is not enabled in the flashed image.
+
+### Source enablement
+
+- The `nnrt_host` block is merged into
+  `overlay/vendor/drobotics/rdk_x5/hdf_config/uhdf/hdf.hcs`.
+- `overlay/vendor/drobotics/rdk_x5/sepolicy/security/public/nnrt.te` defines
+  the host and service types, registration and accelerator-socket access.
+- `drivers_peripheral_nnrt_x5` is in the product `hdf` subsystem; an `nnrt`
+  component and image-verifier checks were added.
+- HCS and SELinux policy both compile (`hdf_default.hcb`, `policy.31`).
+- `hdf_service_contexts` now maps `nnrt_device_service` to
+  `hdf_nnrt_device_service`; the target was regenerated successfully after a
+  transient `third_party/libnl/install.sh` race during GN gen.
+- `tests/nnrt-capi-test.c` compiles against the NDK and links. On the current
+  image it prints `FAIL device list: 0`, as expected before the service is in
+  the image.
+
+A `vendor_image` build was run. The target aborted at an unrelated
+`deps_guard` check (non-passthrough codec/input/memorytracker/mapper modules),
+but the produced `vendor.img` was inspected with `debugfs`:
+
+- `/lib64/libnnrt_driver.z.so` and
+  `/lib64/libnnrt_device_service_2.1.z.so` are present (34048 and 13232 bytes).
+- `/etc/hdfconfig/hdf_default.hcb` contains `nnrt_host` and
+  `nnrt_device_service`.
+- `packages/phone/system/etc/selinux/targeted/policy/policy.31` contains
+  `nnrt_host` and `hdf_nnrt_device_service`; `hdf_service_contexts` maps
+  `nnrt_device_service`.
+
+### Cold boot with kernel 0021
+
+`out/board-logs/20261120-gpu/coldboot-kernel0021.log` shows the NNRT HDF host
+starting in userspace:
+
+```text
+ServiceStart starting:nnrt_host
+ServiceStart started info nnrt_host(pid 754 uid 1000)
+Set selinux context 0 for nnrt_host
+ServiceExec nnrt_host
+```
+
+The host runs as `u:r:nnrt_host:s0`. The capture also showed one permissive
+AVC denial for `get` on `sa_device_service_manager`; `nnrt.te` now allows
+`samgr:binder call` and `sa_device_service_manager:samgr_class get`. The policy
+CIL includes the new rules, but the policy target still aborts at the unrelated
+`deps_guard` check.
+
+### OH NNRT C API verification (2026-11-20)
+
+Board: `10.43.9.213:5555`, boot_id
+`9482e12c-d08d-49fb-ae66-05062ed23e2a`, kernel `#12`
+(2026-11-20 16:04 CST). Log:
+`out/board-logs/20261120-npu/capi-verify.log`.
+
+Device discovery succeeds:
+
+```text
+device=11919407101284969601 name=X5-BPU_D-Robotics_v2_1 count=1
+```
+
+`OH_NNCompilation_Build()` then fails with `OH_NN_FAILED` before reaching the
+HDI offline-model path:
+
+```text
+[Nnbackend.cpp(CreateCompiler:118)] CreateCompiler failed,
+only support build NN model and NN model cache.
+[neural_network_core.cpp(CreateCompiler:596)] CreateCompiler failed
+```
+
+The OH 6.0 NNRT core rejects `OH_NNCompilation_ConstructWithOfflineModelFile`
+and `...OfflineModelBuffer` in `NNBackend::CreateCompiler`. The HDI
+`PrepareOfflineModel()` path exists, but this core only uses it for a MindSpore
+Lite graph with a custom op, not for a raw vendor `.bin`.
+
+The private daemon path still works with the same model:
+
+```text
+run status=0
+output 0 dims=[1,1000,1,1] sum=0.026968 top=473 value=3.481126
+```
+
+Supporting a raw `.bin` through the C API requires a framework patch: let
+`NNBackend::CreateCompiler` accept offline path/buffer and route the build to
+`HDIDeviceV2_1::PrepareOfflineModel` (or an equivalent raw-buffer Device API).
+
+The `interface token check failed` lines are the v1.0/v2.0 backend probes; the
+v2.1 device is registered and named `X5-BPU_D-Robotics_v2_1`.
+
+The `deps_guard` failure is not NNRT-specific.
 
 ### ONNX conversion
 

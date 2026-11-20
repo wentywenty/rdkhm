@@ -35,16 +35,20 @@ Artifacts:
 - `PrepareModel()` (operator graph) returns `NNRT_NOT_SUPPORT`;
   `GetSupportedOperation()` reports all nodes unsupported.
 
-## Still required before use
+## Enablement state
 
-1. Merge `nnrt_device.hcs` into
-   `overlay/vendor/drobotics/rdk_x5/hdf_config/uhdf/hdf.hcs`.
-2. Add SELinux rules for the HDF host to connect to the accelerator socket and
-   access `/dev/bpu*` as needed.
-3. Build an image and verify that
-   `/vendor/lib64/libnnrt_driver.z.so` and
-   `/vendor/lib64/libnnrt_device_service_2.1.z.so` are installed.
-4. Run a real Horizon `.hbm` model through
-   `OH_NNCompilation_ConstructWithOfflineModelFile()` and verify output.
+Source enablement is complete:
 
-No HBM inference has been run on hardware.
+- the `nnrt_host` block is merged into `hdf_config/uhdf/hdf.hcs`;
+- `sepolicy/security/public/nnrt.te` and `hdf_service_contexts` are present;
+- `drivers_peripheral_nnrt_x5` is part of the product `hdf` subsystem;
+- an `nnrt` component and image-verifier checks exist.
+
+The HCS, SELinux policy and `hdf_service_contexts` generation all pass. A
+`vendor_image` build aborted at an unrelated `deps_guard` check, but the
+produced vendor image contains both NNRT libraries and the `nnrt_host` HCB
+block; the system policy contains the NNRT types. The remaining step is a
+successful unified image build and flash, then
+`OH_NNCompilation_ConstructWithOfflineModelFile()` with a real model.
+`tests/nnrt-capi-test.c` is ready; on the current image it reports zero
+devices.

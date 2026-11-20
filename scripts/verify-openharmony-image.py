@@ -142,6 +142,9 @@ def main():
         buffer_vdi = package / "vendor/lib64/chipset-sdk/libdisplay_buffer_vdi_impl_default.z.so"
         mapping[("vendor", "/lib64/libdisplay_buffer_vdi_impl_default.z.so")] = buffer_vdi
         mapping[("vendor", "/lib64/libdisplay_buffer_vdi_impl.z.so")] = buffer_vdi
+        composer_vdi = (workspace / "sources/oh/openharmony-full/out/rdk_x5/hdf/"
+                        "drivers_peripheral_display/libdisplay_composer_vdi_impl_default.z.so")
+        mapping[("vendor", "/lib64/libdisplay_composer_vdi_impl_default.z.so")] = composer_vdi
         for path in (
             "lib64/libdisplay_composer_vdi_impl_default.z.so",
             "lib64/libdisplay_composer_service_1.3.z.so",
