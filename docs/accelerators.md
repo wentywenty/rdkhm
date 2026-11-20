@@ -207,7 +207,8 @@ Source, wire protocol, build result and board-enable steps are documented in
 [nnrt-backend.md](nnrt-backend.md). Current state: the patch is present and a
 component build passed; the libraries are not enabled in an image (no HCS host,
 no SELinux rules). MobileNetV2 inference passed through the private daemon on
-2026-11-20 (`sum=1.000000`, top=892), but the OH NNRT HDI/API path is still
+2026-11-20 (`sum=1.000000`, top=892), and a ResNet18 ONNX was converted to
+`.bin` and tested (3.17 ms / 314 FPS); the OH NNRT HDI/API path is still
 untested. Only the vendor offline-`.bin`/`.hbm` path is supported; the
 operator-graph `PrepareModel()` path returns `NNRT_NOT_SUPPORT`.
 

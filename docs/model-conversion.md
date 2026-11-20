@@ -9,12 +9,53 @@ toolchain in this workspace.
 | --- | --- |
 | OE X5 package | downloaded and extracted |
 | Host prerequisites | Python 3.10.12, gcc/g++ 11.4.0, graphviz present |
-| Python wheels installed | no |
-| ONNX conversion executed | no |
+| Python wheels installed | yes (`thirdparty/toolchains/oe_x5/venv`) |
+| ONNX conversion executed | yes (ResNet18, 2026-11-20) |
 | Precompiled model tested on board | yes (MobileNetV2) |
 
 The runtime cannot execute ONNX. PTQ produces `.bin`; QAT produces `.hbm`.
 The board test used a precompiled PTQ `.bin` from the official model zoo.
+
+## ResNet18 conversion executed (2026-11-20)
+
+The toolchain was installed into `thirdparty/toolchains/oe_x5/venv` and used to
+convert a real ONNX model.
+
+- ONNX: ONNX Model Zoo ResNet18 v1
+  - URL: `https://github.com/onnx/models/raw/main/validated/vision/classification/resnet/model/resnet18-v1-7.onnx`
+  - Local: `thirdparty/toolchains/oe_x5/work/resnet18/resnet18-v1-7.onnx`
+  - SHA256: `4e8f8653e7a2222b3904cc3fe8e304cd8b339ce1d05fd24688162f86fb6df52c`
+- Calibration: 100 ImageNet JPEGs converted to float32 RGB
+  (`calibration_data_rgb_f32`).
+- Config: `work/resnet18/resnet18_config.yaml`, input `1x3x224x224`,
+  `input_type_rt: nv12`, ImageNet mean/scale, `march: bayes-e`.
+
+Commands:
+
+```sh
+hb_mapper checker --model-type onnx --model resnet18-v1-7.onnx \
+  --march bayes-e --input-shape data 1x3x224x224
+hb_mapper makertbin --config resnet18_config.yaml --model-type onnx
+```
+
+Checker: all convolutions on BPU, only the final reshape on CPU.
+Output: `work/resnet18/model_output/resnet18_224x224_nv12.bin` (11 MiB).
+
+Board result (`out/board-logs/20261120-npu/resnet18.log`):
+
+- `model_info`: input NV12 `(1,3,224,224)`, output F32 `(1,1000,1,1)`,
+  no HBRT/model version warning.
+- `perf --frame_count 200 --thread_num 1`: 3.17 ms average, 314 FPS.
+- `infer` on the constant NV12 input: class 473, score 3.48113.
+- Private daemon: `top=473`, `value=3.481126`, same result.
+
+Toolchain installation notes:
+
+- The OE sample model downloader failed against its FTP server (`425`); an ONNX
+  Model Zoo file plus the bundled ImageNet calibration set was used instead.
+- `pycocotools==2.0.3` failed to build with the newer numpy; `2.0.7` was used.
+- `setuptools==65.5.1` is required for `hbdk-config` (`pkg_resources`).
+- `horizon_nn` imports torch at load time; CPU torch `1.13.0` was installed.
 
 ## Toolchain package
 

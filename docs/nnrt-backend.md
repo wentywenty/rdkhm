@@ -8,8 +8,9 @@ Status of the OpenHarmony Neural Network Runtime (NNRt) path on the X5 BPU.
 | Component build | passed (2026-11-19) |
 | Installed in an image | not yet |
 | HDF host enabled | no |
-| Board inference | passed via private daemon (MobileNetV2, 2026-11-20) |
-| Real X5 model | `mobilenetv2_224x224_nv12.bin` downloaded |
+| Board inference | passed via private daemon (MobileNetV2, ResNet18) |
+| ONNX conversion | passed (ResNet18, 2026-11-20) |
+| Real X5 models | MobileNetV2 + converted ResNet18 |
 
 The runtime, device nodes and vendor library already load (`NPU_RUNTIME_READY`);
 that is a capability result, not inference evidence. See
@@ -212,21 +213,22 @@ is not enabled in an image.
 
 The runtime only executes compiled models. ONNX -> `.bin` (PTQ) or `.hbm` (QAT)
 requires the Horizon `hbdk` / OpenExplorer toolchain plus calibration data for
-PTQ. The official X5 OE package is downloaded and extracted under
-`thirdparty/toolchains/oe_x5/`; its wheels are not installed yet, and no ONNX
-has been converted. See [model-conversion.md](model-conversion.md) for the
-toolchain contents, install steps, PTQ/QAT flow, and precompiled model sources.
+PTQ. The OE package is installed in `thirdparty/toolchains/oe_x5/venv`, and a
+ResNet18 ONNX was converted to `.bin` on 2026-11-20 (3.17 ms / 314 FPS on the
+board, no HBRT version warning). See [model-conversion.md](model-conversion.md)
+for commands, calibration requirements and the QAT flow.
 
 Temporary board files left for reuse: `/data/local/tmp/accelerator-daemon`,
 `/data/local/tmp/nnrt-wire-client`, `/data/local/tmp/nnrt-infer-client`,
-`/data/local/tmp/accel-client`, `/data/local/tmp/mobilenetv2.bin`.
+`/data/local/tmp/accel-client`, `/data/local/tmp/mobilenetv2.bin`,
+`/data/local/tmp/resnet18.bin`, `/data/local/tmp/input_nv12.bin`.
 
 ## Limits
 
-- Only `.hbm` offline models are accepted.
+- Only precompiled vendor models (`.bin` / `.hbm`) are accepted; ONNX is not accepted at runtime.
 - No operator-graph compilation.
 - No model cache, dynamic shape, float16, performance or priority settings.
 - Board inference is proven only through the private daemon; the OH NNRT HDI/API path is still untested.
-- ONNX conversion has the OE toolchain downloaded but not installed; see model-conversion.md.
+- ONNX conversion is proven for ResNet18; robot-policy ONNX files are not converted or validated.
 - `bringup/probes/accel_wire.h` and the copy in
   `drivers/peripheral/nnrt/include/accel_wire.h` must stay identical.
