@@ -1,0 +1,76 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] haps/printspooler-build-config.patch
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/build-profile.json5
++++ b/build-profile.json5
+@@ -6,15 +6,15 @@
+       {
+         "name": "default",
+         "signingConfig": "default",
+-        "compileSdkVersion": 18,
+-        "compatibleSdkVersion": 11,
++        "compileSdkVersion": 20,
++        "compatibleSdkVersion": 20,
+         "runtimeOS": "OpenHarmony"
+       },
+       {
+         "name": "tablet",
+         "signingConfig": "default",
+-        "compileSdkVersion": 18,
+-        "compatibleSdkVersion": 11,
++        "compileSdkVersion": 20,
++        "compatibleSdkVersion": 20,
+         "runtimeOS": "OpenHarmony"
+       }
+     ]
+--- a/common/oh-package.json5
++++ b/common/oh-package.json5
+@@ -1,4 +1,5 @@
+ {
++  "modelVersion": "6.0.2",
+   "license": "ISC",
+   "types": "",
+   "name": "@ohos/common",
+--- a/driverEntry/oh-package.json5
++++ b/driverEntry/oh-package.json5
+@@ -1,4 +1,5 @@
+ {
++  "modelVersion": "6.0.2",
+   "name": "driverentry",
+   "version": "1.0.0",
+   "description": "printer and scanner driver demo for openharmony",
+--- a/entry/oh-package.json5
++++ b/entry/oh-package.json5
+@@ -1,4 +1,5 @@
+ {
++  "modelVersion": "6.0.2",
+   "license": "ISC",
+   "devDependencies": {},
+   "name": "entry",
+--- a/feature/ippPrint/oh-package.json5
++++ b/feature/ippPrint/oh-package.json5
+@@ -1,4 +1,5 @@
+ {
++  "modelVersion": "6.0.2",
+   "license": "ISC",
+   "types": "",
+   "name": "@ohos/ippprint",
+--- a/hvigor/hvigor-config.json5
++++ b/hvigor/hvigor-config.json5
+@@ -1,5 +1,5 @@
+ {
+-  "modelVersion": "5.0.2",
++  "modelVersion": "6.0.2",
+   "dependencies": {
+   },
+   "execution": {
+--- a/oh-package.json5
++++ b/oh-package.json5
+@@ -1,5 +1,5 @@
+ {
+-  "modelVersion": "5.0.2",
++  "modelVersion": "6.0.2",
+   "license": "ISC",
+   "devDependencies": {
+     "@ohos/hypium": "1.0.21"

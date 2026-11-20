@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Unified build entry: ./build kernel|oh|hap <app>|display|audio|input|nearlink|accelerators|pintool|image|list
+set -euo pipefail
+root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if [[ $# -lt 1 ]]; then
+    echo "usage: $0 <kernel|oh|hap <app>|display|audio|input|nearlink|accelerators|settings|pintool|image|list>" >&2
+    exit 2
+fi
+case "$1" in
+    list|components)
+        exec "$root/rdkhm" components
+        ;;
+    hap)
+        shift
+        exec python3 "$root/scripts/build-hap.py" "$@"
+        ;;
+    kernel|oh|display|audio|input|nearlink|accelerators|settings|pintool|image)
+        exec "$root/rdkhm" build "$@"
+        ;;
+    *)
+        echo "unknown build target: $1" >&2
+        exit 2
+        ;;
+esac

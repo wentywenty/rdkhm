@@ -1,0 +1,52 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] camera/0004-bringup-permission-gate.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/applications/standard/camera/product/phone/src/main/ets/pages/index.ets
++++ b/applications/standard/camera/product/phone/src/main/ets/pages/index.ets
+@@ -164,42 +164,8 @@
+     })
+ 
+     if (!this.state.permissionFlag) {
+-      let permissionList: Array<Permissions> = [
+-        "ohos.permission.MEDIA_LOCATION",
+-        "ohos.permission.READ_IMAGEVIDEO",
+-        "ohos.permission.WRITE_IMAGEVIDEO",
+-        "ohos.permission.CAMERA",
+-        "ohos.permission.MICROPHONE",
+-        "ohos.permission.DISTRIBUTED_DATASYNC",
+-        "ohos.permission.LOCATION",
+-        "ohos.permission.LOCATION_IN_BACKGROUND",
+-        "ohos.permission.APPROXIMATELY_LOCATION"
+-      ];
+-      Log.info(`${this.TAG} permissions need to require from user: ${JSON.stringify(permissionList)}`);
+-      let atManager = abilityAccessCtrl.createAtManager();
+-      try {
+-        atManager.requestPermissionsFromUser(GlobalContext.get().getCameraAbilityContext(), permissionList)
+-          .then((data) => {
+-            Log.info(`${this.TAG} data permissions: ${JSON.stringify(data.permissions)}`);
+-            Log.info(`${this.TAG} data authResult: ${JSON.stringify(data.authResults)}`);
+-            let sum = 0
+-            for (let i = 0; i < data.authResults.length; i++) {
+-              sum += data.authResults[i];
+-            }
+-            if (sum >= 0) {
+-              GlobalContext.get().setObject('permissionFlag', true);
+-              this.mAction.setPermissionFlag(true);
+-            } else {
+-              GlobalContext.get().setObject('permissionFlag', false);
+-              this.mAction.setPermissionFlag(false);
+-            }
+-            Log.info(`${this.TAG} request permissions result: ${GlobalContext.get().getT<boolean>('permissionFlag')}`);
+-          }, (err: BusinessError) => {
+-            Log.error(`${this.TAG} Failed to start ability err code: ${err.code}`);
+-          })
+-      } catch (error) {
+-        Log.info(`${this.TAG} catch error: ${JSON.stringify(error)}`);
+-      }
++      GlobalContext.get().setObject('permissionFlag', true);
++      this.mAction.setPermissionFlag(true);
+     }
+ 
+     if (GlobalContext.get().getCameraFormParam() != undefined) {

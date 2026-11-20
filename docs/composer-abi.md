@@ -17,8 +17,14 @@ Patch `patches/display/0002-composer-c-entrypoints.patch` adds the 38 mandatory
 C entry points to the default VDI, forwarding to the existing implementation.
 A function-local static instance follows the library lifetime. Every wrapper
 has a static_assert against DisplayComposerVdiAdapter's function pointer type.
-Existing factory exports remain available. Unsupported operations retain the
-existing HDF_ERR_NOT_SUPPORT return; no optional v1.1-v1.3 capability is invented.
+Existing factory exports remain available. Patch 0002 also exports the v1.1
+`RegRefreshCallback` and triggers it after a successful power-on; other v1.1
+operations retain the existing HDF_ERR_NOT_SUPPORT return.
+
+Patch `patches/display/0007-composer-release-entrypoint.patch` adds the
+`DisplayComposerImplRelease` export for the service lifetime; the image verifier
+now checks both `DisplayComposerImplGetInstance` and `DisplayComposerImplRelease`
+in the packaged `libdisplay_composer_service_1.3.z.so`.
 
 `scripts/check-composer-abi.py` derives the required exports from LoadVdiAdapter
 and checks defined public function symbols in the packaged ELF. It rejects the
@@ -29,6 +35,21 @@ is applied by prepare-openharmony.sh after the existing software DRM patch.
 Build and symbol verification do not establish DRM modesetting, buffer transfer,
 HDMI output or desktop launch. Automatic hilog capture remains enabled for the
 next board boot; service restart protections are unchanged.
+
+## Known gap: v1.1/v1.2 entry points
+
+The service `dlsym`s 62 entry points across `LoadVdiFuncPart1/2/3`. Patch 0002
+covers the 38 v1.0 functions plus `RegRefreshCallback`. The default VDI still
+lacks 22 later entries,
+including `RegDisplayVBlankIdleCallback`,
+`GetDisplaySupportedModesExt`, `SetDisplayModeAsync`, the per-frame parameter
+functions, hardware-cursor functions and `FastPresent`. The 2026-11-17 board log
+recorded `RegRefreshCallback` returning not-support on the older image. The
+current patch exports and invokes it, and exports `GetDisplaySupportedColorGamuts`
+with an sRGB answer so `RSScreen::GetScreenColorGamut` stops failing. `check-composer-abi.py` now enforces the
+Part1 set plus `RegRefreshCallback` and `GetDisplaySupportedColorGamuts` and
+reports the remaining 22 optional
+entries as a warning; implementing those callbacks remains follow-up work.
 
 Validation on 2026-11-16: the full `images` build completed successfully. The
 packaged library and the library extracted from the SD image both passed all

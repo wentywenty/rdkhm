@@ -10,7 +10,13 @@ import shutil
 import subprocess
 import urllib.request
 
+from workspace import environment
+
 WORKSPACE = Path(__file__).resolve().parents[1]
+ENV = environment()
+# repo.xml keeps these checkouts beside the kernel and OpenHarmony trees.
+RDK_ROOT = Path(ENV['RDKHM_KERNEL_TREE']).parent
+OH_TREE = Path(ENV['RDKHM_OH_TREE'])
 
 
 def run(*args):
@@ -22,9 +28,9 @@ def sha(path):
 
 
 def main():
-    sources = json.loads((WORKSPACE / 'config/accelerator-sources.json').read_text())
+    sources = json.loads((WORKSPACE / 'config/accelerators/sources.json').read_text())
     for name, revision in sources.items():
-        target = WORKSPACE / 'sources' / name
+        target = RDK_ROOT / name
         if not target.exists():
             subprocess.run(['git', 'clone', 'https://github.com/D-Robotics/' + name + '.git', str(target)], check=True)
             subprocess.run(['git', '-C', str(target), 'checkout', '--detach', revision], check=True)
@@ -32,7 +38,7 @@ def main():
             raise RuntimeError(f'Unexpected revision: {target}')
     downloads = WORKSPACE / 'out/accelerator-downloads'
     downloads.mkdir(parents=True, exist_ok=True)
-    lock_path = WORKSPACE / 'config/accelerator-assets-lock.json'
+    lock_path = WORKSPACE / 'config/accelerators/assets-lock.json'
     lock = json.loads(lock_path.read_text())
     if 'libdrm_package' not in lock or lock.get('sources') != sources:
         raise RuntimeError('Missing or inconsistent accelerator lock; review dependency updates explicitly')
@@ -43,8 +49,8 @@ def main():
         raise RuntimeError('libdrm package checksum mismatch')
     unpack = downloads / 'libdrm2'
     subprocess.run(['dpkg-deb', '-x', str(package), str(unpack)], check=True)
-    dnn = WORKSPACE / 'sources/x5-hobot-dnn/x5/usr/lib'
-    multimedia = WORKSPACE / 'sources/x5-hobot-multimedia/debian/usr/hobot/lib'
+    dnn = RDK_ROOT / 'x5-hobot-dnn/x5/usr/lib'
+    multimedia = RDK_ROOT / 'x5-hobot-multimedia/debian/usr/hobot/lib'
     directories = [dnn, multimedia, unpack / 'usr/lib/aarch64-linux-gnu', Path('/usr/aarch64-linux-gnu/lib')]
     candidates = {}
     for directory in directories:
@@ -62,7 +68,11 @@ def main():
     runtime = stage / 'lib64/rdkhm-accelerator'
     runtime.mkdir(parents=True)
     captured = {}
-    pending = ['libdnn.so', 'libEGL.so.1', 'libGLESv2.so.2', 'ld-linux-aarch64.so.1']
+    # libGLSLC.so is not a DT_NEEDED: libGAL/libGLESv2 dlopen the GLSL
+    # compiler when the first GL context is created. Without it EGL
+    # initializes and enumerates configs but eglCreateContext fails 0x3005.
+    pending = ['libdnn.so', 'libEGL.so.1', 'libGLESv2.so.2', 'libGLSLC.so',
+               'ld-linux-aarch64.so.1']
     while pending:
         name = pending.pop()
         if name in captured:
@@ -72,7 +82,11 @@ def main():
         path = candidates[name].resolve()
         if 'AArch64' not in run('readelf', '-h', str(path)):
             raise RuntimeError(f'Wrong architecture: {path}')
-        captured[name] = {'source': str(path), 'sha256': sha(path)}
+        try:
+            source = str(path.relative_to(WORKSPACE))
+        except ValueError:
+            source = str(path)
+        captured[name] = {'source': source, 'sha256': sha(path)}
         previous = lock.get('libraries', {}).get(name)
         if not previous or previous['sha256'] != captured[name]['sha256']:
             raise RuntimeError(f'Changed runtime asset: {name}')
@@ -80,27 +94,57 @@ def main():
         pending.extend(re.findall(r'\(NEEDED\).*\[(.*?)\]', run('readelf', '-d', str(path))))
     if set(captured) != set(lock['libraries']):
         raise RuntimeError('Runtime dependency set differs from pinned lock')
+    # The vendor EGL dlopens unversioned client-API names. Keeping only the
+    # SONAME copy makes eglBindAPI fail with EGL_BAD_PARAMETER (0x300c), because
+    # the ES dispatch table never registers. Mirror the vendor's dev symlinks.
+    for link, target in (('libEGL.so', 'libEGL.so.1'),
+                         ('libGLESv2.so', 'libGLESv2.so.2'),
+                         ('libgbm.so', 'libgbm.so.1'),
+                         ('libdrm_vivante.so', 'libdrm_vivante.so.1.0.0')):
+        if not (runtime / target).exists():
+            continue
+        if (runtime / link).is_symlink() or (runtime / link).exists():
+            (runtime / link).unlink()
+        (runtime / link).symlink_to(target)
     subprocess.run(['aarch64-linux-gnu-gcc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-O2',
-                    '-I' + str(WORKSPACE / 'sources/x5-hobot-dnn/x5/usr/include'),
-                    str(WORKSPACE / 'bringup/accelerator-probe.c'), '-ldl', '-o', str(runtime / 'accelerator-probe')], check=True)
+                    '-I' + str(RDK_ROOT / 'x5-hobot-dnn/x5/usr/include'),
+                    str(WORKSPACE / 'bringup/probes/accelerator-probe.c'), '-ldl', '-o', str(runtime / 'accelerator-probe')], check=True)
     subprocess.run(['aarch64-linux-gnu-gcc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-O2',
-                    '-I' + str(WORKSPACE / 'sources/x5-hobot-dnn/x5/usr/include'),
-                    str(WORKSPACE / 'bringup/nnrt-worker.c'), '-ldl', '-o', str(runtime / 'nnrt-worker')], check=True)
-    subprocess.run(['aarch64-linux-gnu-gcc', '-std=gnu11', '-Wall', '-Wextra', '-Werror', '-O2',
-                    str(WORKSPACE / 'bringup/accelerator-daemon.c'), '-ldl',
+                    '-I' + str(RDK_ROOT / 'x5-hobot-dnn/x5/usr/include'),
+                    str(WORKSPACE / 'bringup/probes/nnrt-worker.c'), '-ldl', '-o', str(runtime / 'nnrt-worker')], check=True)
+    thirdparty = OH_TREE / 'third_party'
+    subprocess.run(['aarch64-linux-gnu-gcc', '-std=gnu11', '-Wall', '-Wextra', '-Werror', '-O2', '-D__GBM__',
+                    '-I' + str(RDK_ROOT / 'x5-hobot-dnn/x5/usr/include'),
+                    '-I' + str(thirdparty / 'EGL/api'), '-I' + str(thirdparty / 'openGLES/api'),
+                    '-I' + str(thirdparty / 'mesa3d/src/gbm/main'),
+                    str(WORKSPACE / 'bringup/probes/accelerator-daemon.c'),
+                    '-L' + str(runtime), '-Wl,-rpath-link=' + str(runtime),
+                    '-l:libEGL.so.1', '-l:libGLESv2.so.2', '-l:libgbm.so.1', '-ldl',
                     '-o', str(runtime / 'accelerator-daemon')], check=True)
-    thirdparty = WORKSPACE / 'sources/openharmony-full/third_party'
     subprocess.run(['aarch64-linux-gnu-gcc', '-std=gnu11', '-Wall', '-Wextra', '-Werror', '-O2', '-D__GBM__',
                     '-I' + str(thirdparty / 'EGL/api'), '-I' + str(thirdparty / 'openGLES/api'),
-                    '-I' + str(thirdparty / 'mesa3d/src/gbm/main'), str(WORKSPACE / 'bringup/gpu-probe.c'),
+                    '-I' + str(thirdparty / 'mesa3d/src/gbm/main'), str(WORKSPACE / 'bringup/probes/gpu-probe.c'),
                     '-L' + str(runtime), '-Wl,-rpath-link=' + str(runtime),
                     '-l:libEGL.so.1', '-l:libGLESv2.so.2', '-l:libgbm.so.1',
                     '-o', str(runtime / 'gpu-probe')], check=True)
+    subprocess.run(['aarch64-linux-gnu-gcc', '-std=gnu11', '-Wall', '-Wextra', '-Werror', '-O2', '-D__GBM__',
+                    '-I' + str(thirdparty / 'EGL/api'), '-I' + str(thirdparty / 'openGLES/api'),
+                    '-I' + str(thirdparty / 'mesa3d/src/gbm/main'), str(WORKSPACE / 'bringup/probes/gpu-compose-test.c'),
+                    '-L' + str(runtime), '-Wl,-rpath-link=' + str(runtime),
+                    '-l:libEGL.so.1', '-l:libGLESv2.so.2', '-l:libgbm.so.1',
+                    '-o', str(runtime / 'gpu-compose-test')], check=True)
+    subprocess.run(['aarch64-linux-gnu-gcc', '-std=gnu11', '-Wall', '-Wextra', '-Werror', '-O2', '-D__GBM__',
+                    '-I' + str(thirdparty / 'mesa3d/src/gbm/main'), '-I' + str(WORKSPACE / 'bringup/probes'),
+                    str(WORKSPACE / 'bringup/probes/accel-compose-client.c'),
+                    '-L' + str(runtime), '-Wl,-rpath-link=' + str(runtime),
+                    '-l:libgbm.so.1', '-o', str(runtime / 'accel-compose-client')], check=True)
     binaries = stage / 'bin'
     binaries.mkdir()
-    shutil.copyfile(WORKSPACE / 'bringup/rdkhm-accelerator.sh', binaries / 'rdkhm-accelerator')
+    shutil.copyfile(WORKSPACE / 'bringup/helpers/rdkhm-accelerator.sh', binaries / 'rdkhm-accelerator')
     executables = ['lib64/rdkhm-accelerator/ld-linux-aarch64.so.1',
                    'lib64/rdkhm-accelerator/gpu-probe',
+                   'lib64/rdkhm-accelerator/gpu-compose-test',
+                   'lib64/rdkhm-accelerator/accel-compose-client',
                    'lib64/rdkhm-accelerator/accelerator-probe',
                    'lib64/rdkhm-accelerator/nnrt-worker',
                    'lib64/rdkhm-accelerator/accelerator-daemon', 'bin/rdkhm-accelerator']

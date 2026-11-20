@@ -1,0 +1,204 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0007-rtg-qos-proc.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/fs/proc/Makefile b/fs/proc/Makefile
+index bd08616ed..259e32388 100644
+--- a/fs/proc/Makefile
++++ b/fs/proc/Makefile
+@@ -27,6 +27,7 @@ proc-y	+= softirqs.o
+ proc-y	+= namespaces.o
+ proc-y	+= self.o
+ proc-y	+= thread_self.o
++proc-y	+= rtg_qos.o
+ proc-$(CONFIG_PROC_SYSCTL)	+= proc_sysctl.o
+ proc-$(CONFIG_NET)		+= proc_net.o
+ proc-$(CONFIG_PROC_KCORE)	+= kcore.o
+diff --git a/fs/proc/base.c b/fs/proc/base.c
+index 74442e017..951f62615 100644
+--- a/fs/proc/base.c
++++ b/fs/proc/base.c
+@@ -3259,6 +3259,7 @@ static const struct pid_entry tgid_base_stuff[] = {
+ 	REG("timens_offsets",  S_IRUGO|S_IWUSR, proc_timens_offsets_operations),
+ #endif
+ 	REG("comm",      S_IRUGO|S_IWUSR, proc_pid_set_comm_operations),
++	REG("sched_rtg_ctrl", S_IRUSR|S_IWUSR, proc_sched_rtg_ctrl_operations),
+ #ifdef CONFIG_HAVE_ARCH_TRACEHOOK
+ 	ONE("syscall",    S_IRUSR, proc_pid_syscall),
+ #endif
+@@ -3602,6 +3603,7 @@ static const struct pid_entry tid_base_stuff[] = {
+ 	ONE("limits",	 S_IRUGO, proc_pid_limits),
+ #ifdef CONFIG_SCHED_DEBUG
+ 	REG("sched",     S_IRUGO|S_IWUSR, proc_pid_sched_operations),
++	REG("sched_qos_ctrl", S_IRUSR|S_IWUSR, proc_sched_qos_ctrl_operations),
+ #endif
+ 	NOD("comm",      S_IFREG|S_IRUGO|S_IWUSR,
+ 			 &proc_tid_comm_inode_operations,
+diff --git a/fs/proc/internal.h b/fs/proc/internal.h
+index 6b921826d..9a46d7c12 100644
+--- a/fs/proc/internal.h
++++ b/fs/proc/internal.h
+@@ -133,6 +133,9 @@ static inline struct task_struct *get_proc_task(const struct inode *inode)
+ void task_dump_owner(struct task_struct *task, umode_t mode,
+ 		     kuid_t *ruid, kgid_t *rgid);
+ 
++extern const struct file_operations proc_sched_qos_ctrl_operations;
++extern const struct file_operations proc_sched_rtg_ctrl_operations;
++
+ unsigned name_to_int(const struct qstr *qstr);
+ /*
+  * Offset of the first process in the /proc root directory..
+diff --git a/fs/proc/rtg_qos.c b/fs/proc/rtg_qos.c
+new file mode 100644
+--- /dev/null
++++ b/fs/proc/rtg_qos.c
+@@ -0,0 +1,148 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Compatibility interfaces for the OpenHarmony QoS/RTG userspace ABI.
++ *
++ * The vendor X5 kernel exposes /proc/thread-self/sched_qos_ctrl and
++ * /proc/self/sched_rtg_ctrl.  This port keeps the same proc names and ioctl
++ * layout but maps QoS levels to the generic scheduler nice value; RTG enable
++ * state is retained for ABI compatibility.  This is deliberately documented
++ * as a compatibility layer, not a vendor RTG hardware scheduler.
++ */
++#include <linux/fs.h>
++#include <linux/ioctl.h>
++#include <linux/proc_fs.h>
++#include <linux/sched.h>
++#include <linux/sched/task.h>
++#include <linux/slab.h>
++#include <linux/uaccess.h>
++#include <linux/atomic.h>
++
++#include "internal.h"
++
++#define QOS_CTRL_IPC_MAGIC	0xCC
++#define RTG_SCHED_IPC_MAGIC	0xAB
++
++#define QOS_APPLY	1
++#define QOS_LEAVE	2
++#define QOS_GET		3
++
++struct qos_ctrl_data {
++	int pid;
++	unsigned int type;
++	unsigned int level;
++	int qos;
++};
++
++struct rtg_enable_data {
++	int enable;
++	size_t len;
++	char *data;
++};
++
++static atomic_t rtg_enabled = ATOMIC_INIT(0);
++
++static struct task_struct *qos_target(struct file *file)
++{
++	return get_proc_task(file_inode(file));
++}
++
++static long qos_level_to_nice(unsigned int level)
++{
++	long nice = -20 + ((long)level * 40) / 6;
++
++	if (nice < -20)
++		nice = -20;
++	if (nice > 19)
++		nice = 19;
++	return nice;
++}
++
++static unsigned int nice_to_qos_level(int nice)
++{
++	long level;
++
++	if (nice <= -20)
++		return 0;
++	level = ((long)nice + 20) * 6 / 40;
++	if (level > 6)
++		level = 6;
++	return (unsigned int)level;
++}
++
++static long qos_ctrl_ioctl(struct file *file, unsigned int cmd,
++			   unsigned long arg)
++{
++	struct qos_ctrl_data data;
++	struct task_struct *task;
++	long ret = 0;
++
++	if (_IOC_TYPE(cmd) != QOS_CTRL_IPC_MAGIC)
++		return -ENOTTY;
++
++	task = qos_target(file);
++	if (!task)
++		return -ESRCH;
++
++	if (_IOC_NR(cmd) == 1) {
++		if (copy_from_user(&data, (void __user *)arg, sizeof(data))) {
++			ret = -EFAULT;
++			goto out;
++		}
++		if (data.pid > 0) {
++			struct task_struct *target = find_get_task_by_vpid(data.pid);
++
++			if (target) {
++				put_task_struct(task);
++				task = target;
++			}
++		}
++		switch (data.type) {
++		case QOS_APPLY:
++			set_user_nice(task, qos_level_to_nice(data.level));
++			break;
++		case QOS_LEAVE:
++			set_user_nice(task, 0);
++			break;
++		case QOS_GET:
++			data.level = nice_to_qos_level(task_nice(task));
++			if (copy_to_user((void __user *)arg, &data, sizeof(data)))
++				ret = -EFAULT;
++			break;
++		default:
++			ret = -EINVAL;
++		}
++	} else if (_IOC_NR(cmd) == 2 || _IOC_NR(cmd) == 3) {
++		/* Policy/thread-control payloads are accepted for ABI
++		 * compatibility; scheduling is represented by the nice value. */
++		ret = 0;
++	} else {
++		ret = -ENOTTY;
++	}
++
++out:
++	put_task_struct(task);
++	return ret;
++}
++
++static long rtg_ctrl_ioctl(struct file *file, unsigned int cmd,
++			   unsigned long arg)
++{
++	struct rtg_enable_data data;
++
++	if (_IOC_TYPE(cmd) != RTG_SCHED_IPC_MAGIC || _IOC_NR(cmd) != 1)
++		return -ENOTTY;
++	if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
++		return -EFAULT;
++	atomic_set(&rtg_enabled, data.enable ? 1 : 0);
++	return 0;
++}
++
++const struct file_operations proc_sched_qos_ctrl_operations = {
++	.unlocked_ioctl = qos_ctrl_ioctl,
++	.llseek = no_llseek,
++};
++
++const struct file_operations proc_sched_rtg_ctrl_operations = {
++	.unlocked_ioctl = rtg_ctrl_ioctl,
++	.llseek = no_llseek,
++};

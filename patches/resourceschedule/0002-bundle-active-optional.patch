@@ -1,0 +1,17 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] resourceschedule/0002-bundle-active-optional.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/services/common/src/bundle_active_config_reader.cpp
++++ b/services/common/src/bundle_active_config_reader.cpp
+@@ -79,7 +79,8 @@
+ void BundleActiveConfigReader::LoadConfigFile(const char *filePath)
+ {
+     if (!filePath) {
+-        BUNDLE_ACTIVE_LOGE("file does no exit");
++        /* Missing product config is optional; LoadConfig already applied
++         * defaults. Do not emit an ERROR for every empty candidate path. */
+         return;
+     }
+     cJSON *root = nullptr;

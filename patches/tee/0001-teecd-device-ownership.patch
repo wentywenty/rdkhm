@@ -1,0 +1,18 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] tee/0001-teecd-device-ownership.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/services/teecd/build/standard/init/teecd.cfg
++++ b/services/teecd/build/standard/init/teecd.cfg
+@@ -7,7 +7,9 @@
+                 "chmod 700 /sec_storage",
+                 "dp_chown_chmod 700 600 tee tee /sec_storage",
+                 "chown tee tee /dev/tc_ns_client",
+-                "chown tee tee /dev/tc_private"
++                "chown tee tee /dev/tc_private",
++                "chown tee tee /dev/tee0",
++                "chmod 0660 /dev/tee0"
+             ]
+         }, {
+             "name" : "post-fs-data",

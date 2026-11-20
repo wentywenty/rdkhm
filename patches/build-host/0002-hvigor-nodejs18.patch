@@ -1,0 +1,15 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] build: use Node 18 for hvigor
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/ohos_var.gni
++++ b/ohos_var.gni
+@@ -360,7 +360,7 @@ if (ohos_indep_compiler_enable) {
+   hap_packing_tool =
+       "${root_out_dir}/obj/developtools/packing_tool/jar/app_packing_tool.jar"
+ }
+-default_hvigor_nodejs_version = "v16.20.2"
++default_hvigor_nodejs_version = "v18.20.1"
+ nodejs = "//prebuilts/build-tools/common/nodejs/current/bin/node"
+ npm = "//prebuilts/build-tools/common/nodejs/current/bin/npm"
+ 

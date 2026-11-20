@@ -1,0 +1,20 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] launcher: fall back to default desktop style config
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/product/phone/src/main/ets/pagedesktop/viewmodel/PageDesktopViewModel.ts
++++ b/product/phone/src/main/ets/pagedesktop/viewmodel/PageDesktopViewModel.ts
+@@ -165,8 +165,10 @@
+     this.mSettingsModel.addObserver(this.mSettingsChangeObserver);
+     this.onPageDesktopCreate();
+     this.mGridConfig = this.getGridConfig();
+-    this.pageDesktopStyleConfig = layoutConfigManager.getStyleConfig(PageDesktopGridStyleConfig.APP_GRID_STYLE_CONFIG, PageDesktopConstants.FEATURE_NAME);
+-    this.formDetailLayoutConfig = layoutConfigManager.getStyleConfig(FormDetailLayoutConfig.FORM_LAYOUT_INFO, PageDesktopConstants.FEATURE_NAME);
++    this.pageDesktopStyleConfig = layoutConfigManager.getStyleConfig(PageDesktopGridStyleConfig.APP_GRID_STYLE_CONFIG, PageDesktopConstants.FEATURE_NAME) ||
++      PageDesktopGridStyleConfig.getInstance();
++    this.formDetailLayoutConfig = layoutConfigManager.getStyleConfig(FormDetailLayoutConfig.FORM_LAYOUT_INFO, PageDesktopConstants.FEATURE_NAME) ||
++      FormDetailLayoutConfig.getInstance();
+   }
+ 
+   /**

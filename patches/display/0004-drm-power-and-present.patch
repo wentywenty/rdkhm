@@ -1,5 +1,8 @@
-diff --git a/display/composer/vdi_base/include/hdi_drm_composition.h b/display/composer/vdi_base/include/hdi_drm_composition.h
-index 49dfcfe..69214bc 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0004-drm-power-and-present.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/display/composer/vdi_base/include/hdi_drm_composition.h
 +++ b/display/composer/vdi_base/include/hdi_drm_composition.h
 @@ -53,7 +53,7 @@ public:
@@ -11,8 +14,6 @@ index 49dfcfe..69214bc 100644
  
  private:
      int32_t ApplyPlane(HdiDrmLayer &layer, HdiLayer &hlayer, DrmPlane &drmPlane, drmModeAtomicReqPtr pset);
-diff --git a/display/composer/vdi_base/src/drm_device.cpp b/display/composer/vdi_base/src/drm_device.cpp
-index bc380eb..9809e5f 100644
 --- a/display/composer/vdi_base/src/drm_device.cpp
 +++ b/display/composer/vdi_base/src/drm_device.cpp
 @@ -348,7 +348,11 @@ std::unordered_map<uint32_t, std::shared_ptr<HdiDisplay>> DrmDevice::DiscoveryDi
@@ -28,8 +29,6 @@ index bc380eb..9809e5f 100644
          dispId = display->GetId();
          connectorId = connector->GetId();
          mDisplays.emplace(dispId, std::move(display));
-diff --git a/display/composer/vdi_base/src/drm_display.cpp b/display/composer/vdi_base/src/drm_display.cpp
-index 1b13a83..89368fc 100644
 --- a/display/composer/vdi_base/src/drm_display.cpp
 +++ b/display/composer/vdi_base/src/drm_display.cpp
 @@ -105,6 +105,12 @@ int32_t DrmDisplay::GetDisplayPowerStatus(DispPowerStatus *status)
@@ -66,8 +65,29 @@ index 1b13a83..89368fc 100644
  }
  
  int32_t DrmDisplay::ChosePreferenceMode()
-diff --git a/display/composer/vdi_base/src/drm_vsync_worker.cpp b/display/composer/vdi_base/src/drm_vsync_worker.cpp
-index 5fd364f..feaee09 100644
+@@ -278,12 +285,20 @@ int32_t DrmDisplay::SetDisplayVsyncEnabled(bool enabled)
+ int32_t DrmDisplay::GetDisplayBacklight(uint32_t *value)
+ {
+     DISPLAY_CHK_RETURN((value == nullptr), DISPLAY_NULL_PTR, DISPLAY_LOGE("value is nullptr"));
+-    return mConnector->GetBrightness(*value);
++    int32_t ret = mConnector->GetBrightness(*value);
++    if (ret == DISPLAY_NOT_SUPPORT) {
++        /* X5 HDMI has no kernel backlight device. Treat the missing control as
++         * an unmodulated output instead of failing the whole display path. */
++        *value = 0xFF;
++        return DISPLAY_SUCCESS;
++    }
++    return ret;
+ }
+ 
+ int32_t DrmDisplay::SetDisplayBacklight(uint32_t value)
+ {
+-    return mConnector->SetBrightness(value);
++    int32_t ret = mConnector->SetBrightness(value);
++    return ret == DISPLAY_NOT_SUPPORT ? DISPLAY_SUCCESS : ret;
+ }
+ } // namespace OHOS
+ } // namespace HDI
 --- a/display/composer/vdi_base/src/drm_vsync_worker.cpp
 +++ b/display/composer/vdi_base/src/drm_vsync_worker.cpp
 @@ -28,9 +28,10 @@ int32_t DrmVsyncWorker::Init(int fd)
@@ -82,8 +102,6 @@ index 5fd364f..feaee09 100644
      return DISPLAY_SUCCESS;
  }
  
-diff --git a/display/composer/vdi_base/src/hdi_drm_composition.cpp b/display/composer/vdi_base/src/hdi_drm_composition.cpp
-index b5ea48c..383021c 100644
 --- a/display/composer/vdi_base/src/hdi_drm_composition.cpp
 +++ b/display/composer/vdi_base/src/hdi_drm_composition.cpp
 @@ -166,14 +166,14 @@ int32_t HdiDrmComposition::ApplyPlane(HdiDrmLayer &layer,
@@ -117,7 +135,7 @@ index b5ea48c..383021c 100644
          }
      }
      return DISPLAY_SUCCESS;
-@@ -267,20 +263,20 @@ int32_t HdiDrmComposition::FindPlaneAndApply(drmModeAtomicReqPtr pset)
+@@ -254,20 +250,20 @@ int32_t HdiDrmComposition::FindPlaneAndApply(drmModeAtomicReqPtr pset)
  
  int32_t HdiDrmComposition::Apply(bool modeSet)
  {
@@ -142,7 +160,7 @@ index b5ea48c..383021c 100644
  
      // set the outFence property
      ret = drmModeAtomicAddProperty(atomicReqPtr.Get(), mCrtc->GetId(), mCrtc->GetOutFencePropId(),
-@@ -313,11 +309,17 @@ int32_t HdiDrmComposition::Apply(bool modeSet)
+@@ -299,11 +295,17 @@ int32_t HdiDrmComposition::Apply(bool modeSet)
      DISPLAY_CHK_RETURN((ret < 0), DISPLAY_FAILURE,
          DISPLAY_LOGE("can not add the active prop errno %{public}d", errno));
  

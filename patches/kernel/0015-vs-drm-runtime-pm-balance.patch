@@ -1,0 +1,24 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0015-vs-drm-runtime-pm-balance.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/drivers/gpu/drm/verisilicon/vs_drv.c
++++ b/drivers/gpu/drm/verisilicon/vs_drv.c
+@@ -253,6 +253,7 @@
+ err_bind:
+ 	component_unbind_all(drm_dev->dev, drm_dev);
+ err_mode:
++	pm_runtime_disable(dev);
+ 	drm_mode_config_cleanup(drm_dev);
+ 	dev_set_drvdata(dev, NULL);
+ 	return ret;
+@@ -273,6 +274,8 @@
+ 
+ 	component_unbind_all(drm_dev->dev, drm_dev);
+ 
++	pm_runtime_disable(dev);
++
+ #ifdef CONFIG_VERISILICON_GEM_ION
+ 	if (priv->client) {
+ 		ion_client_destroy(priv->client);

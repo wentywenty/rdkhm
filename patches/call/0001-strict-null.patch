@@ -1,0 +1,1391 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] call: fix strict-null and TS/ArkTS import errors
+Date: Thu, 19 Nov 2026 15:50:00 +0800
+---
+diff --git a/entry/src/main/ets/MainAbility/MainAbility.ts b/entry/src/main/ets/MainAbility/MainAbility.ets
+similarity index 100%
+rename from entry/src/main/ets/MainAbility/MainAbility.ts
+rename to entry/src/main/ets/MainAbility/MainAbility.ets
+diff --git a/entry/src/main/ets/ServiceAbility/CallManagerService.ts b/entry/src/main/ets/ServiceAbility/CallManagerService.ets
+similarity index 100%
+rename from entry/src/main/ets/ServiceAbility/CallManagerService.ts
+rename to entry/src/main/ets/ServiceAbility/CallManagerService.ets
+diff --git a/entry/src/main/ets/ServiceAbility/ServiceAbility.ts b/entry/src/main/ets/ServiceAbility/ServiceAbility.ets
+similarity index 100%
+rename from entry/src/main/ets/ServiceAbility/ServiceAbility.ts
+rename to entry/src/main/ets/ServiceAbility/ServiceAbility.ets
+diff --git a/entry/src/main/ets/ServiceAbility/TelephonyApi.ets b/entry/src/main/ets/ServiceAbility/TelephonyApi.ts
+similarity index 100%
+rename from entry/src/main/ets/ServiceAbility/TelephonyApi.ets
+rename to entry/src/main/ets/ServiceAbility/TelephonyApi.ts
+diff --git a/entry/src/main/ets/common/struct/TypeUtils.ets b/entry/src/main/ets/common/struct/TypeUtils.ts
+similarity index 100%
+rename from entry/src/main/ets/common/struct/TypeUtils.ets
+rename to entry/src/main/ets/common/struct/TypeUtils.ts
+diff --git a/entry/src/main/ets/common/utils/VibrationAndProximityUtils.ts b/entry/src/main/ets/common/utils/VibrationAndProximityUtils.ets
+similarity index 100%
+rename from entry/src/main/ets/common/utils/VibrationAndProximityUtils.ts
+rename to entry/src/main/ets/common/utils/VibrationAndProximityUtils.ets
+diff --git a/entry/src/main/ets/model/CallServiceProxy.ets b/entry/src/main/ets/model/CallServiceProxy.ts
+similarity index 100%
+rename from entry/src/main/ets/model/CallServiceProxy.ets
+rename to entry/src/main/ets/model/CallServiceProxy.ts
+diff --git a/entry/src/main/ets/model/ContactManager.ts b/entry/src/main/ets/model/ContactManager.ets
+similarity index 79%
+rename from entry/src/main/ets/model/ContactManager.ts
+rename to entry/src/main/ets/model/ContactManager.ets
+index 0d14351..4030bd6 100644
+--- a/entry/src/main/ets/model/ContactManager.ts
++++ b/entry/src/main/ets/model/ContactManager.ets
+@@ -17,6 +17,7 @@
+  * @file: Contact management
+  */
+ import dataShare from '@ohos.data.dataShare';
++import DataShareResultSet from '@ohos.data.DataShareResultSet';
+ import dataSharePredicates from '@ohos.data.dataSharePredicates';
+ import LogUtils from '../common/utils/LogUtils';
+ import CallManager from '../model/CallManager';
+@@ -38,18 +39,21 @@ export default class ContactManager {
+     if (callData.contactName) {
+       return;
+     }
++    let dataAbilityHelper: dataShare.DataShareHelper | undefined = undefined;
++    let resSet: DataShareResultSet | undefined = undefined;
+     try {
+       const columns = ['id', 'display_name', 'detail_info'];
+       const predicates = new dataSharePredicates.DataSharePredicates();
+       predicates.equalTo('detail_info', callData.accountNumber);
+       predicates.equalTo('is_deleted', 0);
+       let context = globalThis.calluiAbilityContext;
+-      const dataAbilityHelper = await dataShare.createDataShareHelper(context, DB_BASE_URI);
+-      const resSet = await dataAbilityHelper.query(DB_URI, predicates, columns);
+-      LogUtils.i(TAG, 'getContactInfo resSet : ' + JSON.stringify(resSet.rowCount));
+-      if (resSet.rowCount > 0) {
+-        resSet.goToFirstRow();
+-        callData.contactName = resSet.getString(resSet.getColumnIndex('display_name'));
++      dataAbilityHelper = await dataShare.createDataShareHelper(context, DB_BASE_URI);
++      const result = await dataAbilityHelper.query(DB_URI, predicates, columns);
++      resSet = result;
++      LogUtils.i(TAG, 'getContactInfo resSet : ' + JSON.stringify(result.rowCount));
++      if (result.rowCount > 0) {
++        result.goToFirstRow();
++        callData.contactName = result.getString(result.getColumnIndex('display_name'));
+       } else {
+         callData.contactName = '';
+       }
+diff --git a/entry/src/main/module.json b/entry/src/main/module.json
+index 88da4b1..7679fee 100644
+--- a/entry/src/main/module.json
++++ b/entry/src/main/module.json
+@@ -22,7 +22,7 @@
+     "abilities": [
+       {
+         "name": "com.ohos.callui.MainAbility",
+-        "srcEntrance": "./ets/MainAbility/MainAbility.ts",
++        "srcEntrance": "./ets/MainAbility/MainAbility.ets",
+         "description": "$string:callui_description",
+         "icon": "$media:app_icon",
+         "label": "$string:callui_description",
+@@ -31,6 +31,7 @@
+         "startWindowBackground": "$color:black",
+         "removeMissionAfterTerminate": true,
+         "visible": false,
++        "exported": true,
+         "minWindowHeight": 700,
+         "minWindowWidth": 320,
+         "skills": [
+@@ -55,7 +56,7 @@
+         "description": "service",
+         "type": "service",
+         "visible": true,
+-        "srcEntrance": "./ets/ServiceAbility/ServiceAbility.ts",
++        "srcEntrance": "./ets/ServiceAbility/ServiceAbility.ets",
+         "label": "$string:callui_description",
+         "permissions": [
+           "ohos.permission.PLACE_CALL"
+diff --git a/entry/src/main/module.json5 b/entry/src/main/module.json5
+index ae399c5..bc57e4e 100644
+--- a/entry/src/main/module.json5
++++ b/entry/src/main/module.json5
+@@ -1,139 +1,158 @@
+-/**
+- * Copyright (c) 2022 Huawei Device Co., Ltd.
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-{
+-  "module": {
+-    "name": "callui",
+-    "type": "entry",
+-    "srcEntry": "./ets/Application/MyAbilityStage.ts",
+-    "description": "$string:callui_description",
+-    "mainElement": "com.ohos.callui.ServiceAbility",
+-    "deviceTypes": [
+-      "default",
+-      "tablet"
+-    ],
+-    "deliveryWithInstall": true,
+-    "installationFree": false,
+-    "pages": "$profile:main_pages",
+-    "metadata": [
+-      {
+-        "name": "ArkTSPartialUpdate",
+-        "value": "false"
+-      }
+-    ],
+-    "uiSyntax": "ets",
+-    "abilities": [
+-      {
+-        "name": "com.ohos.callui.MainAbility",
+-        "srcEntry": "./ets/MainAbility/MainAbility.ts",
+-        "description": "$string:callui_description",
+-        "icon": "$media:app_icon",
+-        "label": "$string:callui_description",
+-        "supportWindowMode": ["fullscreen", "floating"],
+-        "startWindowIcon": "$media:app_start_window_icon",
+-        "startWindowBackground": "$color:black",
+-        "removeMissionAfterTerminate": true,
+-        "visible": false,
+-        "minWindowHeight": 700,
+-        "minWindowWidth": 320,
+-        "skills": [
+-          {
+-            "entities": [
+-              "entity.system.home"
+-            ],
+-            "actions": [
+-              "action.system.home"
+-            ]
+-          }
+-        ],
+-        "backgroundModes": [
+-          "voip"
+-        ]
+-      }
+-    ],
+-    "extensionAbilities": [
+-      {
+-        "name": "com.ohos.callui.ServiceAbility",
+-        "icon": "$media:app_icon",
+-        "description": "service",
+-        "type": "service",
+-        "visible": true,
+-        "srcEntrance": "./ets/ServiceAbility/ServiceAbility.ts",
+-        "label": "$string:callui_description",
+-        "permissions": [
+-          "ohos.permission.PLACE_CALL"
+-        ],
+-      }
+-    ],
+-    "requestPermissions": [
+-      {
+-        "name": "ohos.permission.READ_CONTACTS",
+-        "reason": "$string:READ_CONTACTS"
+-      },
+-      {
+-        "name": "ohos.permission.SEND_MESSAGES",
+-        "reason": "$string:SEND_MESSAGES"
+-      },
+-      {
+-        "name": "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED",
+-        "reason": "$string:GET_BUNDLE_INFO_PRIVILEGED"
+-      },
+-      {
+-        "name": "ohos.permission.GET_TELEPHONY_STATE",
+-        "reason": "$string:GET_TELEPHONY_STATE"
+-      },
+-      {
+-        "name": "ohos.permission.NOTIFICATION_CONTROLLER",
+-        "reason": "$string:NOTIFICATION_CONTROLLER"
+-      },
+-      {
+-        "name": "ohos.permission.START_ABILITIES_FROM_BACKGROUND",
+-        "reason": "$string:START_ABILITIES_FROM_BACKGROUND"
+-      },
+-      {
+-        "name": "ohos.permission.KEEP_BACKGROUND_RUNNING",
+-        "reason": "$string:KEEP_BACKGROUND_RUNNING"
+-      },
+-      {
+-        "name": "ohos.permission.ANSWER_CALL",
+-        "reason": "$string:ANSWER_CALL"
+-      },
+-      {
+-        "name": "ohos.permission.VIBRATE",
+-        "reason": "$string:VIBRATE"
+-      },
+-      {
+-        "name": "ohos.permission.SET_TELEPHONY_STATE",
+-        "reason": "$string:SET_TELEPHONY_STATE"
+-      },
+-      {
+-        "name": "ohos.permission.ACCELEROMETER",
+-        "reason": "$string:ACCELEROMETER"
+-      },
+-      {
+-        "name": "ohos.permission.MANAGE_SECURE_SETTINGS",
+-        "reason": "$string:MANAGE_SECURE_SETTINGS"
+-      },
+-      {
+-        "name": "ohos.permission.PLACE_CALL",
+-        "reason": "$string:PLACE_CALL"
+-      },
+-      {
+-        "name": "ohos.permission.RUNNING_LOCK",
+-        "reason": "$string:RUNNING_LOCK"
+-      }
+-    ]
+-  }
+-}
+\ No newline at end of file
++/**
++ * Copyright (c) 2022 Huawei Device Co., Ltd.
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++{
++  "module": {
++    "name": "callui",
++    "type": "entry",
++    "srcEntry": "./ets/Application/MyAbilityStage.ts",
++    "description": "$string:callui_description",
++    "mainElement": "com.ohos.callui.ServiceAbility",
++    "deviceTypes": [
++      "default",
++      "tablet"
++    ],
++    "deliveryWithInstall": true,
++    "installationFree": false,
++    "pages": "$profile:main_pages",
++    "metadata": [
++      {
++        "name": "ArkTSPartialUpdate",
++        "value": "false"
++      },
++      {
++        "name": "Api11ArkTSCheckMode",
++        "value": "DoArkTSCheckInCompatibleModeInApi11"
++      }
++    ],
++    "uiSyntax": "ets",
++    "abilities": [
++      {
++        "name": "com.ohos.callui.MainAbility",
++        "srcEntry": "./ets/MainAbility/MainAbility.ets",
++        "description": "$string:callui_description",
++        "icon": "$media:app_icon",
++        "label": "$string:callui_description",
++        "supportWindowMode": ["fullscreen", "floating"],
++        "startWindowIcon": "$media:app_start_window_icon",
++        "startWindowBackground": "$color:black",
++        "removeMissionAfterTerminate": true,
++        "visible": false,
++        "exported": true,
++        "minWindowHeight": 700,
++        "minWindowWidth": 320,
++        "skills": [
++          {
++            "entities": [
++              "entity.system.home"
++            ],
++            "actions": [
++              "action.system.home"
++            ]
++          }
++        ],
++        "backgroundModes": [
++          "voip"
++        ]
++      }
++    ],
++    "extensionAbilities": [
++      {
++        "name": "com.ohos.callui.ServiceAbility",
++        "icon": "$media:app_icon",
++        "description": "service",
++        "type": "service",
++        "visible": true,
++        "srcEntrance": "./ets/ServiceAbility/ServiceAbility.ets",
++        "label": "$string:callui_description",
++        "permissions": [
++          "ohos.permission.PLACE_CALL"
++        ],
++      }
++    ],
++    "requestPermissions": [
++      {
++        "name": "ohos.permission.READ_CONTACTS",
++        "reason": "$string:READ_CONTACTS",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.SEND_MESSAGES",
++        "reason": "$string:SEND_MESSAGES",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED",
++        "reason": "$string:GET_BUNDLE_INFO_PRIVILEGED",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.GET_TELEPHONY_STATE",
++        "reason": "$string:GET_TELEPHONY_STATE",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.NOTIFICATION_CONTROLLER",
++        "reason": "$string:NOTIFICATION_CONTROLLER",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.START_ABILITIES_FROM_BACKGROUND",
++        "reason": "$string:START_ABILITIES_FROM_BACKGROUND",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.KEEP_BACKGROUND_RUNNING",
++        "reason": "$string:KEEP_BACKGROUND_RUNNING",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.ANSWER_CALL",
++        "reason": "$string:ANSWER_CALL",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.VIBRATE",
++        "reason": "$string:VIBRATE",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.SET_TELEPHONY_STATE",
++        "reason": "$string:SET_TELEPHONY_STATE",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.ACCELEROMETER",
++        "reason": "$string:ACCELEROMETER",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.MANAGE_SECURE_SETTINGS",
++        "reason": "$string:MANAGE_SECURE_SETTINGS",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.PLACE_CALL",
++        "reason": "$string:PLACE_CALL",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      },
++      {
++        "name": "ohos.permission.RUNNING_LOCK",
++        "reason": "$string:RUNNING_LOCK",
++        "usedScene": { "abilities": ["com.ohos.callui.MainAbility"], "when": "inuse" }
++      }
++    ]
++  }
++}
+diff --git a/mobiledatasettings/src/main/ets/common/components/headComponent.ets b/mobiledatasettings/src/main/ets/common/components/headComponent.ets
+index 7fa0095..6f27e8b 100644
+--- a/mobiledatasettings/src/main/ets/common/components/headComponent.ets
++++ b/mobiledatasettings/src/main/ets/common/components/headComponent.ets
+@@ -38,7 +38,7 @@ export default struct HeadComponent {
+       .backgroundColor(this.isTouch ? $r('app.color.color_E3E3E3_grey') : $r('app.color.color_00000000_transparent'))
+       .onClick(() => {
+         if (this.isTerminateSelf) {
+-          globalThis.settingsAbilityContext?.terminateSelf().then((data) => {
++          globalThis.settingsAbilityContext?.terminateSelf().then(() => {
+             LogUtils.i(TAG, 'terminateSelfCallBack');
+           });
+         } else {
+diff --git a/mobiledatasettings/src/main/ets/common/components/listItem/listItem.ets b/mobiledatasettings/src/main/ets/common/components/listItem/listItem.ets
+index 76f481a..f82daf5 100644
+--- a/mobiledatasettings/src/main/ets/common/components/listItem/listItem.ets
++++ b/mobiledatasettings/src/main/ets/common/components/listItem/listItem.ets
+@@ -44,7 +44,7 @@ export default struct listItem {
+   @State ceshi: boolean = true;
+   dialogTitle: string = '';
+   radio_state_enable5g = 'RADIO_STATE_ENABLE5G';
+-  recordTypeDialog: CustomDialogController = new CustomDialogController({
++  recordTypeDialog: CustomDialogController | null = new CustomDialogController({
+     builder: dataRomingDialog({ isCon: this.isCon, isMsg: $controlSwitch, cardType: this.cardType }),
+     alignment: DialogAlignment.Bottom,
+     autoCancel: false,
+@@ -115,7 +115,7 @@ export default struct listItem {
+             .onChange((isOn: boolean) => {
+               this.controlSwitch = !this.controlSwitch;
+               LogUtils.i(TAG, 'onclick cardType is :' + JSON.stringify(this.cardType) + 'switcher is:' + JSON.stringify(this.isCon) + 'Switch status:' + this.controlSwitch);
+-              if (this.controlSwitch && this.isCon === 0) {
++              if (this.controlSwitch && this.isCon === 0 && this.recordTypeDialog != null) {
+                 this.recordTypeDialog.open();
+               } else if (this.controlSwitch == false && this.isCon === 0) {
+                   this.cardType === 0 ? disableCellularDataRoamingCardOne() : disableCellularDataRoamingCardTwo();
+@@ -146,9 +146,9 @@ export default struct listItem {
+ @CustomDialog
+ struct dataRomingDialog {
+   controller: CustomDialogController;
+-  isCon: number;
++  isCon: number = 0;
+   @Link isMsg: boolean;
+-  cardType: number;
++  cardType: number = 0;
+ 
+   build() {
+     Column() {
+diff --git a/mobiledatasettings/src/main/ets/common/components/publiccontent.ets b/mobiledatasettings/src/main/ets/common/components/publiccontent.ets
+index 58e9c8c..ea1625d 100644
+--- a/mobiledatasettings/src/main/ets/common/components/publiccontent.ets
++++ b/mobiledatasettings/src/main/ets/common/components/publiccontent.ets
+@@ -13,27 +13,56 @@
+  * limitations under the License.
+  */
+ 
+-export default {
+-  'strings': {
+-    'mobileData': $r('app.string.mobile_data'),
+-    'general': $r('app.string.mobile_data_general'),
+-    'dataUsageFeesMayApply': $r('app.string.mobile_data_charges'),
+-    'dataRoaming': $r('app.string.mobile_data_dataRoaming'),
+-    'enableDataWhileRoaming': $r('app.string.mobile_data_enableDataWhileRoaming'),
+-    'notice': $r('app.string.mobile_data_tips'),
+-    'dataRoamingAsk': $r('app.string.mobile_data_turn_on_data_roaming'),
+-    'cancel': $r('app.string.cancel_space'),
+-    'confirm':$r('app.string.confim_space'),
+-    'netFive': $r('app.string.mobile_data_netFive'),
+-    'voCall': $r('app.string.mobile_data_volte'),
+-    'accessPointNamesAPN': $r('app.string.mobile_data_accessPointNamesAPN'),
+-    'sim1': $r('app.string.mobile_data_card1'),
+-    'sim2': $r('app.string.mobile_data_card2'),
+-    'preferredNetworkMode': $r('app.string.mobile_data_networkMode'),
+-    'networkProvider': $r('app.string.mobile_data_networkProvider'),
+-    'fiveAuto': $r('app.string.mobile_data_fiveAuto'),
+-    'fourAuto': $r('app.string.mobile_data_fourAuto'),
+-    'threeAuto': $r('app.string.mobile_data_threeAuto'),
+-    'twoOnly': $r('app.string.mobile_data_twoOnly'),
++interface PublicContentStrings {
++  mobileData: Resource
++  general: Resource
++  dataUsageFeesMayApply: Resource
++  dataRoaming: Resource
++  enableDataWhileRoaming: Resource
++  notice: Resource
++  dataRoamingAsk: Resource
++  cancel: Resource
++  confirm: Resource
++  netFive: Resource
++  voCall: Resource
++  accessPointNamesAPN: Resource
++  sim1: Resource
++  sim2: Resource
++  preferredNetworkMode: Resource
++  networkProvider: Resource
++  fiveAuto: Resource
++  fourAuto: Resource
++  threeAuto: Resource
++  twoOnly: Resource
++}
++
++interface PublicContent {
++  strings: PublicContentStrings
++}
++
++const publiccontent: PublicContent = {
++  strings: {
++    mobileData: $r('app.string.mobile_data'),
++    general: $r('app.string.mobile_data_general'),
++    dataUsageFeesMayApply: $r('app.string.mobile_data_charges'),
++    dataRoaming: $r('app.string.mobile_data_dataRoaming'),
++    enableDataWhileRoaming: $r('app.string.mobile_data_enableDataWhileRoaming'),
++    notice: $r('app.string.mobile_data_tips'),
++    dataRoamingAsk: $r('app.string.mobile_data_turn_on_data_roaming'),
++    cancel: $r('app.string.cancel_space'),
++    confirm: $r('app.string.confim_space'),
++    netFive: $r('app.string.mobile_data_netFive'),
++    voCall: $r('app.string.mobile_data_volte'),
++    accessPointNamesAPN: $r('app.string.mobile_data_accessPointNamesAPN'),
++    sim1: $r('app.string.mobile_data_card1'),
++    sim2: $r('app.string.mobile_data_card2'),
++    preferredNetworkMode: $r('app.string.mobile_data_networkMode'),
++    networkProvider: $r('app.string.mobile_data_networkProvider'),
++    fiveAuto: $r('app.string.mobile_data_fiveAuto'),
++    fourAuto: $r('app.string.mobile_data_fourAuto'),
++    threeAuto: $r('app.string.mobile_data_threeAuto'),
++    twoOnly: $r('app.string.mobile_data_twoOnly')
+   }
+-}
+\ No newline at end of file
++}
++
++export default publiccontent
+\ No newline at end of file
+diff --git a/mobiledatasettings/src/main/ets/common/components/subHeader.ets b/mobiledatasettings/src/main/ets/common/components/subHeader.ets
+index fd4fa74..3847f17 100644
+--- a/mobiledatasettings/src/main/ets/common/components/subHeader.ets
++++ b/mobiledatasettings/src/main/ets/common/components/subHeader.ets
+@@ -17,8 +17,8 @@ export struct SubHeader {
+   @State titleContent: Resource = $r('app.string.mobile_data_card1');
+   @Prop subTitleContent: string;
+ 
+-  titleContenet() {
+-    return this.titleContenet()
++  titleContenet(): Resource {
++    return this.titleContent
+   }
+ 
+   build() {
+diff --git a/mobiledatasettings/src/main/ets/common/constant/apnItemInfo.ets b/mobiledatasettings/src/main/ets/common/constant/apnItemInfo.ets
+index 52d6b4b..4d4c809 100644
+--- a/mobiledatasettings/src/main/ets/common/constant/apnItemInfo.ets
++++ b/mobiledatasettings/src/main/ets/common/constant/apnItemInfo.ets
+@@ -1,6 +1,6 @@
+ @Observed
+ export class ApnItemInfo{
+-  id: string
+-  key: Resource
+-  value: string | number
++  id: string = ''
++  key!: Resource
++  value: string | number = ''
+ }
+\ No newline at end of file
+diff --git a/mobiledatasettings/src/main/ets/common/model/getCellularDataRoamingEnabledApi.ets b/mobiledatasettings/src/main/ets/common/model/getCellularDataRoamingEnabledApi.ets
+index 8a8d331..3afa102 100644
+--- a/mobiledatasettings/src/main/ets/common/model/getCellularDataRoamingEnabledApi.ets
++++ b/mobiledatasettings/src/main/ets/common/model/getCellularDataRoamingEnabledApi.ets
+@@ -27,16 +27,16 @@ const TAG = 'getCellularDataRomingEnabledApi'
+  *
+  * @return {Promise}
+  */
+-export function isCellularDataRoamingEnabledCardOne(slotId = 0) {
++export function isCellularDataRoamingEnabledCardOne(slotId: number = 0): Promise<boolean> {
+   return telephonyData.isCellularDataRoamingEnabled(slotId);
+ }
+ 
+-export function isCellularDataRoamingEnabledCardTwo(slotId = 1) {
++export function isCellularDataRoamingEnabledCardTwo(slotId: number = 1): Promise<boolean> {
+   return telephonyData.isCellularDataRoamingEnabled(slotId);
+ }
+ 
+-export function getSupportNetwork(slotId = 0) {
+-  return new Promise(function (resolve, reject) {
++export function getSupportNetwork(slotId: number = 0): Promise<boolean> {
++  return new Promise<boolean>((resolve, reject) => {
+     try {
+       let isSupported = radio.isNrSupported();
+       LogUtils.i(TAG, 'getSupportNetwork success data:' + JSON.stringify(isSupported))
+diff --git a/mobiledatasettings/src/main/ets/common/model/getPreferredNetworkModeApi.ets b/mobiledatasettings/src/main/ets/common/model/getPreferredNetworkModeApi.ets
+index dc90417..dcbfafc 100644
+--- a/mobiledatasettings/src/main/ets/common/model/getPreferredNetworkModeApi.ets
++++ b/mobiledatasettings/src/main/ets/common/model/getPreferredNetworkModeApi.ets
+@@ -27,13 +27,6 @@ const TAG = 'getPreferredNetworkModelApi'
+  * @param {string} val - card The slot id
+  * @return {Promise} promise object
+  */
+-export function getPreferredNetwork(val) {
+-    return new Promise((resolve) => {
+-        radio.getPreferredNetwork(val).then((res) => {
+-            LogUtils.i(TAG, 'getPreferredNetwork success data then:' + JSON.stringify(res))
+-            resolve(res);
+-        }).catch((err) => {
+-            LogUtils.i(TAG, 'getPreferredNetwork success catch:' + JSON.stringify(err))
+-        });
+-    });
++export function getPreferredNetwork(val: number): Promise<radio.PreferredNetworkMode> {
++    return radio.getPreferredNetwork(val);
+ }
+\ No newline at end of file
+diff --git a/mobiledatasettings/src/main/ets/common/model/getSimStateApi.ets b/mobiledatasettings/src/main/ets/common/model/getSimStateApi.ets
+index 663c1ac..f887a7d 100644
+--- a/mobiledatasettings/src/main/ets/common/model/getSimStateApi.ets
++++ b/mobiledatasettings/src/main/ets/common/model/getSimStateApi.ets
+@@ -27,10 +27,8 @@ const TAG = 'GetSimStateApi'
+  * @param {number} slotId - return card The slot id
+  * @return {Promise} promise object
+  */
+-export function getSimStateCardOne(slotId = 0) {
+-  if (sim.getSimState) {
+-    return sim.getSimState(slotId);
+-  }
++export function getSimStateCardOne(slotId: number = 0): Promise<sim.SimState> {
++  return sim.getSimState(slotId);
+ }
+ 
+ /**
+@@ -39,10 +37,8 @@ export function getSimStateCardOne(slotId = 0) {
+  * @param {string} slotId - card The slot id
+  * @return {Promise} promise object
+  */
+-export function getSimStateCardTwo(slotId = 1) {
+-  if (sim.getSimState) {
+-    return sim.getSimState(slotId);
+-  }
++export function getSimStateCardTwo(slotId: number = 1): Promise<sim.SimState> {
++  return sim.getSimState(slotId);
+ }
+ 
+ 
+diff --git a/mobiledatasettings/src/main/ets/common/model/getSimTelephoneNumberApi.ets b/mobiledatasettings/src/main/ets/common/model/getSimTelephoneNumberApi.ets
+index e65ec6d..26bd82c 100644
+--- a/mobiledatasettings/src/main/ets/common/model/getSimTelephoneNumberApi.ets
++++ b/mobiledatasettings/src/main/ets/common/model/getSimTelephoneNumberApi.ets
+@@ -25,10 +25,8 @@ import sim from '@ohos.telephony.sim';
+  * @param {number} slotId - Returns the id
+  * @return {Promise} promise object
+  */
+-export function getSimCardOnePhoneNumber(slotId = 0) {
+-  if (sim.getSimTelephoneNumber) {
+-    return sim.getSimTelephoneNumber(slotId);
+-  }
++export function getSimCardOnePhoneNumber(slotId: number = 0): Promise<string> {
++  return sim.getSimTelephoneNumber(slotId);
+ }
+ 
+ /**
+@@ -37,8 +35,6 @@ export function getSimCardOnePhoneNumber(slotId = 0) {
+  * @param {number} slotId - card The slot id
+  * @return {Promise} promise object
+  */
+-export function getSimCardTwoPhoneNumber(slotId = 1) {
+-  if (sim.getSimTelephoneNumber) {
+-    return sim.getSimTelephoneNumber(slotId);
+-  }
++export function getSimCardTwoPhoneNumber(slotId: number = 1): Promise<string> {
++  return sim.getSimTelephoneNumber(slotId);
+ }
+\ No newline at end of file
+diff --git a/mobiledatasettings/src/main/ets/common/model/setPreferredNetworkApi.ets b/mobiledatasettings/src/main/ets/common/model/setPreferredNetworkApi.ets
+index 3958e33..3b2bfc5 100644
+--- a/mobiledatasettings/src/main/ets/common/model/setPreferredNetworkApi.ets
++++ b/mobiledatasettings/src/main/ets/common/model/setPreferredNetworkApi.ets
+@@ -28,13 +28,6 @@ const TAG = 'setPreferredNetworkModelApi'
+  * @param {number} auto - card The slot id
+  * @return {Promise} promise object
+  */
+-export function setPreferredNetwork(slotId, auto) {
+-  return new Promise((resolve) => {
+-    radio.setPreferredNetwork(slotId, auto).then((res) => {
+-      LogUtils.i(TAG, 'setPreferredNetwork success data then:' + JSON.stringify(res))
+-      resolve(res);
+-    }).catch((err) => {
+-      LogUtils.i(TAG, 'setPreferredNetwork  catch:' + JSON.stringify(err))
+-    });
+-  });
++export function setPreferredNetwork(slotId: number, auto: radio.PreferredNetworkMode): Promise<void> {
++  return radio.setPreferredNetwork(slotId, auto);
+ }
+\ No newline at end of file
+diff --git a/mobiledatasettings/src/main/ets/common/utils/AirplaneMode.ets b/mobiledatasettings/src/main/ets/common/utils/AirplaneMode.ets
+index 3683200..2263e31 100644
+--- a/mobiledatasettings/src/main/ets/common/utils/AirplaneMode.ets
++++ b/mobiledatasettings/src/main/ets/common/utils/AirplaneMode.ets
+@@ -12,6 +12,12 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
++import dataShare from '@ohos.data.dataShare';
++import DataShareResultSet from '@ohos.data.DataShareResultSet';
++import dataSharePredicates from '@ohos.data.dataSharePredicates';
++import { BusinessError } from '@ohos.base';
++import LogUtils from './LogUtils';
++
+ /**
+  * Message/AirplaneMode utils
+  */
+@@ -19,19 +25,16 @@ const SETTING_AIRPLANE_MODE_URI = 'datashare:///com.ohos.settingsdata/entry/sett
+ const QUERY_AIRPLANE_MODE_KEY = 'airplane_mode';
+ const TAG = 'AirplaneMode';
+ 
+-import dataShare from '@ohos.data.dataShare';
+-import dataSharePredicates from '@ohos.data.dataSharePredicates';
+-import LogUtils from './LogUtils';
+-
+-let dataShareHelper;
++let dataShareHelper: dataShare.DataShareHelper | undefined = undefined;
+ 
+ /**
+  * add AirPlaneMode Listener.
+  */
+-export function addAirPlaneModeListener(callback) {
++export function addAirPlaneModeListener(callback: (mode: number) => void): void {
+   LogUtils.i(TAG, 'addAirPlaneModeListener');
+   try {
+-    dataShare.createDataShareHelper(globalThis.settingsAbilityContext, SETTING_AIRPLANE_MODE_URI, (err, data) => {
++    dataShare.createDataShareHelper(globalThis.settingsAbilityContext, SETTING_AIRPLANE_MODE_URI,
++      (err: BusinessError, data: dataShare.DataShareHelper) => {
+       if (err != undefined) {
+         LogUtils.e(TAG, 'addAirPlaneModeListener error: code: ' + err.code + ', message: ' + err.message);
+         return;
+@@ -55,14 +58,15 @@ export function addAirPlaneModeListener(callback) {
+ /**
+  * remove AirPlaneMode Listener.
+  */
+-export function removeAirPlaneModeListener() {
++export function removeAirPlaneModeListener(): void {
+   LogUtils.i(TAG, 'removeAirPlaneModeListener');
+-  if (!dataShareHelper) {
++  const helper = dataShareHelper;
++  if (!helper) {
+     LogUtils.e(TAG, 'removeAirPlaneModeListener dataShareHelper null');
+     return;
+   }
+   try {
+-    dataShareHelper.off('dataChange', SETTING_AIRPLANE_MODE_URI, () => {
++    helper.off('dataChange', SETTING_AIRPLANE_MODE_URI, () => {
+       LogUtils.i(TAG, 'removeAirPlaneModeListener dataChange');
+     });
+   } catch (err) {
+@@ -73,9 +77,10 @@ export function removeAirPlaneModeListener() {
+ /**
+  * query AirPlaneMode.
+  */
+-export function queryAirPlaneMode(callback) {
++export function queryAirPlaneMode(callback: (mode: number) => void): void {
+   LogUtils.i(TAG, 'queryAirPlaneMode');
+-  if (!dataShareHelper) {
++  const helper = dataShareHelper;
++  if (!helper) {
+     LogUtils.e(TAG, 'queryAirPlaneMode dataShareHelper null');
+     return;
+   }
+@@ -83,7 +88,7 @@ export function queryAirPlaneMode(callback) {
+   condition.equalTo('KEYWORD', 'airplane_mode');
+   try {
+     // ID, KEYWORD, VALUE
+-    dataShareHelper.query(SETTING_AIRPLANE_MODE_URI, condition, null).then((data) => {
++    helper.query(SETTING_AIRPLANE_MODE_URI, condition, null).then((data: DataShareResultSet) => {
+       LogUtils.i(TAG, 'queryAirPlaneMode query succeed');
+       if (data && data.goToFirstRow()) {
+         LogUtils.i(TAG, 'queryAirPlaneMode query succeed return key');
+@@ -91,7 +96,7 @@ export function queryAirPlaneMode(callback) {
+         return;
+       }
+       callback(-1);
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+       LogUtils.e(TAG, 'queryAirPlaneMode query in error: err: ' + JSON.stringify(err));
+     });
+   } catch (err) {
+diff --git a/mobiledatasettings/src/main/ets/model/apnDataStorage.ets b/mobiledatasettings/src/main/ets/model/apnDataStorage.ets
+index b73de6e..2dffa26 100644
+--- a/mobiledatasettings/src/main/ets/model/apnDataStorage.ets
++++ b/mobiledatasettings/src/main/ets/model/apnDataStorage.ets
+@@ -14,7 +14,7 @@ export class ApnDataStorage {
+   private dbUri: string = 'datashare:///com.ohos.pdpprofileability/net/pdp_profile'
+   private dataShareHelper: dataShare.DataShareHelper | undefined = undefined;
+   private xmlShareHelper: dataShare.DataShareHelper | undefined = undefined;
+-  private content:Context= undefined
++  private content: Context | undefined = undefined
+ 
+   public async initData(context: Context) {
+     this.content = context
+@@ -42,6 +42,9 @@ export class ApnDataStorage {
+       'sim_id': 1,
+       'profile_id': profileID,
+     }
++    if (this.xmlShareHelper == undefined) {
++      return false
++    }
+     this.xmlShareHelper.update(this.xmlUri, xmlData, data).then(insertData => {
+       success = true
+     }).catch((err: BusinessError) => {
+@@ -51,6 +54,9 @@ export class ApnDataStorage {
+   }
+ 
+   ResourceToString(resource: Resource): string {
++    if (this.content == undefined) {
++      return ''
++    }
+     return this.content.resourceManager.getStringSync(resource)
+   }
+ 
+@@ -58,6 +64,9 @@ export class ApnDataStorage {
+     let success: boolean = false
+     let da = new dataSharePredicates.DataSharePredicates();
+     da.equalTo('profile_id', Number(profileID));
++    if (this.dataShareHelper == undefined) {
++      return false
++    }
+     await this.dataShareHelper.delete(this.dbUri, da).then(data => {
+       success = true
+     }).catch((err: BusinessError) => {
+@@ -70,6 +79,9 @@ export class ApnDataStorage {
+   public async dataInsert(apnInfo: ApnInfo): Promise<boolean> {
+     let success: boolean = false
+     let data = this.getValuesBucket(apnInfo)
++    if (this.dataShareHelper == undefined) {
++      return false
++    }
+     await this.dataShareHelper.insert(this.dbUri, data).then(insertData => {
+       success = true
+     }).catch((err: BusinessError) => {
+@@ -84,6 +96,9 @@ export class ApnDataStorage {
+     let data = this.getValuesBucket(apnInfo)
+     let conditionData = new dataSharePredicates.DataSharePredicates();
+     conditionData.equalTo('profile_id', Number(apnInfo.profile_id));
++    if (this.dataShareHelper == undefined) {
++      return false
++    }
+     await this.dataShareHelper.update(this.dbUri, conditionData, data).then(insertData => {
+       success = true
+     }).catch((err: BusinessError) => {
+@@ -213,8 +228,8 @@ export class ApnDataStorage {
+   }
+ 
+ 
+-  public async queryApnList(mccmnc: string): Promise<DataShareResultSet> {
+-    let resultSet: DataShareResultSet = null
++  public async queryApnList(mccmnc: string): Promise<DataShareResultSet | null> {
++    let resultSet: DataShareResultSet | null = null
+     let columns = ['*'];
+     let da = new dataSharePredicates.DataSharePredicates();
+     da.equalTo('mccmnc', mccmnc)
+diff --git a/mobiledatasettings/src/main/ets/model/mobileDataStatus.ets b/mobiledatasettings/src/main/ets/model/mobileDataStatus.ets
+index 069f7ac..79de7bb 100644
+--- a/mobiledatasettings/src/main/ets/model/mobileDataStatus.ets
++++ b/mobiledatasettings/src/main/ets/model/mobileDataStatus.ets
+@@ -14,6 +14,7 @@
+  */
+ import telephonyData from '@ohos.telephony.data';
+ import radio from '@ohos.telephony.radio';
++import { BusinessError } from '@ohos.base';
+ import LogUtils from '../common/utils/LogUtils';
+ import call from '@ohos.telephony.call';
+ 
+@@ -24,40 +25,36 @@ const TAG = 'mobileDataStatus';
+  *
+  * @return {Promise} promise object
+  */
+-export function isCellularDataEnabled() {
+-  if (telephonyData.isCellularDataEnabled()) {
+-    return telephonyData.isCellularDataEnabled();
+-  }
++export function isCellularDataEnabled(): Promise<boolean> {
++  return telephonyData.isCellularDataEnabled();
+ }
+ 
+-export function getOperatorName(slotId = 0) {
+-  return new Promise((resolve, reject) => {
++export function getOperatorName(slotId: number = 0): Promise<string> {
++  return new Promise<string>((resolve, reject) => {
+     try {
+-      radio.getOperatorName(slotId, (error, value) => {
++      radio.getOperatorName(slotId, (error: BusinessError, value: string) => {
+         if (error) {
+-          LogUtils.i(TAG, 'getOperatorName error:' + JSON.stringify(error))
++          LogUtils.i(TAG, 'getOperatorName error:' + JSON.stringify(error));
+           reject(error);
+         } else {
+-          LogUtils.i(TAG, 'getOperatorName value:' + JSON.stringify(value))
++          LogUtils.i(TAG, 'getOperatorName value:' + JSON.stringify(value));
+           resolve(value);
+         }
+       });
+     } catch (error) {
+-      LogUtils.i(TAG, 'getOperatorName catch:' + JSON.stringify(error))
++      LogUtils.i(TAG, 'getOperatorName catch:' + JSON.stringify(error));
+       reject(error);
+     }
+   });
+-};
++}
+ 
+ /**
+  * Enable mobile data
+  *
+  * @return {Promise} promise object
+  */
+-export function enableCellularData() {
+-  if (telephonyData.enableCellularData) {
+-    return telephonyData.enableCellularData();
+-  }
++export function enableCellularData(): Promise<void> {
++  return telephonyData.enableCellularData();
+ }
+ 
+ /**
+@@ -65,10 +62,8 @@ export function enableCellularData() {
+  *
+  * @return {Promise} promise object
+  */
+-export function disableCellularData() {
+-  if (telephonyData.disableCellularData) {
+-    return telephonyData.disableCellularData();
+-  }
++export function disableCellularData(): Promise<void> {
++  return telephonyData.disableCellularData();
+ }
+ 
+ /**
+@@ -76,7 +71,7 @@ export function disableCellularData() {
+  *
+  * @return {Promise}
+  */
+-export function getCellularDataRoaming(slotId = 0) {
++export function getCellularDataRoaming(slotId: number = 0): Promise<boolean> {
+   return telephonyData.isCellularDataRoamingEnabled(slotId);
+ }
+ 
+@@ -85,16 +80,16 @@ export function getCellularDataRoaming(slotId = 0) {
+  *
+  * @return {Promise}
+  */
+-export function enableCellularDataRoamingCardOne(slotId = 0) {
+-  return new Promise((resolve, reject) => {
++export function enableCellularDataRoamingCardOne(slotId: number = 0): Promise<void> {
++  return new Promise<void>((resolve, reject) => {
+     try {
+-      telephonyData.enableCellularDataRoaming(slotId, (error, value) => {
++      telephonyData.enableCellularDataRoaming(slotId, (error: BusinessError) => {
+         if (error) {
+           LogUtils.i(TAG, 'enableCellularDataRoaming card one error :' + JSON.stringify(error));
+           reject(error);
+         } else {
+-          LogUtils.i(TAG, 'enableCellularDataRoaming card one success : then' + JSON.stringify(value));
+-          resolve(value);
++          LogUtils.i(TAG, 'enableCellularDataRoaming card one success');
++          resolve();
+         }
+       });
+     } catch (error) {
+@@ -104,16 +99,16 @@ export function enableCellularDataRoamingCardOne(slotId = 0) {
+   });
+ }
+ 
+-export function enableCellularDataRoamingCardTwo(slotId = 1) {
+-  return new Promise((resolve, reject) => {
++export function enableCellularDataRoamingCardTwo(slotId: number = 1): Promise<void> {
++  return new Promise<void>((resolve, reject) => {
+     try {
+-      telephonyData.enableCellularDataRoaming(slotId, (error, value) => {
++      telephonyData.enableCellularDataRoaming(slotId, (error: BusinessError) => {
+         if (error) {
+           LogUtils.i(TAG, 'enableCellularDataRoaming card two error :' + JSON.stringify(error));
+           reject(error);
+         } else {
+-          LogUtils.i(TAG, 'enableCellularDataRoaming card two success :then' + JSON.stringify(value));
+-          resolve(value);
++          LogUtils.i(TAG, 'enableCellularDataRoaming card two success');
++          resolve();
+         }
+       });
+     } catch (error) {
+@@ -124,20 +119,20 @@ export function enableCellularDataRoamingCardTwo(slotId = 1) {
+ }
+ 
+ /**
+- * Enabling Data Roaming
++ * Disable Data Roaming
+  *
+  * @return {Promise}
+  */
+-export function disableCellularDataRoamingCardOne(slotId = 0) {
+-  return new Promise((resolve, reject) => {
++export function disableCellularDataRoamingCardOne(slotId: number = 0): Promise<void> {
++  return new Promise<void>((resolve, reject) => {
+     try {
+-      telephonyData.disableCellularDataRoaming(slotId, (error, value) => {
++      telephonyData.disableCellularDataRoaming(slotId, (error: BusinessError) => {
+         if (error) {
+           LogUtils.i(TAG, 'disableCellularDataRoaming card one error : ' + JSON.stringify(error));
+           reject(error);
+         } else {
+-          LogUtils.i(TAG, 'disableCellularDataRoaming card one success : then' + JSON.stringify(value));
+-          resolve(value);
++          LogUtils.i(TAG, 'disableCellularDataRoaming card one success');
++          resolve();
+         }
+       });
+     } catch (error) {
+@@ -147,16 +142,16 @@ export function disableCellularDataRoamingCardOne(slotId = 0) {
+   });
+ }
+ 
+-export function disableCellularDataRoamingCardTwo(slotId = 1) {
+-  return new Promise((resolve, reject) => {
++export function disableCellularDataRoamingCardTwo(slotId: number = 1): Promise<void> {
++  return new Promise<void>((resolve, reject) => {
+     try {
+-      telephonyData.disableCellularDataRoaming(slotId, (error, value) => {
++      telephonyData.disableCellularDataRoaming(slotId, (error: BusinessError) => {
+         if (error) {
+           LogUtils.i(TAG, 'disableCellularDataRoaming card two error :' + JSON.stringify(error));
+           reject(error);
+         } else {
+-          LogUtils.i(TAG, 'disableCellularDataRoaming card two success :then' + JSON.stringify(value));
+-          resolve(value);
++          LogUtils.i(TAG, 'disableCellularDataRoaming card two success');
++          resolve();
+         }
+       });
+     } catch (error) {
+@@ -166,37 +161,36 @@ export function disableCellularDataRoamingCardTwo(slotId = 1) {
+   });
+ }
+ 
+-
+-export function enableImsSwitchCardOne() {
+-  call.enableImsSwitch(0).then((data) => {
++export function enableImsSwitchCardOne(): void {
++  call.enableImsSwitch(0).then(() => {
+     AppStorage.SetOrCreate('imsOne', true);
+-    LogUtils.i(TAG, 'enableImsSwitch card one : success then ' + JSON.stringify(data));
+-  }).catch((error) => {
++    LogUtils.i(TAG, 'enableImsSwitch card one : success');
++  }).catch((error: BusinessError) => {
+     LogUtils.i(TAG, 'enableImsSwitch card one : catch' + JSON.stringify(error));
+   });
+ }
+ 
+-export function enableImsSwitchCardTwo() {
+-  call.enableImsSwitch(1).then((data) => {
+-    LogUtils.i(TAG, 'enableImsSwitch card two : success then ' + JSON.stringify(data));
+-  }).catch((error) => {
++export function enableImsSwitchCardTwo(): void {
++  call.enableImsSwitch(1).then(() => {
++    LogUtils.i(TAG, 'enableImsSwitch card two : success');
++  }).catch((error: BusinessError) => {
+     LogUtils.i(TAG, 'enableImsSwitch card two : catch' + JSON.stringify(error));
+   });
+ }
+ 
+-export function disableImsSwitchCardOne() {
+-  call.disableImsSwitch(0).then((data) => {
++export function disableImsSwitchCardOne(): void {
++  call.disableImsSwitch(0).then(() => {
+     AppStorage.SetOrCreate('imsOne', false);
+-    LogUtils.i(TAG, 'disableImsSwitch card one : success then ' + JSON.stringify(data));
+-  }).catch((error) => {
++    LogUtils.i(TAG, 'disableImsSwitch card one : success');
++  }).catch((error: BusinessError) => {
+     LogUtils.i(TAG, 'disableImsSwitch card one : catch' + JSON.stringify(error));
+   });
+ }
+ 
+-export function disableImsSwitchCardTwo() {
+-  call.disableImsSwitch(1).then((data) => {
+-    LogUtils.i(TAG, 'disableImsSwitch card two : success then ' + JSON.stringify(data));
+-  }).catch((error) => {
++export function disableImsSwitchCardTwo(): void {
++  call.disableImsSwitch(1).then(() => {
++    LogUtils.i(TAG, 'disableImsSwitch card two : success');
++  }).catch((error: BusinessError) => {
+     LogUtils.i(TAG, 'disableImsSwitch card two : catch' + JSON.stringify(error));
+   });
+ }
+diff --git a/mobiledatasettings/src/main/ets/model/registerSimStateApi.ets b/mobiledatasettings/src/main/ets/model/registerSimStateApi.ets
+index 4718f9d..9a9dc24 100644
+--- a/mobiledatasettings/src/main/ets/model/registerSimStateApi.ets
++++ b/mobiledatasettings/src/main/ets/model/registerSimStateApi.ets
+@@ -28,16 +28,16 @@ const TAG = 'registerSimStateAPi';
+  * @param {function} callBack - call-back
+  * @param {string} slotId - card The slot id
+  */
+-export function registerSimStateChange(slotId, callBack) {
+-  return observer.on('simStateChange', {
++export function registerSimStateChange(slotId: number,
++  callBack: (data: observer.SimStateData) => void): void {
++  observer.on('simStateChange', {
+     slotId: slotId
+-  }, (callStateInfo) => {
++  }, (callStateInfo: observer.SimStateData) => {
+     LogUtils.i(TAG, 'registerSimStateChange: then ' + JSON.stringify(callStateInfo));
+     callBack(callStateInfo);
+-    return callStateInfo;
+   });
+ }
+ 
+-export function getMaxSimCount() {
++export function getMaxSimCount(): number {
+   return sim.getMaxSimCount();
+ }
+diff --git a/mobiledatasettings/src/main/ets/pages/apnDetail.ets b/mobiledatasettings/src/main/ets/pages/apnDetail.ets
+index 42cc48f..fdca921 100644
+--- a/mobiledatasettings/src/main/ets/pages/apnDetail.ets
++++ b/mobiledatasettings/src/main/ets/pages/apnDetail.ets
+@@ -283,7 +283,7 @@ struct ApnDetail {
+ 
+   onAccept() {
+     for (let i = 0; i < this.list.length; i++) {
+-      if (this.list[i].key.id == this.textValue.id) {
++      if (this.textValue != null && this.list[i].key.id == this.textValue.id) {
+         let apnInfo = new ApnItemInfo()
+         apnInfo.id = this.list[i].id
+         apnInfo.key = this.textValue
+@@ -609,7 +609,7 @@ struct ApnDetail {
+               if (this.singleSelectDialogController != null){
+                 this.singleSelectDialogController.open()
+               }
+-            } else {
++            } else if (this.dialogController != null) {
+               this.dialogController.open()
+             }
+           })
+diff --git a/mobiledatasettings/src/main/ets/pages/index.ets b/mobiledatasettings/src/main/ets/pages/index.ets
+index 670dc46..89e2a42 100644
+--- a/mobiledatasettings/src/main/ets/pages/index.ets
++++ b/mobiledatasettings/src/main/ets/pages/index.ets
+@@ -20,6 +20,8 @@ import { addAirPlaneModeListener, removeAirPlaneModeListener, queryAirPlaneMode
+ import publiccontent from '../common/components/publiccontent';
+ import item from '../common/components/listItem/listItem';
+ import call from '@ohos.telephony.call';
++import radio from '@ohos.telephony.radio';
++import { BusinessError } from '@ohos.base';
+ import { registerSimStateChange, getMaxSimCount } from '../model/registerSimStateApi';
+ import { getSimStateCardOne, getSimStateCardTwo } from '../common/model/getSimStateApi';
+ import { getSimCardOnePhoneNumber, getSimCardTwoPhoneNumber } from '../common/model/getSimTelephoneNumberApi';
+@@ -90,15 +92,16 @@ struct Index {
+    *
+    * @param {Object} slotId - call slotId
+    */
+-  async getPreferredNetwork(slotId) {
+-    const res = await getPreferredNetwork(this.slotId);
+-    if (res == 0) {
++  async getPreferredNetwork(slotId: number) {
++    const res: radio.PreferredNetworkMode = await getPreferredNetwork(this.slotId);
++    const mode: number = res as number;
++    if (mode === 0) {
+       this.byValueWLMS = $r('app.string.mobile_data_5g');
+-    } else if (res == 5) {
++    } else if (mode === 5) {
+       this.byValueWLMS = $r('app.string.mobile_data_4g');
+-    } else if (res == 6) {
++    } else if (mode === 6) {
+       this.byValueWLMS = $r('app.string.mobile_data_3g');
+-    } else if (res == 1) {
++    } else if (mode === 1) {
+       this.byValueWLMS = $r('app.string.mobile_data_2g');
+     }
+   }
+@@ -109,20 +112,12 @@ struct Index {
+   getSimStateDataCardOne() {
+     getSimStateCardOne().then((res: number) => {
+       LogUtils.i(TAG, 'getSimStateData Card1 :success ' + JSON.stringify(res))
+-      const simState = {
+-        SIM_STATE_UNKNOWN: 0,
+-        SIM_STATE_NOT_PRESENT: 1,
+-        SIM_STATE_LOCKED: 2,
+-        SIM_STATE_NOT_READY: 3,
+-        SIM_STATE_READY: 4,
+-        SIM_STATE_LOADED: 5
+-      };
+-      if (res == simState.SIM_STATE_LOADED || res == simState.SIM_STATE_READY) {
++      if (res == 5 || res == 4) {
+         this.simStateStatusCardOne = true;
+       } else {
+         this.simStateStatusCardOne = false;
+       }
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+       this.simStateStatusCardOne = false;
+       LogUtils.i(TAG, 'getSimStateData Card1 :console.error() ' + JSON.stringify(err.message));
+     });
+@@ -134,33 +129,25 @@ struct Index {
+   getSimStateDataCardTwo() {
+     getSimStateCardTwo().then((res: number) => {
+       LogUtils.i(TAG, 'getSimState Card2 :success then' + JSON.stringify(res));
+-      const simState = {
+-        SIM_STATE_UNKNOWN: 0,
+-        SIM_STATE_NOT_PRESENT: 1,
+-        SIM_STATE_LOCKED: 2,
+-        SIM_STATE_NOT_READY: 3,
+-        SIM_STATE_READY: 4,
+-        SIM_STATE_LOADED: 5
+-      };
+-      if (res == simState.SIM_STATE_LOADED || res == simState.SIM_STATE_READY) {
++      if (res == 5 || res == 4) {
+         this.simStateStatusCardTwo = true;
+       } else {
+         this.simStateStatusCardTwo = false;
+       }
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+       this.simStateStatusCardTwo = false;
+       LogUtils.i(TAG, 'getSimState Card2 :console.error() ' + JSON.stringify(err.message));
+     });
+   }
+ 
+-  getSupportNetwork(slotId) {
+-    getSupportNetwork(slotId).then((res) => {
++  getSupportNetwork(slotId: number) {
++    getSupportNetwork(slotId).then((res: boolean) => {
+       if (res) {
+         this.isSupport = true;
+       } else {
+         this.isSupport = false;
+       }
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+     });
+   }
+ 
+@@ -168,10 +155,10 @@ struct Index {
+    * Get mobile phone number
+    */
+   getSimCardOnePhoneNumber() {
+-    getSimCardOnePhoneNumber().then((res) => {
++    getSimCardOnePhoneNumber().then((res: string) => {
+       LogUtils.i(TAG, 'getSimTelephoneNumber card1 other success' + JSON.stringify(res));
+       this.mTelephoneNumber = res;
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+       LogUtils.i(TAG, 'getSimTelephoneNumber card1 other catch' + JSON.stringify(err));
+     });
+   }
+@@ -180,10 +167,10 @@ struct Index {
+    * Get mobile phone number
+    */
+   getSimCardTwoPhoneNumber() {
+-    getSimCardTwoPhoneNumber().then((res) => {
++    getSimCardTwoPhoneNumber().then((res: string) => {
+       LogUtils.i(TAG, 'getSimTelephoneNumber card2 other success' + JSON.stringify(res));
+       this.mTelephoneNumber2 = res;
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+       LogUtils.i(TAG, 'getSimTelephoneNumber card2 other catch' + JSON.stringify(err));
+     });
+   }
+@@ -192,10 +179,10 @@ struct Index {
+    * Get mobile data on or off
+    */
+   getCellularDataState() {
+-    isCellularDataEnabled().then((data) => {
++    isCellularDataEnabled().then((data: boolean) => {
+       LogUtils.i(TAG, 'isCellularDataEnabled success: isON:' + JSON.stringify(data));
+       this.isDataEnable = data;
+-    }).catch((error) => {
++    }).catch((error: BusinessError) => {
+       LogUtils.i(TAG, 'isCellularDataEnabled error catch' + JSON.stringify(error));
+     });
+   }
+@@ -204,7 +191,7 @@ struct Index {
+   initAirPlaneMode() {
+     LogUtils.i(TAG, 'initAirPlaneMode');
+     try {
+-      addAirPlaneModeListener((data) => {
++      addAirPlaneModeListener((data: number) => {
+         LogUtils.i(TAG, 'initAirPlaneMode callback');
+         this.isAirPlaneMode = data == 1 ? true : false;
+       });
+@@ -217,7 +204,7 @@ struct Index {
+   getAirPlaneMode() {
+     LogUtils.i(TAG, 'getAirPlaneMode');
+     try {
+-      queryAirPlaneMode((data) => {
++      queryAirPlaneMode((data: number) => {
+         LogUtils.i(TAG, 'getAirPlaneMode callback');
+         this.isAirPlaneMode = data == 1 ? true : false;
+       });
+@@ -226,7 +213,7 @@ struct Index {
+     }
+   }
+ 
+-  addRegisterSimStateChange(slotId) {
++  addRegisterSimStateChange(slotId: number) {
+     registerSimStateChange(slotId, async () => {
+       this.getCellularDataRoamingEnabled();
+       this.getSimStateDataCardOne();
+@@ -243,7 +230,7 @@ struct Index {
+     })
+   }
+ 
+-  isImsSwitchEnabled(slotId) {
++  isImsSwitchEnabled(slotId: number) {
+     call.isImsSwitchEnabled(slotId).then((res: boolean) => {
+       if (slotId) {
+         this.enableISM2 = res;
+@@ -252,7 +239,7 @@ struct Index {
+         this.enableISM = res;
+         LogUtils.i(TAG, 'isImsSwitchEnable enable 0:' + JSON.stringify(this.enableISM));
+       }
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+       if (slotId) {
+         this.enableISM2 = true;
+         LogUtils.i(TAG, 'isImsSwitchEnable err 1:' + JSON.stringify(this.enableISM2));
+@@ -280,7 +267,10 @@ struct Index {
+     this.getSimStateDataCardOne();
+     //Get network mode
+     this.getPreferredNetwork(this.slotId);
+-    getOperatorName().then((res) => {
++    getOperatorName().then((res: string) => {
++      LogUtils.i(TAG, 'getOperatorName success:' + JSON.stringify(res));
++    }).catch((error: BusinessError) => {
++      LogUtils.i(TAG, 'getOperatorName catch:' + JSON.stringify(error));
+     })
+     this.getSupportNetwork(this.slotId);
+     //card number acquire
+@@ -301,24 +291,24 @@ struct Index {
+   /**
+    * Set network mode
+    */
+-  radioChange(slotId, v) {
+-    const res = setPreferredNetwork(slotId, v);
++  radioChange(slotId: number, v: radio.PreferredNetworkMode) {
++    const res: Promise<void> = setPreferredNetwork(slotId, v);
+     LogUtils.i(TAG, 'radioChange res:' + JSON.stringify(res));
+   }
+ 
+   getCellularDataRoamingEnabled() {
+-    isCellularDataRoamingEnabledCardOne().then((res) => {
++    isCellularDataRoamingEnabledCardOne().then((res: boolean) => {
+       LogUtils.i(TAG, 'getCellularDataRoamingEnabled card one success then:' + JSON.stringify(res));
+       this.dataRoamSwitchCardOne = res;
+-    }).catch((err) => {
++    }).catch((err: BusinessError) => {
+       this.dataRoamSwitchCardOne = false;
+       LogUtils.i(TAG, 'enableCellularDataRoaming card one catch:' + JSON.stringify(err));
+     });
+     if (getMaxSimCount() === 2) {
+-      isCellularDataRoamingEnabledCardTwo().then((res) => {
++      isCellularDataRoamingEnabledCardTwo().then((res: boolean) => {
+         LogUtils.i(TAG, 'getCellularDataRoamingEnabled card two success then:' + JSON.stringify(res));
+         this.dataRoamSwitchCardTwo = res;
+-      }).catch((err) => {
++      }).catch((err: BusinessError) => {
+         this.dataRoamSwitchCardTwo = false;
+         LogUtils.i(TAG, 'enableCellularDataRoaming card two catch:' + JSON.stringify(err));
+       });
+@@ -390,15 +380,15 @@ struct Index {
+                         this.isDataEnable = !this.isDataEnable;
+                         LogUtils.i(TAG, 'mobile data switch changes enable:' + JSON.stringify(this.isDataEnable));
+                         if (this.isDataEnable == false) {
+-                          disableCellularData().then((data) => {
+-                            LogUtils.i(TAG, 'disableCellularData: success then' + JSON.stringify(data));
+-                          }).catch((error) => {
++                          disableCellularData().then(() => {
++                            LogUtils.i(TAG, 'disableCellularData: success');
++                          }).catch((error: BusinessError) => {
+                             LogUtils.i(TAG, 'disableCellularData: error catch' + JSON.stringify(error));
+                           });
+                         } else {
+-                          enableCellularData().then((data) => {
+-                            LogUtils.i(TAG, 'enableCellularData: success then' + JSON.stringify(data));
+-                          }).catch((error) => {
++                          enableCellularData().then(() => {
++                            LogUtils.i(TAG, 'enableCellularData: success');
++                          }).catch((error: BusinessError) => {
+                             LogUtils.i(TAG, 'enableCellularData: error catch' + JSON.stringify(error));
+                           });
+                         }
+Signed-off-by: RDKHM <rdkhm@localhost>

@@ -10,12 +10,14 @@ from workspace import environment
 
 root = Path(__file__).resolve().parents[1]
 env = environment()
-bsp = Path(env.get('RDKHM_BSP', str(root / 'sources/reference-bsp')))
-archive = Path(env.get('RDKHM_WS73_ARCHIVE', str(bsp / 'packages/blobs/ws73/ws73_sdk_linux_WS73_1.10.110_patched.tar.gz')))
+# repo.xml keeps the WS73 BSP checkout beside the kernel tree under rdk/.
+rdk_root = Path(env['RDKHM_KERNEL_TREE']).parent
+archive = Path(env.get('RDKHM_WS73_ARCHIVE',
+                       str(root / 'thirdparty/downloads/ws73_sdk_linux_WS73_1.10.110_patched.tar.gz')))
 expected = '94a02d3a8031482827ebf323261ac596b8c2b63c10e0188f6f58beefa2f18f65'
 if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
     raise RuntimeError('WS73 BSP archive checksum mismatch')
-sdk = root / 'sources/ws73-bsp-94a02d3a'
+sdk = rdk_root / 'ws73-bsp-94a02d3a'
 marker = sdk / '.rdkhm-source.json'
 if not sdk.exists():
     sdk.mkdir(parents=True)

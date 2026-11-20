@@ -1,5 +1,8 @@
-diff --git a/BUILD.gn b/BUILD.gn
-index 8591cae..f42e5cd 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] device-manager/0001-respect-headless-product.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -44,6 +44,8 @@ if (defined(ohos_lite)) {

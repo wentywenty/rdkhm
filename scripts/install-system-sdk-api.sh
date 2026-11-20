@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 workspace=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-tree="$workspace/sources/openharmony-full"
+source "$workspace/env.sh"
+tree="$RDKHM_OH_TREE"
 generated="$tree/out/rdk_x5/sdk-interface/ets1.1/sdk-js"
 api="$tree/out/rdk_x5/ohos_declaration/ets/ohos_declaration_ets"
-sdk="$tree/prebuilts/ohos-sdk/linux/20/ets"
+sdk="$RDKHM_OH_SDK/ets"
 test -f "$api/@ohos.app.ability.ServiceExtensionAbility.d.ts"
 test -d "$sdk/api"
 # The SDK generator converts source-only types before these declarations are installed.

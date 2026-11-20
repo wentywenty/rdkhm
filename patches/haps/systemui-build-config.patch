@@ -1,0 +1,32 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] haps/systemui-build-config.patch
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/build-profile.json5
++++ b/build-profile.json5
+@@ -4,8 +4,8 @@
+       {
+         "name": "default",
+         "signingConfig": "release",
+-        "compileSdkVersion": 12,
+-        "compatibleSdkVersion": 12
++        "compileSdkVersion": 20,
++        "compatibleSdkVersion": 20
+       }
+     ]
+   },
+@@ -189,6 +189,14 @@
+     {
+       "name": "volumepanelcomponent",
+       "srcPath": "./features/volumepanelcomponent",
++      "targets": [
++        {
++          "name": "default",
++          "applyToProducts": [
++            "default"
++          ]
++        }
++      ]
+     },
+     {
+       "name": "wificomponent",

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 workspace=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-tree="$workspace/sources/openharmony-full"
+source "$workspace/env.sh"
+tree="$RDKHM_OH_TREE"
 bash "$workspace/scripts/link-product.sh"
 cd "$tree"
 python_bin="$tree/prebuilts/python/linux-x86/current/bin"

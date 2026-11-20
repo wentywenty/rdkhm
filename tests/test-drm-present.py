@@ -2,11 +2,16 @@
 """Exercise production atomic composition with mocked DRM objects/ioctls."""
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 workspace = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(workspace / "scripts"))
+from workspace import environment
+
 fixture = workspace / "tests/drm-present"
-source = workspace / "sources/openharmony-full/drivers/peripheral/display/composer/vdi_base/src"
+source = (Path(environment(workspace)["RDKHM_OH_TREE"]) /
+          "drivers/peripheral/display/composer/vdi_base/src")
 with tempfile.TemporaryDirectory(prefix="rdkhm-present-") as directory:
     executable = Path(directory) / "test"
     subprocess.run([

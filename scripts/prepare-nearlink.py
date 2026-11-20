@@ -10,13 +10,16 @@ from workspace import environment
 
 WORKSPACE = Path(__file__).resolve().parents[1]
 ENV = environment()
-REFERENCE = Path(ENV.get('RDKHM_NEARLINK_REFERENCE', str(WORKSPACE / 'sources/reference-nearlink')))
+REFERENCE = Path(ENV.get('RDKHM_NEARLINK_REFERENCE', str(WORKSPACE / 'thirdparty/reference-nearlink')))
 REVISION = 'bcbd3ecf5bc407a2bd44e9dd5187c054124e9d79'
 SDK_PATH = 'assets/sdk/ws73_sdk_linux_WS73_1.10.110'
+# repo.xml keeps these generated trees beside the OH and kernel checkouts.
+OH_ROOT = Path(ENV['RDKHM_OH_TREE']).parent
+RDK_ROOT = Path(ENV['RDKHM_KERNEL_TREE']).parent
 
 
 def main():
-    stack = WORKSPACE / 'sources/nearlink-ssap'
+    stack = OH_ROOT / 'nearlink-ssap'
     if not stack.exists():
         stack.mkdir(parents=True)
         with tempfile.TemporaryFile() as archive:
@@ -41,7 +44,7 @@ def main():
         link.unlink()
     if not link.exists():
         link.symlink_to(os.path.relpath(stack, link.parent), target_is_directory=True)
-    sdk = WORKSPACE / 'sources/ws73-sdk'
+    sdk = RDK_ROOT / 'ws73-sdk'
     if not sdk.exists():
         sdk.mkdir(parents=True)
         with tempfile.TemporaryFile() as archive:
@@ -55,12 +58,6 @@ def main():
     source = json.loads((sdk / '.rdkhm-source.json').read_text())
     if source['revision'] != REVISION:
         raise RuntimeError('Unexpected WS73 source revision')
-    for patch in sorted((WORKSPACE / 'patches/nearlink').glob('*.patch')):
-        reverse = subprocess.run(['git', '-C', str(sdk), 'apply', '--reverse', '--check', str(patch)],
-                                 capture_output=True)
-        if reverse.returncode:
-            subprocess.run(['git', '-C', str(sdk), 'apply', '--check', str(patch)], check=True)
-            subprocess.run(['git', '-C', str(sdk), 'apply', str(patch)], check=True)
     # This SDK snapshot omits Kconfig. Preserve its explicit config values and
     # reject unknown syntax rather than inventing defaults for missing symbols.
     values = {}

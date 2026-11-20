@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "RDK X5 40-pin GPIO tool"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "RDK PinTool"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "RDK PinTool"
+    }
+  ]
+}

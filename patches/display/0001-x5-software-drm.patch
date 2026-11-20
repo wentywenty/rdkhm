@@ -1,5 +1,8 @@
-diff --git a/display/buffer/vdi_base/BUILD.gn b/display/buffer/vdi_base/BUILD.gn
-index c2bdfbb..21791ea 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0001-x5-software-drm.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/display/buffer/vdi_base/BUILD.gn
 +++ b/display/buffer/vdi_base/BUILD.gn
 @@ -45,6 +45,7 @@ ohos_shared_library("display_buffer_vdi_impl_default") {
@@ -19,8 +22,6 @@ index c2bdfbb..21791ea 100644
    install_images = [ chipset_base_dir ]
    innerapi_tags = [ "chipsetsdk" ]
    subsystem_name = "hdf"
-diff --git a/display/buffer/vdi_base/src/display_gralloc_gbm.cpp b/display/buffer/vdi_base/src/display_gralloc_gbm.cpp
-index ed06d77..80e4d9b 100644
 --- a/display/buffer/vdi_base/src/display_gralloc_gbm.cpp
 +++ b/display/buffer/vdi_base/src/display_gralloc_gbm.cpp
 @@ -41,7 +41,11 @@ namespace DISPLAY {
@@ -35,8 +36,6 @@ index ed06d77..80e4d9b 100644
  static GrallocManager *g_grallocManager = nullptr;
  static pthread_mutex_t g_lock;
  
-diff --git a/display/composer/vdi_base/BUILD.gn b/display/composer/vdi_base/BUILD.gn
-index 5461fd1..9dc8569 100644
 --- a/display/composer/vdi_base/BUILD.gn
 +++ b/display/composer/vdi_base/BUILD.gn
 @@ -56,6 +56,9 @@ ohos_shared_library("display_composer_vdi_impl_default") {
@@ -58,8 +57,6 @@ index 5461fd1..9dc8569 100644
    install_images = [ chipset_base_dir ]
    subsystem_name = "hdf"
    part_name = "drivers_peripheral_display"
-diff --git a/display/composer/vdi_base/src/drm_crtc.cpp b/display/composer/vdi_base/src/drm_crtc.cpp
-index 6c016b7..901b236 100644
 --- a/display/composer/vdi_base/src/drm_crtc.cpp
 +++ b/display/composer/vdi_base/src/drm_crtc.cpp
 @@ -51,6 +51,10 @@ int32_t DrmCrtc::Init(DrmDevice &drmDevice)
@@ -73,8 +70,6 @@ index 6c016b7..901b236 100644
      // Plane mask
      mPlaneMask = 0;
      ret = drmDevice.GetCrtcProperty(*this, "PLANE_MASK", prop);
-diff --git a/display/composer/vdi_base/src/drm_plane.cpp b/display/composer/vdi_base/src/drm_plane.cpp
-index 8f0f487..a601194 100644
 --- a/display/composer/vdi_base/src/drm_plane.cpp
 +++ b/display/composer/vdi_base/src/drm_plane.cpp
 @@ -165,7 +165,9 @@ int32_t DrmPlane::Init(DrmDevice &drmDevice)
@@ -87,8 +82,6 @@ index 8f0f487..a601194 100644
  
      ret = drmDevice.GetPlaneProperty(*this, PROP_FBID, prop);
      mPropFbId = prop.propId;
-diff --git a/display/composer/vdi_base/src/hdi_drm_composition.cpp b/display/composer/vdi_base/src/hdi_drm_composition.cpp
-index 0e6e88b..b5ea48c 100644
 --- a/display/composer/vdi_base/src/hdi_drm_composition.cpp
 +++ b/display/composer/vdi_base/src/hdi_drm_composition.cpp
 @@ -206,6 +206,10 @@ int32_t HdiDrmComposition::UpdateMode(std::unique_ptr<DrmModeBlock> &modeBlock)
@@ -135,8 +128,6 @@ index 0e6e88b..b5ea48c 100644
      /* Remove useless planes from the drm */
      RemoveUnusePlane(atomicReqPtr.Get());
  
-diff --git a/display/composer/vdi_base/src/hdi_gfx_composition.cpp b/display/composer/vdi_base/src/hdi_gfx_composition.cpp
-index 2d9f544..6a15429 100644
 --- a/display/composer/vdi_base/src/hdi_gfx_composition.cpp
 +++ b/display/composer/vdi_base/src/hdi_gfx_composition.cpp
 @@ -29,6 +29,9 @@ namespace HDI {
@@ -189,8 +180,6 @@ index 2d9f544..6a15429 100644
  }
  
  void HdiGfxComposition::InitGfxSurface(ISurface &iSurface, HdiLayerBuffer &buffer)
-diff --git a/display/display_config.gni b/display/display_config.gni
-index 648b2fd..2f9218f 100644
 --- a/display/display_config.gni
 +++ b/display/display_config.gni
 @@ -23,6 +23,10 @@ if (drivers_peripheral_display_community) {

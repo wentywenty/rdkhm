@@ -1,0 +1,112 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] build: compile apps with hvigor 26
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/scripts/compile_app.py
++++ b/scripts/compile_app.py
+@@ -87,8 +87,16 @@ def make_env(build_profile: str, cwd: str, ohpm_registry: str, options):
+     '''
+     print(f"build_profile:{build_profile}; cwd:{cwd}")
+     cur_dir = os.getcwd()
++    local_npmrc = os.path.join(cwd, '.npmrc')
++    user_npmrc = os.environ.get('NPM_CONFIG_USERCONFIG')
++    if user_npmrc and not os.path.exists(local_npmrc):
++        shutil.copyfile(user_npmrc, local_npmrc)
+     root_dir = get_root_dir()
+-    ohpm_path = os.path.join(root_dir, "prebuilts/tool/command-line-tools/ohpm/bin/ohpm")
++    toolchain = os.environ.get("RDKHM_COMMAND_LINE_TOOLS") if uses_v26(cwd) else None
++    if toolchain:
++        ohpm_path = os.path.join(toolchain, "command-line-tools/ohpm/bin/ohpm")
++    else:
++        ohpm_path = os.path.join(root_dir, "prebuilts/tool/command-line-tools/ohpm/bin/ohpm")
+     if not os.path.exists(ohpm_path):
+         ohpm_path = "ohpm"
+     with open(build_profile, 'r') as input_f:
+@@ -97,10 +105,14 @@ def make_env(build_profile: str, cwd: str, ohpm_registry: str, options):
+         ohpm_install_cmd = [ohpm_path, 'install']
+         if ohpm_registry:
+             ohpm_install_cmd.append('--registry=' + ohpm_registry)
+-        env = {
+-            'PATH': f"{os.path.dirname(os.path.abspath(options.nodejs))}:{os.environ.get('PATH')}",
+-            'NODE_HOME': os.path.dirname(os.path.abspath(options.nodejs)),
+-        }
++        env = os.environ.copy()
++        if toolchain:
++            toolchain_node = os.path.join(toolchain, "command-line-tools/tool/node")
++            env['PATH'] = f"{os.path.join(toolchain_node, 'bin')}:{os.environ.get('PATH')}"
++            env['NODE_HOME'] = toolchain_node
++        else:
++            env['PATH'] = f"{os.path.dirname(os.path.abspath(options.nodejs))}:{os.environ.get('PATH')}"
++            env['NODE_HOME'] = os.path.dirname(os.path.dirname(os.path.abspath(options.nodejs)))
+         os.chdir(cwd)
+         if os.path.exists(os.path.join(cwd, 'hvigorw')):
+             subprocess.run(['chmod', '+x', 'hvigorw'])
+@@ -113,11 +125,32 @@ def make_env(build_profile: str, cwd: str, ohpm_registry: str, options):
+                                 encoding='utf-8')
+         stdout, stderr = proc.communicate()
+         if proc.returncode:
+-            raise Exception('ReturnCode:{}. ohpm install failed. {}'.format(
+-                proc.returncode, stdout))
++            raise Exception('ReturnCode:{}. ohpm install failed. {}\n{}'.format(
++                proc.returncode, stdout, stderr))
+     os.chdir(cur_dir)
+ 
+ 
++def uses_v26(cwd: str):
++    path = os.path.join(cwd, 'hvigor/hvigor-config.json5')
++    try:
++        with open(path, 'r') as input_f:
++            text = input_f.read()
++    except OSError:
++        return False
++    if 'command-line-tools-26' in text:
++        return True
++    try:
++        model_version = json5.loads(text).get('modelVersion')
++    except Exception:
++        return False
++    if not model_version:
++        return False
++    try:
++        return int(str(model_version).split('.')[0]) >= 6
++    except ValueError:
++        return False
++
++
+ def get_integrated_project_config(cwd: str):
+     print(f"[0/0] project dir: {cwd}")
+     with open(os.path.join(cwd, 'hvigor/hvigor-config.json5'), 'r') as input_f:
+@@ -232,7 +265,10 @@ def hvigor_write_log(cmd, cwd, env):
+ def build_hvigor_cmd(cwd: str, model_version: str, options):
+     cmd = ['bash']
+     hvigor_version = get_hvigor_version(cwd)
+-    if options.hvigor_home:
++    toolchain = os.environ.get("RDKHM_COMMAND_LINE_TOOLS") if uses_v26(cwd) else None
++    if toolchain:
++        cmd.extend([f'{os.path.abspath(toolchain)}/command-line-tools/bin/hvigorw'])
++    elif options.hvigor_home:
+         cmd.extend([f'{os.path.abspath(options.hvigor_home)}/bin/hvigorw'])
+     elif model_version:
+         code_home = os.path.dirname(os.path.dirname(options.sdk_home))
+@@ -330,6 +366,10 @@ def hvigor_build(cwd: str, options):
+     model_version = get_integrated_project_config(cwd)
+     print(f"[0/0] model_version: {model_version}")
+ 
++    use_v26 = uses_v26(cwd)
++    hvigor_sdk = os.environ.get("RDKHM_HVIGOR_SDK") if use_v26 else None
++    if hvigor_sdk:
++        options.sdk_home = hvigor_sdk
+     cmd = build_hvigor_cmd(cwd, model_version, options)
+ 
+     print("[0/0] Hvigor clean start")
+@@ -337,6 +377,10 @@ def hvigor_build(cwd: str, options):
+     env['CI'] = 'true'
+     env['PATH'] = f"{os.path.dirname(os.path.abspath(options.nodejs))}:{os.environ.get('PATH')}"
+     env['NODE_HOME'] = os.path.dirname(os.path.dirname(os.path.abspath(options.nodejs)))
++    if use_v26 and options.sdk_home:
++        env['OHOS_SDK_HOME'] = os.path.abspath(options.sdk_home)
++        env['OHOS_BASE_SDK_HOME'] = os.path.abspath(options.sdk_home)
++        env['DEVECO_SDK_HOME'] = os.path.abspath(options.sdk_home)
+     library_path = os.path.join(os.path.abspath(options.sdk_home), '20/ets/ets1.2/build-tools/ets2panda/lib/')
+     env['LD_LIBRARY_PATH'] = library_path
+     set_sdk_path(cwd, model_version, options, env)

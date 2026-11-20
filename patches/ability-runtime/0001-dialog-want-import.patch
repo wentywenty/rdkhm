@@ -1,5 +1,8 @@
-diff --git a/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets b/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets
-index 06e0198..da5f09e 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] ability-runtime/0001-dialog-want-import.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets
 +++ b/services/dialog_ui/ams_system_dialog/feature/src/main/ets/view/IntentDetailPage.ets
 @@ -19,6 +19,7 @@ import insightIntentDriver from '@ohos.app.ability.insightIntentDriver';

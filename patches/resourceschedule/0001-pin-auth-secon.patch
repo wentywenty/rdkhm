@@ -1,0 +1,20 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] resourceschedule/0001-pin-auth-secon.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/ressched/etc/init/resource_schedule_service.cfg
++++ b/ressched/etc/init/resource_schedule_service.cfg
+@@ -199,9 +199,10 @@
+             "path" : ["/vendor/bin/hdf_devhost"],
+             "writepid" : [
+                 "/dev/cpuset/foreground/cgroup.procs",
+-                "/dev/cpu/foreground/cgroup.procs",
+                 "/dev/cpuctl/foreground/cgroup.procs"
+-            ]
++            ],
++            "sandbox" : 0,
++            "secon" : "u:r:pin_auth_host:s0"
+         }
+     ]
+ }

@@ -106,7 +106,7 @@
     },
     {
       "subsystem": "security",
-      "components": [{"component": "crypto_framework"}, {"component": "asset"}]
+      "components": [{"component": "crypto_framework"}, {"component": "asset"}, {"component": "device_auth"}]
     },
     {
       "subsystem": "thirdparty",
@@ -159,6 +159,7 @@
           "drivers_peripheral_wlan_feature_enable_HDF_WLAN_EXTEND_VDI = false",
           "drivers_peripheral_wlan_feature_enable_HDF_UT = false"
         ]},
+        {"component": "drivers_peripheral_nnrt_x5"},
         {"component": "hdf_core", "features": ["hdf_core_default_peripheral_config = false"]}
       ]
     },

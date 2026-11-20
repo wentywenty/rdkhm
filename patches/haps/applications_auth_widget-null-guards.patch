@@ -1,0 +1,40 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] haps/applications_auth_widget-null-guards.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/entry/src/main/ets/pages/components/FaceAuth.ets
++++ b/entry/src/main/ets/pages/components/FaceAuth.ets
+@@ -636,8 +636,8 @@ export default struct FaceAuth {
+                   .draggable(false)
+                   .id('blueFingerprintImgAllFaceAuth')
+                     // radius
+-                  .width(px2vp(this.fingerPosition.udSensorRadiusInPx * 2))
+-                  .height(px2vp(this.fingerPosition.udSensorRadiusInPx * 2))
++                  .width(px2vp((this.fingerPosition.udSensorRadiusInPx ?? 0) * 2))
++                  .height(px2vp((this.fingerPosition.udSensorRadiusInPx ?? 0) * 2))
+                   .margin({
+                     top: $r('app.float.digital_password_mask_height'),
+                     bottom: $r('app.float.digital_password_mask_height')
+@@ -707,8 +707,8 @@ export default struct FaceAuth {
+                   .draggable(false)
+                   .id('blueFingerprintImgFaceAuth')
+                     // radius
+-                  .width(px2vp(this.fingerPosition.udSensorRadiusInPx * 2))
+-                  .height(px2vp(this.fingerPosition.udSensorRadiusInPx * 2))
++                  .width(px2vp((this.fingerPosition.udSensorRadiusInPx ?? 0) * 2))
++                  .height(px2vp((this.fingerPosition.udSensorRadiusInPx ?? 0) * 2))
+                   .margin({ top: $r('app.float.content_padding') })
+                   .colorBlend($r('sys.color.ohos_id_color_activated'))
+                   .onClick(() => {
+@@ -833,8 +833,8 @@ export default struct FaceAuth {
+                 .draggable(false)
+                 .id('blueFingerprintImgFaceAuth')
+                   // radius
+-                .width(px2vp(this.fingerPosition.udSensorRadiusInPx * 2))
+-                .height(px2vp(this.fingerPosition.udSensorRadiusInPx * 2))
++                .width(px2vp((this.fingerPosition.udSensorRadiusInPx ?? 0) * 2))
++                .height(px2vp((this.fingerPosition.udSensorRadiusInPx ?? 0) * 2))
+                 .margin({ top: $r('app.float.content_padding') })
+                 .colorBlend($r('sys.color.ohos_id_color_activated'))
+                 .onClick(() => {

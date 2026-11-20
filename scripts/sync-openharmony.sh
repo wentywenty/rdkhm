@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 workspace=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-mkdir -p "$workspace/sources/openharmony-full" "$workspace/out/logs"
-cd "$workspace/sources/openharmony-full"
+source "$workspace/env.sh"
+tree="$RDKHM_OH_TREE"
+mkdir -p "$tree" "$workspace/out/logs"
+cd "$tree"
 repo init -u https://gitcode.com/openharmony/manifest.git \
     -b d6a0fef04cd19e2ecf0ea978e683e5d2f7953198 \
     -m tag/manifest_tag_20250906_181023.xml --depth=1 -g default \
     --repo-url=https://github.com/GerritCodeReview/git-repo.git --no-repo-verify
 # A resolved manifest pins every project, rather than following release branches.
-install -m 0644 "$workspace/config/openharmony.lock.xml" .repo/manifests/rdkhm-locked.xml
+install -m 0644 "$workspace/config/sources/openharmony.lock.xml" .repo/manifests/rdkhm-locked.xml
 repo init -m rdkhm-locked.xml --no-repo-verify
 # Mirror routing is scoped to this process and does not alter global Git settings.
 env GIT_CONFIG_COUNT=1 \

@@ -1,0 +1,1022 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] nnrt/0001-x5-nnrt-hdi-service.patch
+
+Signed-off-by: RDKHM <rdkhm@localhost>
+---
+diff --git a/nnrt/BUILD.gn b/nnrt/BUILD.gn
+new file mode 100644
+index 0000000000000000000000000000000000000000..1ec921318847f56e4aa57e93f4fbb76af8621147
+--- /dev/null
++++ b/nnrt/BUILD.gn
+@@ -0,0 +1,47 @@
++import("//build/ohos.gni")
++
++ohos_shared_library("libnnrt_device_service_2.1") {
++  include_dirs = [ "include" ]
++  sources = [
++    "src/nnrt_device_service.cpp",
++    "src/rdkhm_accel_client.cpp",
++  ]
++
++  external_deps = [
++    "c_utils:utils",
++    "drivers_interface_nnrt:libnnrt_stub_2.1",
++    "hdf_core:libhdf_utils",
++    "hilog:libhilog",
++    "ipc:ipc_core",
++  ]
++
++  install_images = [ "vendor" ]
++  part_name = "drivers_peripheral_nnrt_x5"
++}
++
++ohos_shared_library("libnnrt_driver") {
++  sources = [ "src/nnrt_device_driver.cpp" ]
++
++  deps = [ ":libnnrt_device_service_2.1" ]
++
++  external_deps = [
++    "c_utils:utils",
++    "drivers_interface_nnrt:libnnrt_stub_2.1",
++    "hdf_core:libhdf_host",
++    "hdf_core:libhdf_ipc_adapter",
++    "hdf_core:libhdf_utils",
++    "hdf_core:libhdi",
++    "hilog:libhilog",
++    "ipc:ipc_core",
++  ]
++
++  install_images = [ "vendor" ]
++  part_name = "drivers_peripheral_nnrt_x5"
++}
++
++group("hdf_nnrt_service") {
++  deps = [
++    ":libnnrt_device_service_2.1",
++    ":libnnrt_driver",
++  ]
++}
+diff --git a/nnrt/bundle.json b/nnrt/bundle.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..35d8f1ed8cf9b3616ec5740469b40f37e6e2ccd9
+--- /dev/null
++++ b/nnrt/bundle.json
+@@ -0,0 +1,40 @@
++{
++  "name": "@ohos/drivers_peripheral_nnrt_x5",
++  "description": "X5 NNRT HDI service backed by the private BPU runtime",
++  "version": "4.0",
++  "license": "Apache License 2.0",
++  "publishAs": "code-segment",
++  "segment": {
++    "destPath": "drivers/peripheral/nnrt"
++  },
++  "dirs": {},
++  "scripts": {},
++  "component": {
++    "name": "drivers_peripheral_nnrt_x5",
++    "subsystem": "hdf",
++    "features": [],
++    "syscap": [],
++    "adapted_system_type": [
++      "standard"
++    ],
++    "rom": "128KB",
++    "ram": "512KB",
++    "deps": {
++      "components": [
++        "c_utils",
++        "hilog",
++        "hdf_core",
++        "drivers_interface_nnrt",
++        "ipc"
++      ],
++      "third_party": []
++    },
++    "build": {
++      "sub_component": [
++        "//drivers/peripheral/nnrt:hdf_nnrt_service"
++      ],
++      "test": [],
++      "inner_kits": []
++    }
++  }
++}
+diff --git a/nnrt/include/accel_wire.h b/nnrt/include/accel_wire.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..d911fffa3ff2d2a89f7c90eeb29b7cb5987f6368
+--- /dev/null
++++ b/nnrt/include/accel_wire.h
+@@ -0,0 +1,137 @@
++#ifndef RDKHM_ACCEL_WIRE_H
++#define RDKHM_ACCEL_WIRE_H
++
++#include <stdint.h>
++
++/* Binary accelerator protocol carried over the same AF_UNIX stream as the
++ * newline text probes. A binary frame always starts with RDKHM_WIRE_MAGIC.
++ * All integers are little-endian; file descriptors travel as SCM_RIGHTS. */
++#define RDKHM_WIRE_MAGIC 0x314B4452u /* "RDK1" */
++#define RDKHM_WIRE_VERSION 1u
++#define RDKHM_WIRE_MAX_DIMS 8u
++#define RDKHM_WIRE_MAX_TENSORS 16u
++#define RDKHM_WIRE_MAX_FDS 16u
++#define RDKHM_WIRE_MAX_LAYERS 8u
++#define RDKHM_WIRE_MAX_PAYLOAD (64u * 1024u * 1024u)
++
++enum rdkhm_wire_command {
++    RDKHM_WIRE_HELLO = 1,
++    RDKHM_WIRE_LOAD = 2,
++    RDKHM_WIRE_INFO = 3,
++    RDKHM_WIRE_RUN = 4,
++    RDKHM_WIRE_RELEASE = 5,
++    RDKHM_WIRE_COMPOSE = 6,
++};
++
++/* Values intentionally match OHOS::HDI::Nnrt NNRT_ReturnCode. */
++enum rdkhm_wire_status {
++    RDKHM_STATUS_OK = 0,
++    RDKHM_STATUS_FAILED = 1,
++    RDKHM_STATUS_NULL_PTR = 2,
++    RDKHM_STATUS_INVALID_PARAMETER = 3,
++    RDKHM_STATUS_MEMORY_ERROR = 4,
++    RDKHM_STATUS_OUT_OF_MEMORY = 5,
++    RDKHM_STATUS_NOT_SUPPORT = 11,
++    RDKHM_STATUS_SERVICE_ERROR = 12,
++    RDKHM_STATUS_DEVICE_ERROR = 13,
++    RDKHM_STATUS_DEVICE_BUSY = 14,
++    RDKHM_STATUS_TIME_OUT = 17,
++    RDKHM_STATUS_INVALID_INPUT = 20,
++    RDKHM_STATUS_INVALID_OUTPUT = 21,
++    RDKHM_STATUS_INVALID_BUFFER = 27,
++    RDKHM_STATUS_INVALID_BUFFER_SIZE = 28,
++    RDKHM_STATUS_INVALID_MODEL = 31,
++};
++
++struct rdkhm_wire_header {
++    uint32_t magic;
++    uint16_t version;
++    uint16_t command;
++    uint32_t session;
++    uint32_t payload;
++    uint16_t fds;
++    uint16_t flags;
++    uint32_t reserved;
++} __attribute__((packed));
++
++struct rdkhm_io_desc {
++    uint32_t type;
++    uint32_t format;
++    uint32_t rank;
++    uint32_t dims[RDKHM_WIRE_MAX_DIMS];
++    uint32_t bytes;
++    uint32_t reserved;
++} __attribute__((packed));
++
++struct rdkhm_io_response {
++    uint32_t status;
++    uint32_t input_count;
++    uint32_t output_count;
++} __attribute__((packed));
++
++struct rdkhm_buffer_desc {
++    uint32_t fd_index;
++    uint32_t reserved;
++    uint64_t offset;
++    uint64_t bytes;
++} __attribute__((packed));
++
++struct rdkhm_run_request {
++    uint32_t input_count;
++    uint32_t output_count;
++} __attribute__((packed));
++
++struct rdkhm_run_output {
++    uint32_t rank;
++    uint32_t dims[RDKHM_WIRE_MAX_DIMS];
++    uint32_t bytes;
++    uint32_t reserved;
++} __attribute__((packed));
++
++struct rdkhm_load_request {
++    uint32_t model_bytes;
++    uint32_t reserved;
++} __attribute__((packed));
++
++struct rdkhm_compose_layer {
++    uint32_t fd_index;
++    uint32_t fence_fd_index;
++    uint32_t format;
++    uint32_t width;
++    uint32_t height;
++    uint32_t stride;
++    uint64_t modifier;
++    uint32_t crop_x;
++    uint32_t crop_y;
++    uint32_t crop_w;
++    uint32_t crop_h;
++    int32_t dst_x;
++    int32_t dst_y;
++    uint32_t dst_w;
++    uint32_t dst_h;
++    uint32_t alpha;
++    uint32_t transform;
++    uint32_t blend;
++    uint32_t reserved;
++} __attribute__((packed));
++
++struct rdkhm_compose_request {
++    uint32_t target_fd_index;
++    uint32_t target_fence_fd_index;
++    uint32_t target_format;
++    uint32_t target_width;
++    uint32_t target_height;
++    uint32_t target_stride;
++    uint64_t target_modifier;
++    uint32_t layer_count;
++    uint32_t flags;
++} __attribute__((packed));
++
++struct rdkhm_compose_response {
++    uint32_t status;
++    uint32_t elapsed_ms;
++    uint32_t layers;
++    uint32_t reserved;
++} __attribute__((packed));
++
++#endif /* RDKHM_ACCEL_WIRE_H */
+diff --git a/nnrt/include/nnrt_device_service.h b/nnrt/include/nnrt_device_service.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..2a4ec0d8663177bac57dfc43a5f76e4f853e0375
+--- /dev/null
++++ b/nnrt/include/nnrt_device_service.h
+@@ -0,0 +1,72 @@
++#ifndef RDKHM_NNRT_DEVICE_SERVICE_H
++#define RDKHM_NNRT_DEVICE_SERVICE_H
++
++#include <cstdint>
++#include <memory>
++#include <string>
++#include <vector>
++
++#include "v2_1/innrt_device.h"
++#include "v2_1/iprepared_model.h"
++
++namespace OHOS {
++namespace HDI {
++namespace Nnrt {
++namespace V2_1 {
++
++class RdkhmPreparedModel : public IPreparedModel {
++public:
++    RdkhmPreparedModel(std::string socket, uint32_t session,
++                       const std::vector<std::vector<uint32_t>> &inputDims,
++                       const std::vector<std::vector<uint32_t>> &outputDims);
++    ~RdkhmPreparedModel() override;
++
++    int32_t ExportModelCache(std::vector<SharedBuffer> &modelCache) override;
++    int32_t GetInputDimRanges(std::vector<std::vector<uint32_t>> &minInputDims,
++                              std::vector<std::vector<uint32_t>> &maxInputDims) override;
++    int32_t Run(const std::vector<IOTensor> &inputs, const std::vector<IOTensor> &outputs,
++                std::vector<std::vector<int32_t>> &outputDims) override;
++
++private:
++    std::string socket_;
++    uint32_t session_;
++    std::vector<std::vector<uint32_t>> inputDims_;
++    std::vector<std::vector<uint32_t>> outputDims_;
++};
++
++class RdkhmNnrtDeviceService : public INnrtDevice {
++public:
++    RdkhmNnrtDeviceService();
++    ~RdkhmNnrtDeviceService() override = default;
++
++    int32_t GetDeviceName(std::string &name) override;
++    int32_t GetVendorName(std::string &name) override;
++    int32_t GetDeviceType(DeviceType &deviceType) override;
++    int32_t GetDeviceStatus(DeviceStatus &status) override;
++    int32_t GetSupportedOperation(const Model &model, std::vector<bool> &ops) override;
++    int32_t IsFloat16PrecisionSupported(bool &isSupported) override;
++    int32_t IsPerformanceModeSupported(bool &isSupported) override;
++    int32_t IsPrioritySupported(bool &isSupported) override;
++    int32_t IsDynamicInputSupported(bool &isSupported) override;
++    int32_t PrepareModel(const Model &model, const ModelConfig &config,
++                         sptr<IPreparedModel> &preparedModel) override;
++    int32_t IsModelCacheSupported(bool &isSupported) override;
++    int32_t PrepareModelFromModelCache(const std::vector<SharedBuffer> &modelCache,
++                                       const ModelConfig &config,
++                                       sptr<IPreparedModel> &preparedModel) override;
++    int32_t PrepareOfflineModel(const std::vector<SharedBuffer> &offlineModels,
++                                const ModelConfig &config,
++                                sptr<IPreparedModel> &preparedModel) override;
++    int32_t AllocateBuffer(uint32_t length, SharedBuffer &buffer) override;
++    int32_t ReleaseBuffer(const SharedBuffer &buffer) override;
++
++private:
++    std::string socket_;
++};
++
++} // namespace V2_1
++} // namespace Nnrt
++} // namespace HDI
++} // namespace OHOS
++
++#endif // RDKHM_NNRT_DEVICE_SERVICE_H
+diff --git a/nnrt/include/rdkhm_accel_client.h b/nnrt/include/rdkhm_accel_client.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..5d9c1d8182843b2175a08e349badda00f2cf0354
+--- /dev/null
++++ b/nnrt/include/rdkhm_accel_client.h
+@@ -0,0 +1,55 @@
++#ifndef RDKHM_ACCEL_CLIENT_H
++#define RDKHM_ACCEL_CLIENT_H
++
++#include <cstddef>
++#include <cstdint>
++#include <string>
++#include <vector>
++
++#include "accel_wire.h"
++
++namespace rdkhm {
++
++struct IoDesc {
++    uint32_t type = 0;
++    uint32_t format = 0;
++    uint32_t rank = 0;
++    uint32_t dims[RDKHM_WIRE_MAX_DIMS] = {0};
++    uint32_t bytes = 0;
++};
++
++struct Buffer {
++    int fd = -1;
++    uint64_t offset = 0;
++    uint64_t bytes = 0;
++};
++
++/* One request per connection; model sessions live in the daemon. */
++class AccelClient {
++public:
++    explicit AccelClient(std::string socket_path = "/dev/unix/socket/rdkhm_accel");
++    ~AccelClient() = default;
++
++    int32_t Hello();
++    int32_t Load(const void *model, size_t size, uint32_t &session);
++    int32_t LoadFd(int model_fd, uint32_t &session);
++    int32_t Info(uint32_t session, std::vector<IoDesc> &inputs, std::vector<IoDesc> &outputs);
++    int32_t Run(uint32_t session, const std::vector<Buffer> &inputs,
++                const std::vector<Buffer> &outputs,
++                std::vector<std::vector<uint32_t>> &output_dims);
++    int32_t Release(uint32_t session);
++
++private:
++    int32_t Transact(uint16_t command, uint32_t &session, const void *payload, uint32_t length,
++                     const std::vector<int> &fds, std::vector<uint8_t> &response);
++    int32_t SendFrame(int fd, uint16_t command, uint32_t session, const void *payload,
++                      uint32_t length, const std::vector<int> &fds);
++    int32_t ReceiveFrame(int fd, uint16_t expected_command, uint32_t &session,
++                         std::vector<uint8_t> &payload);
++
++    std::string socket_path_;
++};
++
++} // namespace rdkhm
++
++#endif // RDKHM_ACCEL_CLIENT_H
+diff --git a/nnrt/src/nnrt_device_driver.cpp b/nnrt/src/nnrt_device_driver.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..17c423b22a1b44d17fe4753b1ef3a5a43b45992a
+--- /dev/null
++++ b/nnrt/src/nnrt_device_driver.cpp
+@@ -0,0 +1,91 @@
++#include <hdf_base.h>
++#include <hdf_device_desc.h>
++#include <hdf_log.h>
++#include <hdf_sbuf_ipc.h>
++
++#include "v2_1/nnrt_device_stub.h"
++
++using namespace OHOS::HDI::Nnrt::V2_1;
++
++struct HdfNnrtDeviceHost {
++    struct IDeviceIoService ioService;
++    OHOS::sptr<OHOS::IRemoteObject> stub;
++};
++
++static int32_t NnrtDeviceDriverDispatch(struct HdfDeviceIoClient *client, int cmdId,
++                                        struct HdfSBuf *data, struct HdfSBuf *reply)
++{
++    auto *host = CONTAINER_OF(client->device->service, struct HdfNnrtDeviceHost, ioService);
++    OHOS::MessageParcel *dataParcel = nullptr;
++    OHOS::MessageParcel *replyParcel = nullptr;
++    OHOS::MessageOption option;
++
++    if (SbufToParcel(data, &dataParcel) != HDF_SUCCESS) {
++        HDF_LOGE("%{public}s: invalid data sbuf", __func__);
++        return HDF_ERR_INVALID_PARAM;
++    }
++    if (SbufToParcel(reply, &replyParcel) != HDF_SUCCESS) {
++        HDF_LOGE("%{public}s: invalid reply sbuf", __func__);
++        return HDF_ERR_INVALID_PARAM;
++    }
++    return host->stub->SendRequest(cmdId, *dataParcel, *replyParcel, option);
++}
++
++static int HdfNnrtDeviceDriverInit(struct HdfDeviceObject *deviceObject)
++{
++    (void)deviceObject;
++    HDF_LOGI("HdfNnrtDeviceDriverInit");
++    return HDF_SUCCESS;
++}
++
++static int HdfNnrtDeviceDriverBind(struct HdfDeviceObject *deviceObject)
++{
++    HDF_LOGI("HdfNnrtDeviceDriverBind");
++    auto *host = new (std::nothrow) HdfNnrtDeviceHost;
++    if (host == nullptr) {
++        HDF_LOGE("%{public}s: failed to allocate host", __func__);
++        return HDF_FAILURE;
++    }
++    host->ioService.Dispatch = NnrtDeviceDriverDispatch;
++    host->ioService.Open = nullptr;
++    host->ioService.Release = nullptr;
++
++    auto serviceImpl = INnrtDevice::Get(true);
++    if (serviceImpl == nullptr) {
++        HDF_LOGE("%{public}s: failed to load NNRT HDI implementation", __func__);
++        delete host;
++        return HDF_FAILURE;
++    }
++    host->stub = OHOS::HDI::ObjectCollector::GetInstance().GetOrNewObject(
++        serviceImpl, INnrtDevice::GetDescriptor());
++    if (host->stub == nullptr) {
++        HDF_LOGE("%{public}s: failed to create stub object", __func__);
++        delete host;
++        return HDF_FAILURE;
++    }
++    deviceObject->service = &host->ioService;
++    return HDF_SUCCESS;
++}
++
++static void HdfNnrtDeviceDriverRelease(struct HdfDeviceObject *deviceObject)
++{
++    if (deviceObject->service == nullptr) return;
++    auto *host = CONTAINER_OF(deviceObject->service, struct HdfNnrtDeviceHost, ioService);
++    delete host;
++}
++
++struct HdfDriverEntry g_nnrtdeviceDriverEntry = {
++    .moduleVersion = 2,
++    .moduleName = "nnrt",
++    .Bind = HdfNnrtDeviceDriverBind,
++    .Init = HdfNnrtDeviceDriverInit,
++    .Release = HdfNnrtDeviceDriverRelease,
++};
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++HDF_INIT(g_nnrtdeviceDriverEntry);
++#ifdef __cplusplus
++}
++#endif
+diff --git a/nnrt/src/nnrt_device_service.cpp b/nnrt/src/nnrt_device_service.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..b33e2d5d5048599728269084270bf031fff3c30a
+--- /dev/null
++++ b/nnrt/src/nnrt_device_service.cpp
+@@ -0,0 +1,242 @@
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#include "nnrt_device_service.h"
++
++#include <cerrno>
++#include <cstdlib>
++#include <new>
++#include <utility>
++#include <sys/mman.h>
++#include <unistd.h>
++
++#include <hdf_base.h>
++
++#include "rdkhm_accel_client.h"
++
++namespace OHOS {
++namespace HDI {
++namespace Nnrt {
++namespace V2_1 {
++namespace {
++
++constexpr int32_t Success() { return static_cast<int32_t>(NNRT_ReturnCode::NNRT_SUCCESS); }
++constexpr int32_t Failure(NNRT_ReturnCode code) { return static_cast<int32_t>(code); }
++
++std::string SocketPath()
++{
++    const char *value = std::getenv("RDKHM_ACCEL_SOCKET");
++    return (value != nullptr && *value != '\0') ? value : "/dev/unix/socket/rdkhm_accel";
++}
++
++std::vector<uint32_t> ShapeOf(const rdkhm::IoDesc &desc)
++{
++    return std::vector<uint32_t>(desc.dims, desc.dims + desc.rank);
++}
++
++} // namespace
++
++RdkhmPreparedModel::RdkhmPreparedModel(std::string socket, uint32_t session,
++                                       const std::vector<std::vector<uint32_t>> &inputDims,
++                                       const std::vector<std::vector<uint32_t>> &outputDims)
++    : socket_(std::move(socket)), session_(session),
++      inputDims_(inputDims), outputDims_(outputDims) {}
++
++RdkhmPreparedModel::~RdkhmPreparedModel()
++{
++    rdkhm::AccelClient client(socket_);
++    (void)client.Release(session_);
++}
++
++int32_t RdkhmPreparedModel::ExportModelCache(std::vector<SharedBuffer> &modelCache)
++{
++    (void)modelCache;
++    return Failure(NNRT_ReturnCode::NNRT_NOT_SUPPORT);
++}
++
++int32_t RdkhmPreparedModel::GetInputDimRanges(std::vector<std::vector<uint32_t>> &minInputDims,
++                                              std::vector<std::vector<uint32_t>> &maxInputDims)
++{
++    minInputDims = inputDims_;
++    maxInputDims = inputDims_;
++    return Success();
++}
++
++int32_t RdkhmPreparedModel::Run(const std::vector<IOTensor> &inputs,
++                                const std::vector<IOTensor> &outputs,
++                                std::vector<std::vector<int32_t>> &outputDims)
++{
++    if (inputs.size() != inputDims_.size() || outputs.size() != outputDims_.size()) {
++        return Failure(NNRT_ReturnCode::NNRT_INVALID_INPUT);
++    }
++    std::vector<rdkhm::Buffer> inputBuffers;
++    std::vector<rdkhm::Buffer> outputBuffers;
++    for (const auto &tensor : inputs) {
++        inputBuffers.push_back({tensor.data.fd, tensor.data.offset, tensor.data.dataSize});
++    }
++    for (const auto &tensor : outputs) {
++        outputBuffers.push_back({tensor.data.fd, tensor.data.offset, tensor.data.dataSize});
++    }
++    rdkhm::AccelClient client(socket_);
++    std::vector<std::vector<uint32_t>> dims;
++    int32_t status = client.Run(session_, inputBuffers, outputBuffers, dims);
++    if (status != RDKHM_STATUS_OK) return status;
++    outputDims.clear();
++    for (const auto &shape : dims) {
++        outputDims.emplace_back(shape.begin(), shape.end());
++    }
++    return Success();
++}
++
++RdkhmNnrtDeviceService::RdkhmNnrtDeviceService() : socket_(SocketPath()) {}
++
++int32_t RdkhmNnrtDeviceService::GetDeviceName(std::string &name)
++{
++    name = "X5-BPU";
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::GetVendorName(std::string &name)
++{
++    name = "D-Robotics";
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::GetDeviceType(DeviceType &deviceType)
++{
++    deviceType = DeviceType::ACCELERATOR;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::GetDeviceStatus(DeviceStatus &status)
++{
++    rdkhm::AccelClient client(socket_);
++    status = client.Hello() == RDKHM_STATUS_OK ? DeviceStatus::AVAILABLE : DeviceStatus::OFFLINE;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::GetSupportedOperation(const Model &model, std::vector<bool> &ops)
++{
++    /* Only vendor offline models are supported at this stage. The operator
++     * graph path needs an HBM compiler and is intentionally reported as
++     * unsupported instead of failing later during PrepareModel. */
++    ops.assign(model.nodes.size(), false);
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::IsFloat16PrecisionSupported(bool &isSupported)
++{
++    isSupported = false;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::IsPerformanceModeSupported(bool &isSupported)
++{
++    isSupported = false;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::IsPrioritySupported(bool &isSupported)
++{
++    isSupported = false;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::IsDynamicInputSupported(bool &isSupported)
++{
++    isSupported = false;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::PrepareModel(const Model &model, const ModelConfig &config,
++                                             sptr<IPreparedModel> &preparedModel)
++{
++    (void)model;
++    (void)config;
++    (void)preparedModel;
++    return Failure(NNRT_ReturnCode::NNRT_NOT_SUPPORT);
++}
++
++int32_t RdkhmNnrtDeviceService::IsModelCacheSupported(bool &isSupported)
++{
++    isSupported = false;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::PrepareModelFromModelCache(
++    const std::vector<SharedBuffer> &modelCache, const ModelConfig &config,
++    sptr<IPreparedModel> &preparedModel)
++{
++    (void)modelCache;
++    (void)config;
++    (void)preparedModel;
++    return Failure(NNRT_ReturnCode::NNRT_NOT_SUPPORT);
++}
++
++int32_t RdkhmNnrtDeviceService::PrepareOfflineModel(
++    const std::vector<SharedBuffer> &offlineModels, const ModelConfig &config,
++    sptr<IPreparedModel> &preparedModel)
++{
++    (void)config;
++    if (offlineModels.size() != 1 || offlineModels[0].fd < 0) {
++        return Failure(NNRT_ReturnCode::NNRT_INVALID_MODEL);
++    }
++    rdkhm::AccelClient client(socket_);
++    uint32_t session = 0;
++    int32_t status = client.LoadFd(offlineModels[0].fd, session);
++    if (status != RDKHM_STATUS_OK) return status;
++    std::vector<rdkhm::IoDesc> inputs;
++    std::vector<rdkhm::IoDesc> outputs;
++    status = client.Info(session, inputs, outputs);
++    if (status != RDKHM_STATUS_OK) {
++        (void)client.Release(session);
++        return status;
++    }
++    std::vector<std::vector<uint32_t>> inputDims;
++    std::vector<std::vector<uint32_t>> outputDims;
++    for (const auto &desc : inputs) inputDims.push_back(ShapeOf(desc));
++    for (const auto &desc : outputs) outputDims.push_back(ShapeOf(desc));
++    auto *model = new (std::nothrow) RdkhmPreparedModel(socket_, session, inputDims, outputDims);
++    if (model == nullptr) {
++        (void)client.Release(session);
++        return Failure(NNRT_ReturnCode::NNRT_OUT_OF_MEMORY);
++    }
++    preparedModel = model;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::AllocateBuffer(uint32_t length, SharedBuffer &buffer)
++{
++    int fd = memfd_create("rdkhm-nnrt", MFD_CLOEXEC);
++    if (fd < 0) return Failure(NNRT_ReturnCode::NNRT_MEMORY_ERROR);
++    if (ftruncate(fd, static_cast<off_t>(length)) != 0) {
++        close(fd);
++        return Failure(NNRT_ReturnCode::NNRT_MEMORY_ERROR);
++    }
++    buffer.fd = fd;
++    buffer.bufferSize = length;
++    buffer.offset = 0;
++    buffer.dataSize = length;
++    return Success();
++}
++
++int32_t RdkhmNnrtDeviceService::ReleaseBuffer(const SharedBuffer &buffer)
++{
++    if (buffer.fd >= 0) close(buffer.fd);
++    return Success();
++}
++
++} // namespace V2_1
++} // namespace Nnrt
++} // namespace HDI
++} // namespace OHOS
++
++extern "C" OHOS::HDI::Nnrt::V2_1::INnrtDevice *NnrtDeviceImplGetInstance(void)
++{
++    return new (std::nothrow) OHOS::HDI::Nnrt::V2_1::RdkhmNnrtDeviceService();
++}
++
++extern "C" void NnrtDeviceImplRelease(OHOS::HDI::Nnrt::V2_1::INnrtDevice *instance)
++{
++    delete instance;
++}
+diff --git a/nnrt/src/rdkhm_accel_client.cpp b/nnrt/src/rdkhm_accel_client.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..a349ca1229f7cb33ca9641942898ca465b370a18
+--- /dev/null
++++ b/nnrt/src/rdkhm_accel_client.cpp
+@@ -0,0 +1,285 @@
++#include "rdkhm_accel_client.h"
++
++#include <cerrno>
++#include <cstring>
++#include <utility>
++#include <sys/socket.h>
++#include <sys/time.h>
++#include <sys/un.h>
++#include <unistd.h>
++
++namespace rdkhm {
++namespace {
++
++constexpr int32_t TRANSPORT_ERROR = RDKHM_STATUS_SERVICE_ERROR;
++
++uint32_t ReadStatus(const std::vector<uint8_t> &payload)
++{
++    uint32_t status = RDKHM_STATUS_FAILED;
++    if (payload.size() >= sizeof(status)) memcpy(&status, payload.data(), sizeof(status));
++    return status;
++}
++
++} // namespace
++
++AccelClient::AccelClient(std::string socket_path) : socket_path_(std::move(socket_path)) {}
++
++int32_t AccelClient::SendFrame(int fd, uint16_t command, uint32_t session, const void *payload,
++                               uint32_t length, const std::vector<int> &fds)
++{
++    struct rdkhm_wire_header header = {};
++    header.magic = RDKHM_WIRE_MAGIC;
++    header.version = RDKHM_WIRE_VERSION;
++    header.command = command;
++    header.session = session;
++    header.payload = length;
++    header.fds = static_cast<uint16_t>(fds.size());
++    struct iovec iov[2] = {{.iov_base = &header, .iov_len = sizeof(header)},
++                           {.iov_base = const_cast<void *>(payload), .iov_len = length}};
++    struct msghdr message = {};
++    message.msg_iov = iov;
++    message.msg_iovlen = length > 0 ? 2u : 1u;
++    char control[CMSG_SPACE(sizeof(int) * 4)] = {};
++    if (!fds.empty()) {
++        message.msg_control = control;
++        message.msg_controllen = CMSG_SPACE(sizeof(int) * fds.size());
++        struct cmsghdr *cmsg = CMSG_FIRSTHDR(&message);
++        cmsg->cmsg_level = SOL_SOCKET;
++        cmsg->cmsg_type = SCM_RIGHTS;
++        cmsg->cmsg_len = CMSG_LEN(sizeof(int) * fds.size());
++        memcpy(CMSG_DATA(cmsg), fds.data(), sizeof(int) * fds.size());
++    }
++    ssize_t sent = sendmsg(fd, &message, MSG_NOSIGNAL);
++    if (sent < static_cast<ssize_t>(sizeof(header))) return TRANSPORT_ERROR;
++    size_t remaining = length - static_cast<size_t>(sent - sizeof(header));
++    const uint8_t *cursor = static_cast<const uint8_t *>(payload) + (sent - sizeof(header));
++    while (remaining > 0) {
++        ssize_t written = send(fd, cursor, remaining, MSG_NOSIGNAL);
++        if (written < 0 && errno == EINTR) continue;
++        if (written <= 0) return TRANSPORT_ERROR;
++        cursor += written;
++        remaining -= static_cast<size_t>(written);
++    }
++    return RDKHM_STATUS_OK;
++}
++
++int32_t AccelClient::ReceiveFrame(int fd, uint16_t expected_command, uint32_t &session,
++                                  std::vector<uint8_t> &payload)
++{
++    struct rdkhm_wire_header header = {};
++    uint8_t *cursor = reinterpret_cast<uint8_t *>(&header);
++    size_t got = 0;
++    while (got < sizeof(header)) {
++        ssize_t length = recv(fd, cursor + got, sizeof(header) - got, 0);
++        if (length < 0 && errno == EINTR) continue;
++        if (length <= 0) return TRANSPORT_ERROR;
++        got += static_cast<size_t>(length);
++    }
++    if (header.magic != RDKHM_WIRE_MAGIC || header.version != RDKHM_WIRE_VERSION ||
++        header.command != expected_command || header.payload > RDKHM_WIRE_MAX_PAYLOAD) {
++        return TRANSPORT_ERROR;
++    }
++    session = header.session;
++    payload.resize(header.payload);
++    got = 0;
++    while (got < payload.size()) {
++        ssize_t length = recv(fd, payload.data() + got, payload.size() - got, 0);
++        if (length < 0 && errno == EINTR) continue;
++        if (length <= 0) return TRANSPORT_ERROR;
++        got += static_cast<size_t>(length);
++    }
++    return RDKHM_STATUS_OK;
++}
++
++int32_t AccelClient::Transact(uint16_t command, uint32_t &session, const void *payload,
++                              uint32_t length, const std::vector<int> &fds,
++                              std::vector<uint8_t> &response)
++{
++    int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
++    if (fd < 0) return TRANSPORT_ERROR;
++    struct sockaddr_un address = {};
++    address.sun_family = AF_UNIX;
++    if (socket_path_.size() >= sizeof(address.sun_path)) {
++        close(fd);
++        return TRANSPORT_ERROR;
++    }
++    memcpy(address.sun_path, socket_path_.c_str(), socket_path_.size() + 1);
++    if (connect(fd, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0) {
++        close(fd);
++        return TRANSPORT_ERROR;
++    }
++    struct timeval timeout = {};
++    timeout.tv_sec = 15;
++    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
++    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
++    int32_t status = SendFrame(fd, command, session, payload, length, fds);
++    if (status == RDKHM_STATUS_OK) {
++        status = ReceiveFrame(fd, command, session, response);
++    }
++    close(fd);
++    return status;
++}
++
++int32_t AccelClient::Hello()
++{
++    std::vector<uint8_t> response;
++    uint32_t session = 0;
++    if (Transact(RDKHM_WIRE_HELLO, session, nullptr, 0, {}, response) != RDKHM_STATUS_OK) {
++        return TRANSPORT_ERROR;
++    }
++    return static_cast<int32_t>(ReadStatus(response));
++}
++
++int32_t AccelClient::Load(const void *model, size_t size, uint32_t &session)
++{
++    if (model == nullptr || size == 0 || size + sizeof(struct rdkhm_load_request) > UINT32_MAX) {
++        return RDKHM_STATUS_INVALID_PARAMETER;
++    }
++    std::vector<uint8_t> request(sizeof(struct rdkhm_load_request) + size);
++    struct rdkhm_load_request head = {};
++    head.model_bytes = static_cast<uint32_t>(size);
++    memcpy(request.data(), &head, sizeof(head));
++    memcpy(request.data() + sizeof(head), model, size);
++    session = 0;
++    uint32_t assigned = 0;
++    std::vector<uint8_t> response;
++    if (Transact(RDKHM_WIRE_LOAD, assigned, request.data(), static_cast<uint32_t>(request.size()), {},
++                 response) != RDKHM_STATUS_OK) {
++        return TRANSPORT_ERROR;
++    }
++    int32_t status = static_cast<int32_t>(ReadStatus(response));
++    if (status == RDKHM_STATUS_OK) session = assigned;
++    return status;
++}
++
++int32_t AccelClient::LoadFd(int model_fd, uint32_t &session)
++{
++    if (model_fd < 0) return RDKHM_STATUS_INVALID_PARAMETER;
++    session = 0;
++    uint32_t assigned = 0;
++    std::vector<uint8_t> response;
++    if (Transact(RDKHM_WIRE_LOAD, assigned, nullptr, 0, {model_fd}, response) != RDKHM_STATUS_OK) {
++        return TRANSPORT_ERROR;
++    }
++    int32_t status = static_cast<int32_t>(ReadStatus(response));
++    if (status == RDKHM_STATUS_OK) session = assigned;
++    return status;
++}
++
++int32_t AccelClient::Info(uint32_t session, std::vector<IoDesc> &inputs, std::vector<IoDesc> &outputs)
++{
++    std::vector<uint8_t> response;
++    if (Transact(RDKHM_WIRE_INFO, session, nullptr, 0, {}, response) != RDKHM_STATUS_OK) {
++        return TRANSPORT_ERROR;
++    }
++    if (response.size() == sizeof(uint32_t)) {
++        return static_cast<int32_t>(ReadStatus(response));
++    }
++    if (response.size() < sizeof(struct rdkhm_io_response)) return TRANSPORT_ERROR;
++    struct rdkhm_io_response head = {};
++    memcpy(&head, response.data(), sizeof(head));
++    size_t count = static_cast<size_t>(head.input_count) + head.output_count;
++    if (head.status != RDKHM_STATUS_OK ||
++        response.size() != sizeof(head) + count * sizeof(struct rdkhm_io_desc)) {
++        return static_cast<int32_t>(head.status);
++    }
++    const struct rdkhm_io_desc *desc =
++        reinterpret_cast<const struct rdkhm_io_desc *>(response.data() + sizeof(head));
++    inputs.clear();
++    outputs.clear();
++    for (uint32_t i = 0; i < head.input_count; i++) {
++        IoDesc item;
++        item.type = desc[i].type;
++        item.format = desc[i].format;
++        item.rank = desc[i].rank;
++        memcpy(item.dims, desc[i].dims, sizeof(item.dims));
++        item.bytes = desc[i].bytes;
++        inputs.push_back(item);
++    }
++    desc += head.input_count;
++    for (uint32_t i = 0; i < head.output_count; i++) {
++        IoDesc item;
++        item.type = desc[i].type;
++        item.format = desc[i].format;
++        item.rank = desc[i].rank;
++        memcpy(item.dims, desc[i].dims, sizeof(item.dims));
++        item.bytes = desc[i].bytes;
++        outputs.push_back(item);
++    }
++    return RDKHM_STATUS_OK;
++}
++
++int32_t AccelClient::Run(uint32_t session, const std::vector<Buffer> &inputs,
++                         const std::vector<Buffer> &outputs,
++                         std::vector<std::vector<uint32_t>> &output_dims)
++{
++    if (inputs.size() > RDKHM_WIRE_MAX_TENSORS || outputs.size() > RDKHM_WIRE_MAX_TENSORS) {
++        return RDKHM_STATUS_INVALID_PARAMETER;
++    }
++    size_t count = inputs.size() + outputs.size();
++    std::vector<uint8_t> request(sizeof(struct rdkhm_run_request) +
++                                 count * sizeof(struct rdkhm_buffer_desc));
++    struct rdkhm_run_request head = {
++        .input_count = static_cast<uint32_t>(inputs.size()),
++        .output_count = static_cast<uint32_t>(outputs.size()),
++    };
++    memcpy(request.data(), &head, sizeof(head));
++    struct rdkhm_buffer_desc *desc =
++        reinterpret_cast<struct rdkhm_buffer_desc *>(request.data() + sizeof(head));
++    std::vector<int> fds;
++    for (const Buffer &buffer : inputs) {
++        if (buffer.fd < 0) return RDKHM_STATUS_INVALID_PARAMETER;
++        desc->fd_index = static_cast<uint32_t>(fds.size());
++        desc->offset = buffer.offset;
++        desc->bytes = buffer.bytes;
++        fds.push_back(buffer.fd);
++        desc++;
++    }
++    for (const Buffer &buffer : outputs) {
++        if (buffer.fd < 0) return RDKHM_STATUS_INVALID_PARAMETER;
++        desc->fd_index = static_cast<uint32_t>(fds.size());
++        desc->offset = buffer.offset;
++        desc->bytes = buffer.bytes;
++        fds.push_back(buffer.fd);
++        desc++;
++    }
++    std::vector<uint8_t> response;
++    if (Transact(RDKHM_WIRE_RUN, session, request.data(), static_cast<uint32_t>(request.size()),
++                 fds, response) != RDKHM_STATUS_OK) {
++        return TRANSPORT_ERROR;
++    }
++    if (response.size() == sizeof(uint32_t)) {
++        return static_cast<int32_t>(ReadStatus(response));
++    }
++    if (response.size() < 2 * sizeof(uint32_t)) return TRANSPORT_ERROR;
++    uint32_t status = 0;
++    uint32_t out_count = 0;
++    memcpy(&status, response.data(), sizeof(status));
++    memcpy(&out_count, response.data() + sizeof(status), sizeof(out_count));
++    if (status != RDKHM_STATUS_OK) return static_cast<int32_t>(status);
++    if (response.size() != 2 * sizeof(uint32_t) + out_count * sizeof(struct rdkhm_run_output)) {
++        return TRANSPORT_ERROR;
++    }
++    output_dims.clear();
++    const struct rdkhm_run_output *out =
++        reinterpret_cast<const struct rdkhm_run_output *>(response.data() + 2 * sizeof(uint32_t));
++    for (uint32_t i = 0; i < out_count; i++) {
++        std::vector<uint32_t> dims;
++        for (uint32_t d = 0; d < out[i].rank && d < RDKHM_WIRE_MAX_DIMS; d++) {
++            dims.push_back(out[i].dims[d]);
++        }
++        output_dims.push_back(std::move(dims));
++    }
++    return RDKHM_STATUS_OK;
++}
++
++int32_t AccelClient::Release(uint32_t session)
++{
++    std::vector<uint8_t> response;
++    if (Transact(RDKHM_WIRE_RELEASE, session, nullptr, 0, {}, response) != RDKHM_STATUS_OK) {
++        return TRANSPORT_ERROR;
++    }
++    return static_cast<int32_t>(ReadStatus(response));
++}
++
++} // namespace rdkhm

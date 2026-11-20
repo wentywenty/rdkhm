@@ -22,6 +22,7 @@ group("board_files") {
     "audio:audio_config",
     "//device/board/drobotics/rdk_x5/nearlink:rdkhm_ssap",
     "image_conf:image_conf",
+    "stubs:stubs",
     ":desktop_config",
     ":rdkhm-usb",
     ":init.rdk_x5.cfg",
@@ -39,7 +40,7 @@ group("desktop_config") {
 # These files describe the same-release prebuilt HAPs, not RK3568 hardware.
 foreach(name, [ "install_list", "uninstall_list", "install_list_capability", "install_list_permissions" ]) {
   ohos_prebuilt_etc(name) {
-    source = "//vendor/hihope/rk3568/preinstall-config/${name}.json"
+    source = "//vendor/drobotics/rdk_x5/preinstall-config/${name}.json"
     relative_install_dir = "app"
     part_name = "product_rdk_x5"
   }

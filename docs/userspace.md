@@ -1,8 +1,8 @@
 # OpenHarmony userspace work
 
 The pinned 6.0 manifest is synchronized with the default project group into
-`sources/openharmony-full`. `out/openharmony-resolved.xml` records exact commits.
-The kernel dependency checkouts in `sources/openharmony` remain separate.
+`sources/oh/openharmony-full`. `out/openharmony-resolved.xml` records exact commits.
+The kernel dependency checkouts in `sources/oh/openharmony` remain separate.
 The standard-only group omits `third_party/harfbuzz` even though the rich product
 inherits its component; the default group includes all 456 pinned projects.
 
@@ -17,12 +17,43 @@ runtime validation remains pending. JS build support is enabled.
 The 2D graphics configuration keeps shared GPU interfaces but disables OpenGL
 and Vulkan backends for CPU rendering. This configuration is not a verified
 software-rendering implementation on X5.
-The SELinux policy build is disabled during initial bring-up; the kernel
-retains SELinux capability. Production policy and device permissions require
-separate validation. Kernel and DTBs continue to be built outside the OH graph.
+SELinux policy generation is enabled for `rdk_x5`; the development boot script
+runs `selinux=1 enforcing=0`. Production enforcing policy and device permissions
+still require separate validation and AVC review. Kernel and DTBs continue to be
+built outside the OH graph.
 The standard build includes updater libraries required by other components;
 no updater is included in the separate kernel bring-up image. SD partition and
 OTA qualification remains pending; SD partition and mount integration are present.
+
+## HAP builds
+
+`config/build/haps.json` is the app registry. `scripts/build-hap.py` builds,
+signs and stages one app; `verified: false` entries require `--force`.
+Per-app build fixes are kept under `patches/haps/`, for example
+`admin_provisioning-build-config.patch` and `theme-build-config.patch`.
+Both apps build, sign and are marked `verified=true`; their HAPs are
+`out/haps/admin_provisioning.hap` and `out/haps/theme.hap`.
+Image assembly currently injects Settings, Camera, Photos, Launcher, SystemUI,
+ScreenLock, Notes and PinTool HAPs; admin_provisioning, theme, contacts and mms
+remain build artifacts until their packaging path is changed.
+
+## Settings NearLink page
+
+`patches/settings/0003-nearlink-settings-page.patch` adds a read-only
+Settings > 星闪 page. It reports whether the USB module (`ffff:3733`) is
+enumerated and whether `SystemCapability.Communication.NearLink` is exported;
+it does not provide pairing because no NearLink service or HDI is integrated.
+
+The image packages the prebuilt Settings HAP by default. Run
+`./build hap settings` (or `python3 scripts/build-hap.py settings`) to build,
+sign and stage `out/settings/Settings.hap`; `make-openharmony-image.sh`
+replaces the system HAP when that file exists. `build-settings-hap.sh` remains
+a compatibility wrapper around the generic builder. This is a source and
+packaging change only, not a board-verified feature.
+
+Other rebuilt HAPs live under `out/haps/` (for example `contacts.hap`,
+`mms.hap`). The image builder does not inject them automatically; see
+`docs/hap-tasks.md` T12 for the current mapping gap.
 
 ## Environment findings
 
@@ -63,7 +94,7 @@ passed product preloader does not imply a completed userspace build.
 
 The final `rdk_x5` configuration builds the full `images` target successfully,
 including native init, RenderService, ArkUI and system HAPs. Filesystems are in
-`sources/openharmony-full/out/rdk_x5/packages/phone/images`. Upstream startup
+`sources/oh/openharmony-full/out/rdk_x5/packages/phone/images`. Upstream startup
 guard findings about service jobs, DAC identities and library whitelists remain;
 successful compilation does not imply runtime acceptance. SELinux policy
 generation is enabled with X5 device labels, but board AVC review and a

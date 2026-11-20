@@ -1,0 +1,121 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] mms: migrate workers and mark singleton
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/AppScope/app.json5 b/AppScope/app.json5
+index fa0d9e9..334b751 100644
+--- a/AppScope/app.json5
++++ b/AppScope/app.json5
+@@ -1,5 +1,6 @@
+ {
+   "app": {
++    "singleton": true,
+     "bundleName": "com.ohos.mms",
+     "vendor": "example",
+     "versionCode": 1000000,
+diff --git a/entry/build-profile.json5 b/entry/build-profile.json5
+index e4c72a9..a8c9e28 100644
+--- a/entry/build-profile.json5
++++ b/entry/build-profile.json5
+@@ -3,7 +3,7 @@
+   "buildOption": {
+     "sourceOption": {
+       "workers": [
+-        "./src/main/ets/workers/base/Worker.ts"
++        "./src/main/ets/workers/base/Worker.ets"
+       ]
+     }
+   },
+diff --git a/entry/src/main/ets/Application/MyAbilityStage.ts b/entry/src/main/ets/Application/MyAbilityStage.ets
+similarity index 100%
+rename from entry/src/main/ets/Application/MyAbilityStage.ts
+rename to entry/src/main/ets/Application/MyAbilityStage.ets
+diff --git a/entry/src/main/ets/MainAbility/MainAbility.ts b/entry/src/main/ets/MainAbility/MainAbility.ets
+similarity index 100%
+rename from entry/src/main/ets/MainAbility/MainAbility.ts
+rename to entry/src/main/ets/MainAbility/MainAbility.ets
+diff --git a/entry/src/main/ets/StaticSubscriber/MmsStaticSubscriber.ts b/entry/src/main/ets/StaticSubscriber/MmsStaticSubscriber.ets
+similarity index 100%
+rename from entry/src/main/ets/StaticSubscriber/MmsStaticSubscriber.ts
+rename to entry/src/main/ets/StaticSubscriber/MmsStaticSubscriber.ets
+diff --git a/entry/src/main/ets/pages/conversation/conversationController.ets b/entry/src/main/ets/pages/conversation/conversationController.ets
+index 2893ca8..ad494bf 100644
+--- a/entry/src/main/ets/pages/conversation/conversationController.ets
++++ b/entry/src/main/ets/pages/conversation/conversationController.ets
+@@ -1479,7 +1479,7 @@ export default class ConversationController {
+   // Check whether the time on the top of each SMS message is displayed.
+   setDateShow(item, list) {
+     if (item == undefined || list == undefined) {
+-      returen;
++      return;
+     }
+     item.dateShow = true;
+     if (item.date == undefined || item.date == null) {
+diff --git a/entry/src/main/ets/utils/SingleInstanceUtils.ts b/entry/src/main/ets/utils/SingleInstanceUtils.ets
+similarity index 100%
+rename from entry/src/main/ets/utils/SingleInstanceUtils.ts
+rename to entry/src/main/ets/utils/SingleInstanceUtils.ets
+diff --git a/entry/src/main/ets/workers/base/Worker.ts b/entry/src/main/ets/workers/base/Worker.ets
+similarity index 100%
+rename from entry/src/main/ets/workers/base/Worker.ts
+rename to entry/src/main/ets/workers/base/Worker.ets
+diff --git a/entry/src/main/ets/workers/base/WorkerTask.ts b/entry/src/main/ets/workers/base/WorkerTask.ets
+similarity index 100%
+rename from entry/src/main/ets/workers/base/WorkerTask.ts
+rename to entry/src/main/ets/workers/base/WorkerTask.ets
+diff --git a/entry/src/main/ets/workers/base/WorkerWrapper.ts b/entry/src/main/ets/workers/base/WorkerWrapper.ets
+similarity index 98%
+rename from entry/src/main/ets/workers/base/WorkerWrapper.ts
+rename to entry/src/main/ets/workers/base/WorkerWrapper.ets
+index f00efdf..f984985 100644
+--- a/entry/src/main/ets/workers/base/WorkerWrapper.ts
++++ b/entry/src/main/ets/workers/base/WorkerWrapper.ets
+@@ -43,7 +43,7 @@ export abstract class WorkerWrapper {
+ 
+   async initWorker() {
+     HiLog.i(TAG, `WorkerWrapper initWorker ${WorkerType[this.getWorkerType()]}`)
+-    let initWorker = await new worker.ThreadWorker('entry/ets/workers/base/Worker.ts', {
++    let initWorker = await new worker.ThreadWorker('entry/ets/workers/base/Worker.ets', {
+       name: WorkerType[this.getWorkerType()]
+     });
+     let that = this;
+diff --git a/entry/src/main/module.json5 b/entry/src/main/module.json5
+index 9802c5e..d11dd90 100644
+--- a/entry/src/main/module.json5
++++ b/entry/src/main/module.json5
+@@ -2,7 +2,7 @@
+   "module": {
+     "name": "entry",
+     "type": "entry",
+-    "srcEntry": "./ets/Application/MyAbilityStage.ts",
++    "srcEntry": "./ets/Application/MyAbilityStage.ets",
+     "description": "$string:entry_description",
+     "mainElement": "com.ohos.mms.MainAbility",
+     "deviceTypes": [
+@@ -15,12 +15,16 @@
+       {
+         "name": "ArkTSPartialUpdate",
+         "value": "true"
++      },
++      {
++        "name": "Api11ArkTSCheckMode",
++        "value": "DoArkTSCheckInCompatibleModeInApi11"
+       }
+     ],
+     "abilities": [
+       {
+         "name": "com.ohos.mms.MainAbility",
+-        "srcEntry": "./ets/MainAbility/MainAbility.ts",
++        "srcEntry": "./ets/MainAbility/MainAbility.ets",
+         "description": "$string:mainability_description",
+         "icon": "$media:smsmms",
+         "label": "$string:messages",
+@@ -47,7 +51,7 @@
+         "resource": "$profile:static_subscriber_config"
+       }],
+       "name": "Subscriber",
+-      "srcEntrance": "./ets/StaticSubscriber/MmsStaticSubscriber.ts",
++      "srcEntrance": "./ets/StaticSubscriber/MmsStaticSubscriber.ets",
+       "type": "staticSubscriber",
+       "visible": true
+     }],

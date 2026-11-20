@@ -1,0 +1,81 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] graphic2d/0003-app-server-drawable-split.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/rosen/modules/render_service/core/pipeline/main_thread/rs_render_service.cpp
++++ b/rosen/modules/render_service/core/pipeline/main_thread/rs_render_service.cpp
+@@ -43,6 +43,7 @@
+ #endif
+ #include "pipeline/hardware_thread/rs_hardware_thread.h"
+ #include "pipeline/rs_surface_render_node.h"
++#include "pipeline/rs_render_node.h"
+ #include "pipeline/rs_uni_render_judgement.h"
+ #include "render/rs_render_kawase_blur_filter.h"
+ #include "system/rs_system_parameters.h"
+@@ -104,6 +105,7 @@ if (Drawing::SystemProperties::IsUseVulkan()) {
+     RsVulkanContext::SetRecyclable(false);
+ }
+ #endif
++    RSRenderNode::SetDrawableGenerationEnabled(true);
+     RSMainThread::Instance();
+     RSUniRenderJudgement::InitUniRenderConfig();
+ 
+--- a/rosen/modules/render_service_base/include/pipeline/rs_render_node.h
++++ b/rosen/modules/render_service_base/include/pipeline/rs_render_node.h
+@@ -108,6 +108,9 @@ public:
+     virtual bool GetBootAnimation() const;
+ 
+     virtual bool GetGlobalPositionEnabled() const;
++    /* Only the render-service process generates DrawableV2 objects. */
++    static void SetDrawableGenerationEnabled(bool enabled);
++    static bool IsDrawableGenerationEnabled();
+ 
+     void MoveChild(SharedPtr child, int index);
+     void RemoveChild(SharedPtr child, bool skipTransition = false);
+--- a/rosen/modules/render_service_base/src/pipeline/rs_render_node.cpp
++++ b/rosen/modules/render_service_base/src/pipeline/rs_render_node.cpp
+@@ -16,6 +16,7 @@
+ #include "pipeline/rs_render_node.h"
+ 
+ #include <algorithm>
++#include <atomic>
+ #include <cstdint>
+ #include <memory>
+ #include <mutex>
+@@ -74,6 +75,9 @@
+ 
+ namespace OHOS {
+ namespace Rosen {
++namespace {
++std::atomic<bool> g_drawableGenerationEnabled{true};
++}
+ 
+ namespace {
+ const std::unordered_set<RSDrawableSlot> edrDrawableSlots = {
+@@ -4357,10 +4361,25 @@ void RSRenderNode::SetLastIsNeedAssignToSubThread(bool lastIsNeedAssignToSubThre
+     lastIsNeedAssignToSubThread_ = lastIsNeedAssignToSubThread;
+ }
+ 
++void RSRenderNode::SetDrawableGenerationEnabled(bool enabled)
++{
++    g_drawableGenerationEnabled.store(enabled, std::memory_order_relaxed);
++}
++
++bool RSRenderNode::IsDrawableGenerationEnabled()
++{
++    return g_drawableGenerationEnabled.load(std::memory_order_relaxed);
++}
++
+ void RSRenderNode::InitRenderParams()
+ {
+ #ifdef RS_ENABLE_GPU
+     stagingRenderParams_ = std::make_unique<RSRenderParams>(GetId());
++    /* Client processes build node trees but must not attempt to create server
++     * drawables; only librender_service has the generator registrations. */
++    if (!g_drawableGenerationEnabled.load(std::memory_order_relaxed)) {
++        return;
++    }
+     DrawableV2::RSRenderNodeDrawableAdapter::OnGenerate(shared_from_this());
+     if (renderDrawable_ == nullptr) {
+ #ifndef ROSEN_ARKUI_X

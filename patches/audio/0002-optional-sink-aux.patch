@@ -1,5 +1,8 @@
-diff --git a/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp b/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp
-index 3544c0d..50b073d 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] audio/0002-optional-sink-aux.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp
 +++ b/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp
 @@ -94,7 +94,7 @@ int32_t SinkAdapterInit(struct SinkAdapter *adapter, const struct SinkAdapterAtt
@@ -11,8 +14,6 @@ index 3544c0d..50b073d 100644
  
      return sink->Init(sinkAttr);
  }
-diff --git a/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c b/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c
-index 4c3814f..92f7a51 100644
 --- a/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c
 +++ b/frameworks/native/pulseaudio/modules/hdi/hdi_sink.c
 @@ -4290,7 +4290,7 @@ static pa_hook_result_t SinkInputPutCb(pa_core *core, pa_sink_input *i, struct U

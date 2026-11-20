@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  repo manifest for every upstream outside the full OpenHarmony tree:
+  RDK kernel/BSP/wireless and the OpenHarmony kernel/HDF dependency checkouts.
+  The full OpenHarmony tree is a separate repo workspace under
+  sources/oh/openharmony-full, pinned by config/sources/openharmony.lock.xml.
+  camsys is a sibling project because repo cannot nest projects inside
+  x5-kernel; scripts/fetch-sources.sh links it into the kernel tree.
+-->
+<manifest>
+  <remote name="drobotics" fetch="https://github.com/D-Robotics" />
+  <remote name="openharmony" fetch="https://gitcode.com/openharmony" />
+  <default sync-j="8" />
+
+  <project path="rdk/x5-kernel" name="x5-kernel" remote="drobotics"
+           revision="b2edb450c6eaef1c7277885d49f74efb6088b634" />
+  <project path="rdk/x5-drv-camsys" name="x5-drv-camsys" remote="drobotics"
+           revision="22c7c2e870622fe779d832ef1753b27191772cdd" />
+  <project path="rdk/x5-hobot-dnn" name="x5-hobot-dnn" remote="drobotics"
+           revision="b1db3ecac6bdb96070d62e104df6439167c26492" />
+  <project path="rdk/x5-hobot-drivers" name="x5-hobot-drivers" remote="drobotics"
+           revision="9ebc13c76c4dfe14410537b4c1b0761d51d1ab9e" />
+  <project path="rdk/x5-hobot-multimedia" name="x5-hobot-multimedia" remote="drobotics"
+           revision="0f297df905511c3429567202813359acee26dbb3" />
+  <project path="oh/manifest" name="manifest" remote="openharmony"
+           revision="d6a0fef04cd19e2ecf0ea978e683e5d2f7953198" />
+
+  <!-- OpenHarmony kernel/HDF dependency checkouts used by the X5 kernel build. -->
+  <project path="oh/openharmony/kernel/linux/linux-6.6" name="kernel_linux_6.6"
+           remote="openharmony" revision="05abe5cb2815cc7a2ebb64669a347884db467f6d" />
+  <project path="oh/openharmony/kernel/linux/config" name="kernel_linux_config"
+           remote="openharmony" revision="3e172421da6aae23bbcc4eb29bc1498d570b5546" />
+  <project path="oh/openharmony/kernel/linux/patches" name="kernel_linux_patches"
+           remote="openharmony" revision="abbf648c02217175631e8bc3797022d217b8b6ba" />
+  <project path="oh/openharmony/kernel/linux/build" name="kernel_linux_build"
+           remote="openharmony" revision="d0bb4816a16a550ab94af3e6692820e7fe3070c4" />
+  <project path="oh/openharmony/kernel/linux/common_modules" name="kernel_linux_common_modules"
+           remote="openharmony" revision="873afbfda1992ac3dad5d2dd6512e4f76edf8d3a" />
+  <project path="oh/openharmony/drivers/hdf_core" name="drivers_hdf_core"
+           remote="openharmony" revision="530c883061478426a5714d6b23019784b07dd769" />
+  <project path="oh/openharmony/third_party/bounds_checking_function"
+           name="third_party_bounds_checking_function" remote="openharmony"
+           revision="2ae82839ecaaa7d031e66ccbd2076d671acfd615" />
+  <project path="oh/openharmony/device/board/hihope" name="device_board_hihope"
+           remote="openharmony" revision="a6a3f1e6962e318c5517ee06b200b26da0556880" />
+  <project path="oh/openharmony/vendor/hihope" name="vendor_hihope"
+           remote="openharmony" revision="3e6a4e960f74ad7d0b156682b80845dbb544d237" />
+</manifest>

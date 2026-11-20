@@ -1,0 +1,29 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] screenlock/0002-default-unlocked.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/services/src/screenlock_system_ability.cpp
++++ b/services/src/screenlock_system_ability.cpp
+@@ -591,8 +591,8 @@ bool ScreenLockSystemAbility::IsScreenLocked()
+     if (iter != isScreenlockedMap_.end()) {
+         return iter->second;
+     } else {
+-        SCLOCK_HILOGE("The IsScreenLocked is not set. userId=%{public}d, default screenLocked: true", userId);
+-        return true;
++        SCLOCK_HILOGE("The IsScreenLocked is not set. userId=%{public}d, default screenLocked: false", userId);
++        return false;
+     }
+ }
+ 
+@@ -608,8 +608,8 @@ int32_t ScreenLockSystemAbility::IsLockedWithUserId(int32_t userId, bool &isLock
+         isLocked = iter->second;
+         return E_SCREENLOCK_OK;
+     } else {
+-        isLocked = true;
+-        SCLOCK_HILOGE("IsLockedWithUserId userId is not set. userId=%{public}d, default screenLocked: true", userId);
++        isLocked = false;
++        SCLOCK_HILOGE("IsLockedWithUserId userId is not set. userId=%{public}d, default screenLocked: false", userId);
+         return E_SCREENLOCK_USER_ID_INVALID;
+     }
+ }

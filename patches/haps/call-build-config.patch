@@ -1,0 +1,82 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] haps: call build configuration
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/entry/build-profile.json5
++++ b/entry/build-profile.json5
+@@ -15,7 +15,7 @@
+ 
+ {
+   "apiType": 'stageMode',
+-  "buildOption": {"compileMode": "esmodule"},
++  "buildOption": {},
+   "targets": [
+     {
+       "name": "default"
+--- a/mobiledatasettings/build-profile.json5
++++ b/mobiledatasettings/build-profile.json5
+@@ -17,7 +17,6 @@
+   "apiType": 'stageMode',
+   "buildOption": {
+   },
+-  "buildOption": {"compileMode": "esmodule"},
+   "entryModules": [
+     "callui"
+   ],
+--- a/mobiledatasettings/src/main/module.json5
++++ b/mobiledatasettings/src/main/module.json5
+@@ -17,7 +17,7 @@
+   "module": {
+     "name": "mobiledatasettings",
+     "type": "feature",
+-    "srcEntrance": "./ets/Application/MyAbilityStage.ts",
++    "srcEntry": "./ets/Application/MyAbilityStage.ts",
+     "description": "$string:app_name",
+     "mainElement": "com.ohos.mobiledatasettings.MainAbility",
+     "deviceTypes": [
+@@ -31,12 +31,16 @@
+       {
+         "name": "ArkTSPartialUpdate",
+         "value": "false"
++      },
++      {
++        "name": "Api11ArkTSCheckMode",
++        "value": "DoArkTSCheckInCompatibleModeInApi11"
+       }
+     ],
+     "abilities": [
+       {
+         "name": "com.ohos.mobiledatasettings.MainAbility",
+-        "srcEntrance": "./ets/MainAbility/MainAbility.ts",
++        "srcEntry": "./ets/MainAbility/MainAbility.ts",
+         "description": "$string:mainability_description",
+         "icon": "$media:app_icon",
+         "label": "$string:mainability_description",
+@@ -48,19 +52,23 @@
+     "requestPermissions": [
+       {
+         "name": "ohos.permission.GET_NETWORK_INFO",
+-        "reason": "$string:GET_NETWORK_INFO"
++        "reason": "$string:GET_NETWORK_INFO",
++        "usedScene": { "abilities": ["com.ohos.mobiledatasettings.MainAbility"], "when": "inuse" }
+       },
+       {
+         "name": "ohos.permission.SET_TELEPHONY_STATE",
+-        "reason": "$string:SET_TELEPHONY_STATE"
++        "reason": "$string:SET_TELEPHONY_STATE",
++        "usedScene": { "abilities": ["com.ohos.mobiledatasettings.MainAbility"], "when": "inuse" }
+       },
+       {
+         "name": "ohos.permission.GET_TELEPHONY_STATE",
+-        "reason": "$string:GET_TELEPHONY_STATE"
++        "reason": "$string:GET_TELEPHONY_STATE",
++        "usedScene": { "abilities": ["com.ohos.mobiledatasettings.MainAbility"], "when": "inuse" }
+       },
+       {
+         "name": "ohos.permission.MANAGE_SECURE_SETTINGS",
+-        "reason": "$string:MANAGE_SECURE_SETTINGS"
++        "reason": "$string:MANAGE_SECURE_SETTINGS",
++        "usedScene": { "abilities": ["com.ohos.mobiledatasettings.MainAbility"], "when": "inuse" }
+       }
+     ]
+   }

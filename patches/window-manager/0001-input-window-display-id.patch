@@ -1,0 +1,15 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] window-manager/0001-input-window-display-id.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/wmserver/src/input_window_monitor.cpp
++++ b/wmserver/src/input_window_monitor.cpp
+@@ -228,6 +228,7 @@ void InputWindowMonitor::TraverseWindowNodes(const std::vector<sptr<WindowNode>>
+             .area = MMI::Rect { areaRect.posX_, areaRect.posY_,
+                 static_cast<int32_t>(areaRect.width_), static_cast<int32_t>(areaRect.height_) },
+             .agentWindowId = static_cast<int32_t>(windowNode->GetWindowId()),
++            .displayId = static_cast<int32_t>(windowNode->GetDisplayId()),
+         };
+ 
+         auto iter = (windowNode->GetParentId() == INVALID_WINDOW_ID) ?

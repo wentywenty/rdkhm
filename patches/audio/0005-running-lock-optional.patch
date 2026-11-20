@@ -1,0 +1,40 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] audio/0005-running-lock-optional.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/frameworks/native/hdiadapter_new/util/audio_running_lock.cpp
++++ b/frameworks/native/hdiadapter_new/util/audio_running_lock.cpp
+@@ -32,7 +32,9 @@ AudioRunningLock::AudioRunningLock(const std::string &lockName)
+ 
+ int32_t AudioRunningLock::Lock(const int32_t timeoutMs)
+ {
+-    CHECK_AND_RETURN_RET_LOG(runningLock_ != nullptr, -1, "lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     Trace lockTrace("AudioRunningLock::Lock");
+     std::lock_guard<std::mutex> lock(mutex_);
+     lastAppsUid_ = {};
+@@ -51,7 +53,9 @@ int32_t AudioRunningLock::Lock(const int32_t timeoutMs)
+ 
+ int32_t AudioRunningLock::UnLock(void)
+ {
+-    CHECK_AND_RETURN_RET_LOG(runningLock_ != nullptr, -1, "lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     Trace unlockTrace("AudioRunningLock::UnLock");
+     std::lock_guard<std::mutex> lock(mutex_);
+     isLocked_ = false;
+@@ -69,7 +73,9 @@ int32_t AudioRunningLock::UnLock(void)
+ 
+ int32_t AudioRunningLock::UpdateAppsUidToPowerMgr(void)
+ {
+-    CHECK_AND_RETURN_RET_LOG(runningLock_ != nullptr, -1, "lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     Trace trace("AudioRunningLock::UpdateAppsUidToPowerMgr");
+     std::lock_guard<std::mutex> lock(mutex_);
+     if ((!isLocked_) || currentAppsUid_ == lastAppsUid_) {

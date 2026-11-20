@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 workspace=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-archive="$workspace/sources/ohos-sdk-windows_linux-public.tar.gz"
+source "$workspace/env.sh"
+archive="$RDKHM_CACHE_DIR/ohos-sdk-windows_linux-public.tar.gz"
 hash=a315834ac133625efc912bd078f3e2b2550868d04aef1b5aa4f9679c8b3c9d8e
-destination="$workspace/sources/openharmony-full/prebuilts/ohos-sdk/linux/20"
+destination="$RDKHM_OH_SDK"
 if [[ ! -f "$archive" ]]; then
     curl -fL --retry 3 --connect-timeout 20 \
         https://repo.huaweicloud.com/openharmony/os/6.0-Release/ohos-sdk-windows_linux-public.tar.gz \

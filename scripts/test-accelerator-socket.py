@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Exercise the staged ARM64 daemon through its private loader under QEMU."""
+import array
 import os
 from pathlib import Path
 import socket
+import struct
 import subprocess
 import tempfile
 import time
@@ -50,7 +52,58 @@ with tempfile.TemporaryDirectory(prefix='rdkhm-socket-') as directory:
         request([b'PING\r\n'], b'PONG\n')
         request([b'PING\0\n'], b'ERROR invalid-frame\n')
         request([b'x' * 128], b'ERROR invalid-frame\n')
-        request([b'NNRT_BACKEND\n'], b'NNRT_BACKEND_UNAVAILABLE\n')
+        MAGIC = 0x314B4452
+        VERSION = 1
+
+        def binary(sock, command, session=0, payload=b'', fds=()):
+            header = struct.pack('<IHHIIHHI', MAGIC, VERSION, command, session,
+                                 len(payload), len(fds), 0, 0)
+            if fds:
+                rights = array.array('i', fds)
+                sock.sendmsg([header], [(socket.SOL_SOCKET, socket.SCM_RIGHTS, rights)])
+            else:
+                sock.sendall(header)
+            if payload:
+                sock.sendall(payload)
+            data = b''
+            while len(data) < 24:
+                chunk = sock.recv(24 - len(data))
+                assert chunk, data
+                data += chunk
+            magic, version, got, session, length, fd_count, _, _ = struct.unpack('<IHHIIHHI', data)
+            assert (magic, version, got, fd_count) == (MAGIC, VERSION, command, 0), data
+            body = b''
+            while len(body) < length:
+                chunk = sock.recv(length - len(body))
+                assert chunk, body
+                body += chunk
+            return session, body
+
+        with connect() as client:
+            session, body = binary(client, 1)
+            assert struct.unpack('<I', body)[0] == 0, body
+        with connect() as client:
+            _, body = binary(client, 3, session=999)
+            assert struct.unpack('<I', body)[0] == 31, body
+        with connect() as client:
+            _, body = binary(client, 5, session=999)
+            assert struct.unpack('<I', body)[0] == 31, body
+        with connect() as client:
+            load_request = struct.pack('<II', 0, 0)
+            _, body = binary(client, 2, payload=load_request)
+            assert struct.unpack('<I', body)[0] == 31, body
+        with connect() as client:
+            _, body = binary(client, 6, payload=b'')
+            assert struct.unpack('<I', body)[0] == 3, body
+        model = os.memfd_create('empty-model')
+        try:
+            with connect() as client:
+                _, body = binary(client, 2, fds=(model,))
+                assert struct.unpack('<I', body)[0] == 31, body
+        finally:
+            os.close(model)
+        request([b'GPU_COMPOSE_CHECK\n'], b'GPU_COMPOSE_READY\n')
+        request([b'NNRT_BACKEND\n'], b'NNRT_BACKEND_RUNTIME_READY\n')
         with connect() as idle:
             assert idle.recv(256) == b'ERROR timeout\n'
         request([b'PING\n'], b'PONG\n')

@@ -1,0 +1,21 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] media-foundation/0001-avbuffer-default-memory-type.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/src/buffer/avbuffer_queue/avbuffer_queue.cpp
++++ b/src/buffer/avbuffer_queue/avbuffer_queue.cpp
+@@ -337,6 +337,13 @@
+         MEDIA_LOG_D("AVBufferQueueImpl::RequestBuffer config.memoryType unknown, "
+                     "memoryType_ = %u", static_cast<uint32_t>(memoryType_));
+         configCopy.memoryType = memoryType_;
++    }
++    if (configCopy.memoryType == MemoryType::UNKNOWN_MEMORY) {
++        /* Some media/audio queues are created without a concrete memory type.
++         * Without this fallback every request fails with 0xF002 and no buffer
++         * can be produced.  Use the default virtual allocation here; callers
++         * that need surface/DMA memory must still request it explicitly. */
++        configCopy.memoryType = MemoryType::VIRTUAL_MEMORY;
+     }
+ 
+     // check param

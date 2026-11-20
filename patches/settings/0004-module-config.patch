@@ -1,0 +1,24 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] settings: remove home skill from module config
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/product/phone/src/main/module.json5
++++ b/product/phone/src/main/module.json5
+@@ -28,16 +28,6 @@
+         "label": "$string:entry_MainAbility",
+         "visible": true,
+         "launchType": "singleton",
+-        "skills": [
+-          {
+-            "entities": [
+-              "entity.system.home"
+-            ],
+-            "actions": [
+-              "action.system.home"
+-            ]
+-          }
+-        ],
+         "startWindowIcon": "$media:app_icon",
+         "startWindowBackground": "$color:white",
+       },

@@ -1,5 +1,8 @@
-diff --git a/display/composer/vdi_base/include/drm_plane.h b/display/composer/vdi_base/include/drm_plane.h
-index 373d307..6675b5f 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0006-primary-plane-format.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/display/composer/vdi_base/include/drm_plane.h
 +++ b/display/composer/vdi_base/include/drm_plane.h
 @@ -15,6 +15,7 @@
@@ -21,8 +24,6 @@ index 373d307..6675b5f 100644
      void BindToPipe(uint32_t pipe)
      {
          mPipe = pipe;
-diff --git a/display/composer/vdi_base/src/drm_device.cpp b/display/composer/vdi_base/src/drm_device.cpp
-index 9809e5f..57bb39f 100644
 --- a/display/composer/vdi_base/src/drm_device.cpp
 +++ b/display/composer/vdi_base/src/drm_device.cpp
 @@ -276,6 +276,12 @@ std::vector<std::shared_ptr<DrmPlane>> DrmDevice::GetDrmPlane(uint32_t pipe, uin

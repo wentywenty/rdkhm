@@ -2,10 +2,14 @@
 """Compile the real encoder selector against a small DRM resource fixture."""
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 workspace = Path(__file__).resolve().parents[1]
-vdi = workspace / "sources/openharmony-full/drivers/peripheral/display/composer/vdi_base"
+sys.path.insert(0, str(workspace / "scripts"))
+from workspace import environment
+
+vdi = Path(environment(workspace)["RDKHM_OH_TREE"]) / "drivers/peripheral/display/composer/vdi_base"
 with tempfile.TemporaryDirectory(prefix="rdkhm-encoder-") as directory:
     temp = Path(directory)
     (temp / "xf86drm.h").write_text("#pragma once\n")

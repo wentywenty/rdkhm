@@ -1,0 +1,15 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] security-component/0003-deviceauth-sandbox.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/services/deviceauth_service.cfg
++++ b/services/deviceauth_service.cfg
+@@ -13,6 +13,7 @@
+       "path" : ["/system/bin/sa_main", "/system/profile/deviceauth_service.json"],
+       "uid" : "deviceauth",
+       "gid" : ["deviceauth", "shell", "netsys_socket"],
++      "sandbox" : 0,
+       "ondemand" : true,
+       "secon" : "u:r:deviceauth_service:s0",
+       "permission" : [

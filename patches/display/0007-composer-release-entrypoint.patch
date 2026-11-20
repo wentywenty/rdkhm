@@ -1,0 +1,19 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0007-composer-release-entrypoint.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/display/composer/hdi_service/src/display_composer_service.cpp
++++ b/display/composer/hdi_service/src/display_composer_service.cpp
+@@ -45,6 +45,11 @@ const std::string BOOTEVENT_COMPOSER_HOST_READY = "bootevent.composer_host.ready";
+ extern "C" V1_3::IDisplayComposer* DisplayComposerImplGetInstance(void)
+ {
+     return new (std::nothrow) DisplayComposerService();
+ }
++
++extern "C" void DisplayComposerImplRelease(V1_3::IDisplayComposer* instance)
++{
++    delete instance;
++}
+ 
+ DisplayComposerService::DisplayComposerService()

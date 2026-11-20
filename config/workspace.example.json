@@ -1,8 +1,10 @@
 {
   "CROSS_COMPILE": "/opt/gcc-arm-11.2-2022.02-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-",
-  "RDKHM_BSP": "sources/reference-bsp",
-  "RDKHM_NEARLINK_REFERENCE": "sources/reference-nearlink",
+  "RDKHM_TOOLS_DIR": "thirdparty",
+  "RDKHM_BSP": "thirdparty/reference-bsp",
+  "RDKHM_NEARLINK_REFERENCE": "thirdparty/reference-nearlink",
   "RDKHM_REGDB": "/lib/firmware",
+  "RDKHM_KERNEL_PROFILE": "default",
   "JOBS": "16",
   "SYNC_JOBS": "8"
 }

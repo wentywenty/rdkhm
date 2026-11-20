@@ -1,0 +1,15 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] screenlock/0001-unlock-without-account.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/features/screenlock/src/main/ets/com/ohos/model/screenLockService.ts
++++ b/features/screenlock/src/main/ets/com/ohos/model/screenLockService.ts
+@@ -241,6 +241,7 @@ export class ScreenLockService {
+         Log.showInfo(TAG, `unlockScreen`);
+         this.accountModel.isActivateAccount((isActivate: boolean) => {
+             if (!isActivate) {
++                this.unlocking();
+                 return
+             }
+             mUnLockBeginAnimation(() => {

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-hdc="$root/sources/openharmony-full/prebuilts/ohos-sdk/linux/20/toolchains/hdc"
-target=${1:-10.43.10.159:5555}
+source "$root/env.sh"
+hdc="$RDKHM_HDC"
+target=${1:?usage: $0 <hdc-target:port>}
 stage="/data/rdkhm-fixes/boot-audio-$(date +%Y%m%d-%H%M%S)"
-system="$root/sources/openharmony-full/out/rdk_x5/packages/phone/system"
+system="$RDKHM_OH_TREE/out/rdk_x5/packages/phone/system"
 remote() {
     local output status
     output=$(timeout 30 "$hdc" -t "$target" shell "set -e; { $1; }; result=\$?; echo __RDKHM_STATUS:\$result")
@@ -22,7 +23,12 @@ for lib in libaccountmgr.z.so libsink_adapter.z.so libmodule-hdi-sink.z.so; do
     actual=$(remote "/rdkhm/busybox sha256sum $stage/$lib" | awk '{print $1}' | tr -d '\r')
     [[ "$actual" == "$expected" ]] || { echo "Transfer mismatch: $lib" >&2; exit 1; }
 done
-send "$root/out/driver-bundle/lib/modules/6.1.83-rdkhm/designware_i2s.ko" "$stage/designware_i2s.ko"
+release_file="$root/out/kernel/obj/include/config/kernel.release"
+[[ -f "$release_file" ]] || { echo "Missing $release_file; build the kernel first" >&2; exit 1; }
+release=$(cat "$release_file")
+i2s_module="$root/out/driver-bundle/lib/modules/$release/designware_i2s.ko"
+[[ -f "$i2s_module" ]] || { echo "Missing module: $i2s_module" >&2; exit 1; }
+send "$i2s_module" "$stage/designware_i2s.ko"
 remote '/rdkhm/busybox mount -o remount,rw /'
 trap 'remote "/rdkhm/busybox mount -o remount,ro /" || true' EXIT
 # Replacing pathnames keeps existing library mappings intact until service restart.

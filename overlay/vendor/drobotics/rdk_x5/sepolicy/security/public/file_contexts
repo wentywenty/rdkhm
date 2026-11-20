@@ -2,4 +2,8 @@
 /dev/bpu                                          u:object_r:dev_dri_file:s0
 /dev/bpu_core[0-9]+                               u:object_r:dev_dri_file:s0
 /vendor/bin/rdkhm-accelerator                     u:object_r:vendor_file:s0
+/vendor/lib64/rdkhm-accelerator/(accelerator-daemon|accelerator-probe|gpu-probe|nnrt-worker) u:object_r:rdkhm_accel_exec:s0
 /vendor/lib64/rdkhm-accelerator/ld-linux-aarch64.so.1 u:object_r:rdkhm_accel_exec:s0
+/rdkhm/gpio-daemon                               u:object_r:rdkhm_gpio_exec:s0
+/rdkhm/gpio                                      u:object_r:rdkhm_gpio_exec:s0
+/dev/rdkhm-gpio.sock                             u:object_r:rdkhm_gpio_socket:s0

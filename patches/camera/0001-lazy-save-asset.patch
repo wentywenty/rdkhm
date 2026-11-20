@@ -1,0 +1,108 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] camera: lazy-init media asset to avoid startup freeze
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/common/src/main/ets/default/camera/CameraService.ts
++++ b/common/src/main/ets/default/camera/CameraService.ts
+@@ -87,7 +87,7 @@ export class CameraService {
+   private mAVRecorder!: media.AVRecorder;
+   private mThumbnail!: image.PixelMap;
+   private mIsStartRecording = false;
+-  private mSaveCameraAsset = new SaveCameraAsset();
++  private mSaveCameraAsset: SaveCameraAsset | null = null;
+   private mThumbnailGetter = new ThumbnailGetter();
+   private camerasCache: any = null;
+   private outputCapability: camera.CameraOutputCapability = null;
+@@ -129,6 +129,13 @@ export class CameraService {
+     return globalThis.sInstanceCameraService;
+   }
+ 
++  private getSaveCameraAsset(): SaveCameraAsset {
++    if (this.mSaveCameraAsset === null) {
++      this.mSaveCameraAsset = new SaveCameraAsset();
++    }
++    return this.mSaveCameraAsset;
++  }
++
+   public async initCamera(cameraId: string): Promise<number> {
+     Log.start(`${TAG} initCamera`);
+     if (!this.mCameraManager) {
+@@ -311,7 +318,7 @@ export class CameraService {
+       ReportUtil.writeFaultLog(error);
+     }
+     Log.info(`${TAG} createPhotoOutput mPhotoOutPut: ${this.mPhotoOutPut}.`);
+-    this.mSaveCameraAsset.saveImage(this.mImageReceiver, 40, 40, this.mThumbnailGetter, functionCallback);
++    this.getSaveCameraAsset().saveImage(this.mImageReceiver, 40, 40, this.mThumbnailGetter, functionCallback);
+     Log.end(`${TAG} createPhotoOutput`);
+   }
+ 
+@@ -461,7 +468,7 @@ export class CameraService {
+ 
+   public async createVideoOutput(functionCallBack: VideoCallBack) {
+     Log.start(`${TAG} createVideoOutput`);
+-    this.mFileAssetId = await this.mSaveCameraAsset.createVideoFd(functionCallBack);
++    this.mFileAssetId = await this.getSaveCameraAsset().createVideoFd(functionCallBack);
+     if (this.mFileAssetId === undefined) {
+       Log.error(`${TAG} createVideoOutput error: mFileAssetId undefined`);
+       functionCallBack.onRecodeError('createVideoOutput error: mFileAssetId undefined');
+@@ -605,7 +612,7 @@ export class CameraService {
+     }
+ 
+     if (this.mFileAssetId != undefined) {
+-      await this.mSaveCameraAsset.videoPrepareFile.close(this.mFileAssetId);
++      await this.getSaveCameraAsset().videoPrepareFile.close(this.mFileAssetId);
+       this.mFileAssetId = undefined;
+       Log.info(`${TAG} fileAsset.close().`);
+     }
+@@ -738,7 +745,7 @@ export class CameraService {
+   }
+ 
+   public getPhotoUri() {
+-    return this.mSaveCameraAsset.getPhotoUri();
++    return this.getSaveCameraAsset().getPhotoUri();
+   }
+ 
+   public getRecentFileUri(): string {
+--- a/common/src/main/ets/default/camera/SaveCameraAsset.ts
++++ b/common/src/main/ets/default/camera/SaveCameraAsset.ts
+@@ -36,13 +36,19 @@ export default class SaveCameraAsset {
+   public videoPrepareFile: UserFileManager.FileAsset;
+   private lastSaveTime = '';
+   private saveIndex = 0;
+-  private mUserFileManager: UserFileManager.UserFileManager;
++  private mUserFileManager: UserFileManager.UserFileManager | undefined;
+   private mCameraAlbum: UserFileManager.Album;
+   private photoUri: string = '';
+   private videoUri: string = '';
+ 
+   constructor() {
+-    this.mUserFileManager = UserFileManager.getUserFileMgr(GlobalContext.get().getCameraAbilityContext());
++  }
++
++  private getUserFileManager(): UserFileManager.UserFileManager {
++    if (!this.mUserFileManager) {
++      this.mUserFileManager = UserFileManager.getUserFileMgr(GlobalContext.get().getCameraAbilityContext());
++    }
++    return this.mUserFileManager;
+   }
+ 
+   public getPhotoUri() {
+@@ -172,7 +178,7 @@ export default class SaveCameraAsset {
+     };
+     let fileAsset: UserFileManager.FileAsset;
+     try {
+-      fileAsset = await this.mUserFileManager.createPhotoAsset(displayName, option);
++      fileAsset = await this.getUserFileManager().createPhotoAsset(displayName, option);
+       if (fileAsset !== undefined) {
+         Log.info(`${TAG} createPhotoAsset successfully displayName` + fileAsset.displayName);
+       } else {
+@@ -209,7 +215,7 @@ export default class SaveCameraAsset {
+     Log.log(`${TAG} createCameraAlbum E`);
+     if (!this.mCameraAlbum) {
+       let fetchResult =
+-        await this.mUserFileManager?.getAlbums(UserFileManager.AlbumType.SYSTEM, UserFileManager.AlbumSubType.CAMERA);
++        await this.getUserFileManager().getAlbums(UserFileManager.AlbumType.SYSTEM, UserFileManager.AlbumSubType.CAMERA);
+       this.mCameraAlbum = await fetchResult?.getFirstObject();
+       Log.log(`${TAG} createCameraAlbum albumUri: ${JSON.stringify(this.mCameraAlbum.albumUri)}`);
+     }

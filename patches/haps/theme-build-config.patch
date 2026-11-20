@@ -1,0 +1,227 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] haps/theme-build-config.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/build-profile.json5 b/build-profile.json5
+index 48f770c..18ee1ed 100644
+--- a/build-profile.json5
++++ b/build-profile.json5
+@@ -1,17 +1,16 @@
+ {
+   "app": {
+-    "compileSdkVersion": 9,
+-    "compatibleSdkVersion": 9,
+     "products": [
+       {
+         "name": "default",
+-        "signingConfig": "default"
++        "compileSdkVersion": 20,
++        "compatibleSdkVersion": 20
+       },
+     ],
+   },
+   "modules": [
+     {
+-      "name": "phone-wallpaper",
++      "name": "phone_wallpaper",
+       "srcPath": "./product/phone",
+       "targets": [
+         {
+@@ -23,7 +22,7 @@
+       ]
+     },
+     {
+-      "name": "pad-wallpaper",
++      "name": "pad_wallpaper",
+       "srcPath": "./product/pad",
+       "targets": [
+         {
+diff --git a/product/pad/build-profile.json5 b/product/pad/build-profile.json5
+index 67d28a4..8967b52 100644
+--- a/product/pad/build-profile.json5
++++ b/product/pad/build-profile.json5
+@@ -1,8 +1,6 @@
+ {
+   "apiType": 'stageMode',
+-  "buildOption": {
+-    "arkEnable": true
+-  },
++  "buildOption": {},
+   "targets": [
+     {
+       "name": "default",
+diff --git a/product/pad/oh-package.json5 b/product/pad/oh-package.json5
+new file mode 100644
+index 0000000..099b83d
+--- /dev/null
++++ b/product/pad/oh-package.json5
+@@ -0,0 +1,10 @@
++{
++  "modelVersion": "6.0.2",
++  "license": "ISC",
++  "devDependencies": {},
++  "name": "pad_wallpaper",
++  "description": "example description",
++  "repository": {},
++  "version": "1.0.0",
++  "dependencies": {}
++}
+diff --git a/product/pad/src/main/ets/Application/AbilityStage.ts b/product/pad/src/main/ets/Application/AbilityStage.ts
+index a6cfc3e..e9ebf68 100644
+--- a/product/pad/src/main/ets/Application/AbilityStage.ts
++++ b/product/pad/src/main/ets/Application/AbilityStage.ts
+@@ -13,7 +13,7 @@
+  * limitations under the License.
+  */
+ 
+-import AbilityStage from "@ohos.application.AbilityStage"
++import AbilityStage from "@ohos.app.ability.AbilityStage"
+ 
+ export default class MyAbilityStage extends AbilityStage {
+     onCreate() {
+diff --git a/product/pad/src/main/ets/pages/index.ets b/product/pad/src/main/ets/pages/index.ets
+index 76da268..b92e1e7 100644
+--- a/product/pad/src/main/ets/pages/index.ets
++++ b/product/pad/src/main/ets/pages/index.ets
+@@ -13,16 +13,20 @@
+  * limitations under the License.
+  */
+ 
++import image from '@ohos.multimedia.image';
++
+ const MODULE_TAG = 'ExtWallpaper : ';
+ 
+ @Entry
+ @Component
+ struct Index {
+-  @StorageLink('slPixelData') pixelData: any = [];
++  @StorageLink('slPixelData') pixelData: image.PixelMap | undefined = undefined;
+ 
+   build() {
+     Flex({direction: FlexDirection.Column, alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center}) {
+-      Image(this.pixelData);
++      if (this.pixelData !== undefined) {
++        Image(this.pixelData);
++      }
+     }
+     .width('100%')
+     .height('100%');
+diff --git a/product/pad/src/main/module.json5 b/product/pad/src/main/module.json5
+index b2ffb44..4a3ffa6 100644
+--- a/product/pad/src/main/module.json5
++++ b/product/pad/src/main/module.json5
+@@ -1,8 +1,8 @@
+ {
+   "module": {
+-    "name": "pad-wallpaper",
++    "name": "pad_wallpaper",
+     "type": "feature",
+-    "srcEntrance": "./ets/Application/AbilityStage.ts",
++    "srcEntry": "./ets/Application/AbilityStage.ts",
+     "description": "$string:myapplication_desc",
+     "mainElement": "MainAbility",
+     "deviceTypes": [
+@@ -23,7 +23,7 @@
+     "extensionAbilities": [
+       {
+         "name": "WallpaperExtAbility",
+-        "srcEntrance": "./ets/WallpaperExtAbility/WallpaperExtAbility.ts",
++        "srcEntry": "./ets/WallpaperExtAbility/WallpaperExtAbility.ts",
+         "description": "$string:MainAbility_desc",
+         "icon": "$media:icon",
+         "label": "$string:app_name",
+diff --git a/product/phone/build-profile.json5 b/product/phone/build-profile.json5
+index 67d28a4..8967b52 100644
+--- a/product/phone/build-profile.json5
++++ b/product/phone/build-profile.json5
+@@ -1,8 +1,6 @@
+ {
+   "apiType": 'stageMode',
+-  "buildOption": {
+-    "arkEnable": true
+-  },
++  "buildOption": {},
+   "targets": [
+     {
+       "name": "default",
+diff --git a/product/phone/oh-package.json5 b/product/phone/oh-package.json5
+new file mode 100644
+index 0000000..6d8502f
+--- /dev/null
++++ b/product/phone/oh-package.json5
+@@ -0,0 +1,10 @@
++{
++  "modelVersion": "6.0.2",
++  "license": "ISC",
++  "devDependencies": {},
++  "name": "phone_wallpaper",
++  "description": "example description",
++  "repository": {},
++  "version": "1.0.0",
++  "dependencies": {}
++}
+diff --git a/product/phone/src/main/ets/Application/AbilityStage.ts b/product/phone/src/main/ets/Application/AbilityStage.ts
+index a6cfc3e..e9ebf68 100644
+--- a/product/phone/src/main/ets/Application/AbilityStage.ts
++++ b/product/phone/src/main/ets/Application/AbilityStage.ts
+@@ -13,7 +13,7 @@
+  * limitations under the License.
+  */
+ 
+-import AbilityStage from "@ohos.application.AbilityStage"
++import AbilityStage from "@ohos.app.ability.AbilityStage"
+ 
+ export default class MyAbilityStage extends AbilityStage {
+     onCreate() {
+diff --git a/product/phone/src/main/ets/pages/index.ets b/product/phone/src/main/ets/pages/index.ets
+index 76da268..b92e1e7 100644
+--- a/product/phone/src/main/ets/pages/index.ets
++++ b/product/phone/src/main/ets/pages/index.ets
+@@ -13,16 +13,20 @@
+  * limitations under the License.
+  */
+ 
++import image from '@ohos.multimedia.image';
++
+ const MODULE_TAG = 'ExtWallpaper : ';
+ 
+ @Entry
+ @Component
+ struct Index {
+-  @StorageLink('slPixelData') pixelData: any = [];
++  @StorageLink('slPixelData') pixelData: image.PixelMap | undefined = undefined;
+ 
+   build() {
+     Flex({direction: FlexDirection.Column, alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center}) {
+-      Image(this.pixelData);
++      if (this.pixelData !== undefined) {
++        Image(this.pixelData);
++      }
+     }
+     .width('100%')
+     .height('100%');
+diff --git a/product/phone/src/main/module.json5 b/product/phone/src/main/module.json5
+index e09623b..eef8898 100644
+--- a/product/phone/src/main/module.json5
++++ b/product/phone/src/main/module.json5
+@@ -1,8 +1,8 @@
+ {
+   "module": {
+-    "name": "phone-wallpaper",
++    "name": "phone_wallpaper",
+     "type": "feature",
+-    "srcEntrance": "./ets/Application/AbilityStage.ts",
++    "srcEntry": "./ets/Application/AbilityStage.ts",
+     "description": "$string:myapplication_desc",
+     "mainElement": "MainAbility",
+     "deviceTypes": [
+@@ -23,7 +23,7 @@
+     "extensionAbilities": [
+       {
+         "name": "WallpaperExtAbility",
+-        "srcEntrance": "./ets/WallpaperExtAbility/WallpaperExtAbility.ts",
++        "srcEntry": "./ets/WallpaperExtAbility/WallpaperExtAbility.ts",
+         "description": "$string:MainAbility_desc",
+         "icon": "$media:icon",
+         "label": "$string:app_name",

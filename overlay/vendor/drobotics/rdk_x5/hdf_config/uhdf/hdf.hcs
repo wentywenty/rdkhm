@@ -34,6 +34,8 @@ root {
         usb_serial :: host {
             hostName = "usb_serial_host";
             priority = 50;
+            sandbox = 0;
+            initconfig = ["\"secon\" : \"u:r:su:s0\""];
             usb_serial_device :: device {
                 device0 :: deviceNode {
                     moduleName = "libusb_serial_ddk_driver.z.so";
@@ -109,6 +111,50 @@ root {
                 device0 :: deviceNode {
                     moduleName = "liballocator_driver_1.0.z.so";
                     serviceName = "allocator_service";
+                }
+            }
+        }
+        power :: host {
+            hostName = "power_host";
+            priority = 50;
+            uid = "power_host";
+            gid = ["power_host", "system"];
+            initconfig = ["\"secon\" : \"u:r:power_host:s0\""];
+            power_device :: device {
+                device0 :: deviceNode {
+                    moduleName = "libpower_driver.z.so";
+                    serviceName = "power_interface_service";
+                }
+            }
+        }
+        // The common USB camera VDI is built by drivers_peripheral_camera.
+        // Register its HDI host here; without this device node the generated
+        // camera_host_config.hcb is never consumed by the HDF devhost.
+        camera :: host {
+            hostName = "camera_host";
+            priority = 50;
+            gid = ["camera_host", "uhdf_driver"];
+            camera_device :: device {
+                device0 :: deviceNode {
+                    policy = 2;
+                    priority = 100;
+                    moduleName = "libcamera_host_service_1.0.z.so";
+                    serviceName = "camera_service";
+                }
+            }
+        }
+        pin_auth :: host {
+            hostName = "pin_auth_host";
+            priority = 50;
+            uid = "pin_auth_host";
+            gid = ["pin_auth_host", "useriam"];
+            initconfig = ["\"secon\" : \"u:r:pin_auth_host:s0\""];
+            pin_auth_device :: device {
+                device0 :: deviceNode {
+                    policy = 2;
+                    priority = 200;
+                    moduleName = "libpin_auth_driver.z.so";
+                    serviceName = "pin_auth_interface_service";
                 }
             }
         }

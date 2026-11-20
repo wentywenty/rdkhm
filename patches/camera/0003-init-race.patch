@@ -1,0 +1,37 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] camera: wait for first init before publishing capability
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/common/src/main/ets/default/function/CameraBasicFunction.ts
++++ b/common/src/main/ets/default/function/CameraBasicFunction.ts
+@@ -45,7 +45,13 @@ export class CameraBasicFunction extends BaseFunction {
+     Log.info(`${this.TAG} initCamera this.startIdentification:${JSON.stringify(this.startIdentification)} `);
+     if (this.startIdentification) {
+       const platformCapability = CameraPlatformCapability.getInstance();
+-      this.mWorkerManager.postMessage(Action.initCameraDone(platformCapability));
++      // The first init is still running; do not publish a zero camera count.
++      for (let i = 0; i < 100 && platformCapability.mCameraCount === 0; i++) {
++        await new Promise<void>((resolve) => setTimeout(resolve, 100));
++      }
++      if (platformCapability.mCameraCount > 0) {
++        this.mWorkerManager.postMessage(Action.initCameraDone(platformCapability));
++      }
+       return;
+     }
+     if (callType) {
+--- a/product/phone/src/main/ets/pages/PreviewArea.ets
++++ b/product/phone/src/main/ets/pages/PreviewArea.ets
+@@ -696,8 +696,10 @@ export struct PreviewArea {
+ 
+   private canInit(): boolean {
+     //相机状态是首次加载或者session释放完成状态，才能进行初始化操作
+-    return GlobalContext.get().getT<string>('cameraStatus') == CameraStatus.CAMERA_BEFORE_VALUE ||
+-      GlobalContext.get().getT<string>('cameraStatus') == CameraStatus.CAMERA_RELEASE_FINISHED;
++    let cameraStatus = GlobalContext.get().getT<string>('cameraStatus');
++    return cameraStatus == CameraStatus.CAMERA_BEFORE_VALUE ||
++      cameraStatus == CameraStatus.CAMERA_RELEASE_FINISHED ||
++      cameraStatus == CameraStatus.CAMERA_BEGIN_INIT;
+   }
+ 
+   private canRelease(): boolean {

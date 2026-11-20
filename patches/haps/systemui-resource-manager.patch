@@ -1,0 +1,150 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] haps/systemui-resource-manager.patch
+Signed-off-by: RDKHM <rdkhm@localhost>
+---
+--- a/common/src/main/ets/default/ResourceUtil.ts
++++ b/common/src/main/ets/default/ResourceUtil.ts
+@@ -32,7 +32,14 @@ export class ResourceUtil {
+       } else {
+         context = AbilityManager.getContext(abilityName);
+       }
++      if (!context) {
++        console.error(`ResourceUtil: missing context for ${abilityName}`);
++        return;
++      }
+       this.resMgr = await context.resourceManager;
++      if (!this.resMgr) {
++        console.error(`ResourceUtil: missing resourceManager for ${abilityName}`);
++      }
+     }
+     return this.resMgr;
+   }
+@@ -43,7 +50,12 @@ export class ResourceUtil {
+    * @param resource - NormalResource instance
+    */
+   async getString(resource): Promise<string> {
+-    return await this.resMgr.getString(resource.id);
++    try {
++      return this.resMgr.getStringSync(resource.id);
++    } catch (error) {
++      console.error(`ResourceUtil: getString failed id=${resource.id}: ${JSON.stringify(error)}`);
++      throw error;
++    }
+   }
+ 
+   /**
+--- a/features/navigationservice/src/main/ets/com/ohos/navigationservice/common/NavBarConfiguration.ts
++++ b/features/navigationservice/src/main/ets/com/ohos/navigationservice/common/NavBarConfiguration.ts
+@@ -16,10 +16,11 @@
+ import AbilityManager from '../../../../../../../../../common/src/main/ets/default/abilitymanager/abilityManager';
+ import display from '@ohos.display';
+ import Log from '../../../../../../../../../common/src/main/ets/default/Log';
+-import ResourceUtil from '../../../../../../../../../common/src/main/ets/default/ResourceUtil';
++import { ResourceUtil } from '../../../../../../../../../common/src/main/ets/default/ResourceUtil';
+ import deviceInfo from '@ohos.deviceInfo';
+ 
+ const TAG = 'NavBarConfiguration';
++const resourceUtil = new ResourceUtil();
+ var directionNav;
+ var navbarPosition;
+ var statusbarPosition;
+@@ -64,7 +65,7 @@ class NavBarConfiguration {
+   }
+ 
+   async getDirectionAndPosition() {
+-    await ResourceUtil.initResourceManager(AbilityManager.ABILITY_NAME_NAVIGATION_BAR);
++    await resourceUtil.initResourceManager(AbilityManager.ABILITY_NAME_NAVIGATION_BAR);
+     if (maxWidth > maxHeight) {
+       direction = 1;
+     } else {
+@@ -73,25 +74,25 @@ class NavBarConfiguration {
+ 
+     if (direction == -1) {
+       Log.showInfo(TAG, 'direction is -1');
+-      statusbarPosition = await ResourceUtil.getString($r("app.string.status_bar_position_landscape"))
+-      navbarPosition = await ResourceUtil.getString($r("app.string.nav_bar_position_landscape"))
++      statusbarPosition = await resourceUtil.getString($r("app.string.status_bar_position_landscape"))
++      navbarPosition = await resourceUtil.getString($r("app.string.nav_bar_position_landscape"))
+ 
+-      statusShortSideLength = await ResourceUtil.getString($r("app.string.status_bar_size_landscape"));
+-      navShortSideLength = await ResourceUtil.getString($r("app.string.nav_bar_size_landscape"));
++      statusShortSideLength = await resourceUtil.getString($r("app.string.status_bar_size_landscape"));
++      navShortSideLength = await resourceUtil.getString($r("app.string.nav_bar_size_landscape"));
+     } else if (direction == 1) {
+       Log.showInfo(TAG, 'direction is 1');
+-      statusbarPosition = await ResourceUtil.getString($r("app.string.status_bar_position_landscape"))
+-      navbarPosition = await ResourceUtil.getString($r("app.string.nav_bar_position_landscape"))
++      statusbarPosition = await resourceUtil.getString($r("app.string.status_bar_position_landscape"))
++      navbarPosition = await resourceUtil.getString($r("app.string.nav_bar_position_landscape"))
+ 
+-      statusShortSideLength = await ResourceUtil.getString($r("app.string.status_bar_size_landscape"));
+-      navShortSideLength = await ResourceUtil.getString($r("app.string.nav_bar_size_landscape"));
++      statusShortSideLength = await resourceUtil.getString($r("app.string.status_bar_size_landscape"));
++      navShortSideLength = await resourceUtil.getString($r("app.string.nav_bar_size_landscape"));
+     } else {
+       Log.showInfo(TAG, 'direction is 2');
+-      statusbarPosition = await ResourceUtil.getString($r("app.string.status_bar_position_portrait"))
+-      navbarPosition = await ResourceUtil.getString($r("app.string.nav_bar_position_portrait"))
++      statusbarPosition = await resourceUtil.getString($r("app.string.status_bar_position_portrait"))
++      navbarPosition = await resourceUtil.getString($r("app.string.nav_bar_position_portrait"))
+ 
+-      statusShortSideLength = await ResourceUtil.getString($r("app.string.status_bar_size_portrait"));
+-      navShortSideLength = await ResourceUtil.getString($r("app.string.nav_bar_size_portrait"));
++      statusShortSideLength = await resourceUtil.getString($r("app.string.status_bar_size_portrait"));
++      navShortSideLength = await resourceUtil.getString($r("app.string.nav_bar_size_portrait"));
+     }
+     statusShortSideLength = parseInt(statusShortSideLength) + '';
+     navShortSideLength = parseInt(navShortSideLength) + '';
+--- a/features/statusbarcomponent/src/main/ets/com/ohos/common/StatusBarConfiguration.ts
++++ b/features/statusbarcomponent/src/main/ets/com/ohos/common/StatusBarConfiguration.ts
+@@ -16,10 +16,11 @@
+ import AbilityManager from '../../../../../../../../common/src/main/ets/default/abilitymanager/abilityManager';
+ import display from '@ohos.display'
+ import Log from '../../../../../../../../common/src/main/ets/default/Log'
+-import ResourceUtil from '../../../../../../../../common/src/main/ets/default/ResourceUtil'
++import { ResourceUtil } from '../../../../../../../../common/src/main/ets/default/ResourceUtil'
+ import CommonStyleConfiguration from '../../../../../../../../common/src/main/ets/default/StyleConfiguration'
+ 
+ const TAG = 'StatusBarConfiguration';
++const resourceUtil = new ResourceUtil();
+ 
+ var statusbarPosition;
+ var shortSideLength = '0';
+@@ -63,7 +64,7 @@ class StatusBarConfiguration {
+ 
+   async getDirectionAndPosition() {
+     Log.showInfo(TAG, 'getDirectionAndPosition');
+-    await ResourceUtil.initResourceManager(AbilityManager.ABILITY_NAME_STATUS_BAR);
++    await resourceUtil.initResourceManager(AbilityManager.ABILITY_NAME_STATUS_BAR);
+     if (maxWidth > maxHeight) {
+       direction = 1;
+     } else {
+@@ -73,19 +74,19 @@ class StatusBarConfiguration {
+     let deviceTypeInfo = style.deviceTypeInfo
+     if (direction == -1) {
+       Log.showInfo(TAG, 'direction is -1');
+-      statusbarPosition = await ResourceUtil.getString($r("app.string.status_bar_position_landscape"))
+-      shortSideLength = deviceTypeInfo == 'phone' ? await ResourceUtil.getString($r("app.string.phone_status_bar_size_landscape"))
+-                                                  : await ResourceUtil.getString($r("app.string.status_bar_size_landscape"));
++      statusbarPosition = await resourceUtil.getString($r("app.string.status_bar_position_landscape"))
++      shortSideLength = deviceTypeInfo == 'phone' ? await resourceUtil.getString($r("app.string.phone_status_bar_size_landscape"))
++                                                  : await resourceUtil.getString($r("app.string.status_bar_size_landscape"));
+     } else if (direction == 1) {
+       Log.showInfo(TAG, 'direction is 1');
+-      statusbarPosition = await ResourceUtil.getString($r("app.string.status_bar_position_landscape"))
+-      shortSideLength = deviceTypeInfo == 'phone' ? await ResourceUtil.getString($r("app.string.phone_status_bar_size_landscape"))
+-                                                  : await ResourceUtil.getString($r("app.string.status_bar_size_landscape"));
++      statusbarPosition = await resourceUtil.getString($r("app.string.status_bar_position_landscape"))
++      shortSideLength = deviceTypeInfo == 'phone' ? await resourceUtil.getString($r("app.string.phone_status_bar_size_landscape"))
++                                                  : await resourceUtil.getString($r("app.string.status_bar_size_landscape"));
+     } else {
+       Log.showInfo(TAG, 'direction is 2');
+-      statusbarPosition = await ResourceUtil.getString($r("app.string.status_bar_position_portrait"))
+-      shortSideLength = deviceTypeInfo == 'phone' ? await ResourceUtil.getString($r("app.string.phone_status_bar_size_portrait"))
+-                                                  : await ResourceUtil.getString($r("app.string.status_bar_size_portrait"));
++      statusbarPosition = await resourceUtil.getString($r("app.string.status_bar_position_portrait"))
++      shortSideLength = deviceTypeInfo == 'phone' ? await resourceUtil.getString($r("app.string.phone_status_bar_size_portrait"))
++                                                  : await resourceUtil.getString($r("app.string.status_bar_size_portrait"));
+     }
+     shortSideLength = parseInt(shortSideLength) + '';
+     Log.showInfo(TAG, 'direction = ' + direction + 'statusbarPosition = ' + statusbarPosition +

@@ -1,5 +1,8 @@
-diff --git a/display/composer/vdi_base/src/hdi_drm_composition.cpp b/display/composer/vdi_base/src/hdi_drm_composition.cpp
-index 383021c..d68ebef 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0005-primary-plane-zpos.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/display/composer/vdi_base/src/hdi_drm_composition.cpp
 +++ b/display/composer/vdi_base/src/hdi_drm_composition.cpp
 @@ -144,10 +144,13 @@ int32_t HdiDrmComposition::ApplyPlane(HdiDrmLayer &layer,

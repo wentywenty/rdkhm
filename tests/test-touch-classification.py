@@ -2,10 +2,15 @@
 """Exercise the production classifier with evdev capability fixtures."""
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 workspace = Path(__file__).resolve().parents[1]
-source = (workspace / "sources/openharmony-full/drivers/peripheral/input/udriver/src/input_device_manager.cpp").read_text()
+sys.path.insert(0, str(workspace / "scripts"))
+from workspace import environment
+
+source = (Path(environment(workspace)["RDKHM_OH_TREE"]) /
+          "drivers/peripheral/input/udriver/src/input_device_manager.cpp").read_text()
 classifier = source[source.index("uint32_t GetInputDeviceTypeInfo("):source.index("int32_t InputDeviceManager::GetCurDevIndex()")]
 fixture = r'''
 #include <cstdint>

@@ -1,0 +1,55 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] launcher/0001-create-window-before-rdb.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/product/pad/src/main/ets/MainAbility/MainAbility.ts
++++ b/product/pad/src/main/ets/MainAbility/MainAbility.ts
+@@ -58,11 +58,6 @@ export default class MainAbility extends ServiceExtension {
+     // init Gesture navigation
+     this.startGestureNavigation();
+ 
+-    // init rdb
+-    let dbStore = RdbStoreManager.getInstance();
+-    await dbStore.initRdbConfig();
+-    await dbStore.createTable();
+-
+     let registerWinEvent = (win) => {
+       win.on('lifeCycleEvent', (stageEventType) => {
+         // 桌面获焦或失焦时，通知桌面的卡片变为可见状态
+@@ -80,6 +75,10 @@ export default class MainAbility extends ServiceExtension {
+     windowManager.createWindow(globalThis.desktopContext, windowManager.DESKTOP_WINDOW_NAME,
+       windowManager.DESKTOP_RANK, 'pages/' + windowManager.DESKTOP_WINDOW_NAME, true, registerWinEvent);
+ 
++    let dbStore = RdbStoreManager.getInstance();
++    await dbStore.initRdbConfig();
++    await dbStore.createTable();
++
+     // load recent
+     windowManager.createRecentWindow();
+     this.registerInputConsumer();
+--- a/product/phone/src/main/ets/MainAbility/MainAbility.ts
++++ b/product/phone/src/main/ets/MainAbility/MainAbility.ts
+@@ -53,11 +53,6 @@ export default class MainAbility extends ServiceExtension {
+   async initLauncher(): Promise<void> {
+     // init Launcher context
+     globalThis.desktopContext = this.context;
+-    // init rdb
+-    let dbStore = RdbStoreManager.getInstance();
+-    await dbStore.initRdbConfig();
+-    await dbStore.createTable();
+-
+     let registerWinEvent = (win: window.Window) => {
+       win.on('windowEvent', (stageEventType) => {
+         // 桌面获焦或失焦时，通知桌面的卡片变为可见状态
+@@ -72,6 +67,10 @@ export default class MainAbility extends ServiceExtension {
+     windowManager.createWindow(globalThis.desktopContext, windowManager.DESKTOP_WINDOW_NAME,
+       windowManager.DESKTOP_RANK, 'pages/' + windowManager.DESKTOP_WINDOW_NAME, true, registerWinEvent);
+ 
++    let dbStore = RdbStoreManager.getInstance();
++    await dbStore.initRdbConfig();
++    await dbStore.createTable();
++
+     await PreferencesHelper.getInstance().initPreference(this.context);
+     AppStorage.setOrCreate('firstActivate', true);
+     // init global const

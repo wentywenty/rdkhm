@@ -1,5 +1,8 @@
-diff --git a/audio/supportlibs/alsa_adapter/src/alsa_soundcard.c b/audio/supportlibs/alsa_adapter/src/alsa_soundcard.c
-index e6bd6eb..c036fa1 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] audio/0001-x5-alsa-integration.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/audio/supportlibs/alsa_adapter/src/alsa_soundcard.c
 +++ b/audio/supportlibs/alsa_adapter/src/alsa_soundcard.c
 @@ -196,14 +196,15 @@ static int32_t CfgSaveAdapterStruct(cJSON *adapter, struct AlsaAdapterCfgInfo *i

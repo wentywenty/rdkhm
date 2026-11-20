@@ -1,5 +1,8 @@
-diff --git a/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp b/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp
-index 9346563..479baab 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] account/0001-empty-index-object.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp
 +++ b/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp
 @@ -1353,7 +1353,7 @@ ErrCode OsAccountControlFileManager::GetAccountIndexInfo(std::string &accountInd

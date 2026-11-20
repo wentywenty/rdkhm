@@ -1,5 +1,8 @@
-diff --git a/src/ssap_server.c b/src/ssap_server.c
-index 98ee29e..0a66f01 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] nearlink-ssap/0001-ohos-clang-compatibility.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/src/ssap_server.c
 +++ b/src/ssap_server.c
 @@ -473,6 +473,7 @@ int ssap_server_dispatch(ssap_server_t *srv, const uint8_t *pdu, size_t len)
@@ -10,8 +13,6 @@ index 98ee29e..0a66f01 100644
                  uint16_t subLen = (uint16_t)(pdu[off] | ((uint16_t)pdu[off + 1] << 8));
                  off += 2;
                  if (off + subLen > len)
-diff --git a/test/test_server.c b/test/test_server.c
-index 5338b9c..321a160 100644
 --- a/test/test_server.c
 +++ b/test/test_server.c
 @@ -13,6 +13,16 @@

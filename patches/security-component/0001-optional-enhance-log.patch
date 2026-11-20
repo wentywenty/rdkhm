@@ -1,0 +1,16 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] security-component/0001-optional-enhance-log.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/frameworks/enhance_adapter/src/sec_comp_enhance_adapter.cpp
++++ b/frameworks/enhance_adapter/src/sec_comp_enhance_adapter.cpp
+@@ -69,7 +69,7 @@
+ 
+     void* handler = dlopen(libPath.c_str(), RTLD_LAZY);
+     if (handler == nullptr) {
+-        SC_LOG_ERROR(LABEL, "init enhance lib %{public}s failed, error %{public}s", libPath.c_str(), dlerror());
++        SC_LOG_WARN(LABEL, "optional enhance lib %{public}s not present, error %{public}s", libPath.c_str(), dlerror());
+         return;
+     }
+     if (type == SEC_COMP_ENHANCE_CLIENT_INTERFACE) {

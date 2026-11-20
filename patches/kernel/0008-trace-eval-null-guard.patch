@@ -1,0 +1,33 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0008-trace-eval-null-guard.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/kernel/trace/trace_events.c
++++ b/kernel/trace/trace_events.c
+@@ -2759,8 +2759,15 @@ void trace_event_eval_update(struct trace_eval_map **map, int len)
+ 	int last_i;
+ 	int i;
+ 
++	if (!map || len <= 0) {
++		return;
++	}
++
+ 	down_write(&trace_event_sem);
+ 	list_for_each_entry_safe(call, p, &ftrace_events, list) {
++		if (!call || !call->class) {
++			continue;
++		}
+ 		/* events are usually grouped together with systems */
+ 		if (!last_system || call->class->system != last_system) {
+ 			first = true;
+@@ -2779,6 +2786,9 @@ void trace_event_eval_update(struct trace_eval_map **map, int len)
+ 		 * system.
+ 		 */
+ 		for (i = last_i; i < len; i++) {
++			if (!map[i] || !map[i]->system) {
++				continue;
++			}
+ 			if (call->class->system == map[i]->system) {
+ 				/* Save the first system if need be */
+ 				if (first) {

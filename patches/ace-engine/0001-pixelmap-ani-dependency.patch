@@ -1,5 +1,8 @@
-diff --git a/frameworks/core/interfaces/native/common/BUILD.gn b/frameworks/core/interfaces/native/common/BUILD.gn
-index 481a55ec..9c2e7f00 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] ace-engine/0001-pixelmap-ani-dependency.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/frameworks/core/interfaces/native/common/BUILD.gn
 +++ b/frameworks/core/interfaces/native/common/BUILD.gn
 @@ -58,6 +58,12 @@ template("ace_core_interfaces_native") {

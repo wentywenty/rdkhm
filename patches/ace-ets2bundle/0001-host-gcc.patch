@@ -1,5 +1,8 @@
-diff --git a/compiler/package-lock.json b/compiler/package-lock.json
-index 3aa764b..93cba26 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] ace-ets2bundle/0001-host-gcc.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/compiler/package-lock.json
 +++ b/compiler/package-lock.json
 @@ -1538,6 +1538,43 @@
@@ -210,8 +213,6 @@ index 3aa764b..93cba26 100644
      },
      "type-fest": {
        "version": "0.20.2",
-diff --git a/koala-wrapper/native/BUILD.gn b/koala-wrapper/native/BUILD.gn
-index a79c063..da402db 100644
 --- a/koala-wrapper/native/BUILD.gn
 +++ b/koala-wrapper/native/BUILD.gn
 @@ -46,6 +46,7 @@ shared_library("es2panda") {

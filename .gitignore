@@ -3,3 +3,26 @@
 __pycache__/
 /config/workspace.local.json
 /overlay/device/board/drobotics/rdk_x5/nearlink/ssap
+
+# Local-only large inputs, downloads and reference trees: not source.
+/thirdparty/
+
+# Local duplicate output/source trees. Canonical data lives behind the
+# `out` and `sources` links (or in ordinary directories of those names).
+/out.local/
+/sources.local/
+
+# Legacy locations kept ignored so an old checkout cannot be re-added by accident.
+/command-line-tools-26/
+/commandline-tools-*.zip
+/reference/
+/components/
+/roboparty_rdk/
+
+# Editor, agent and OS noise.
+.DS_Store
+*.swp
+.idea/
+.vscode/
+.claude/
+.pytest_cache/

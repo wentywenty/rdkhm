@@ -1,0 +1,45 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0012-rtg-ioctl-compat.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/fs/proc/rtg_qos.c
++++ b/fs/proc/rtg_qos.c
+@@ -128,13 +128,32 @@
+ 			   unsigned long arg)
+ {
+ 	struct rtg_enable_data data;
++	unsigned int nr = _IOC_NR(cmd);
+ 
+-	if (_IOC_TYPE(cmd) != RTG_SCHED_IPC_MAGIC || _IOC_NR(cmd) != 1)
++	(void)file;
++	if (_IOC_TYPE(cmd) != RTG_SCHED_IPC_MAGIC)
+ 		return -ENOTTY;
+-	if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
+-		return -EFAULT;
+-	atomic_set(&rtg_enabled, data.enable ? 1 : 0);
+-	return 0;
++
++	switch (nr) {
++	case 1: /* SET_ENABLE */
++		if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
++			return -EFAULT;
++		atomic_set(&rtg_enabled, data.enable ? 1 : 0);
++		return 0;
++	case 12: /* GET_ENABLE */
++		if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
++			return -EFAULT;
++		data.enable = atomic_read(&rtg_enabled);
++		if (copy_to_user((void __user *)arg, &data, sizeof(data)))
++			return -EFAULT;
++		return 0;
++	default:
++		/* The remaining frame-aware RTG commands are compatibility-only;
++		 * accept them so userspace does not fail with ENOTTY. */
++		if (nr >= 2 && nr <= 11)
++			return 0;
++		return -ENOTTY;
++	}
+ }
+ 
+ const struct file_operations proc_sched_qos_ctrl_operations = {

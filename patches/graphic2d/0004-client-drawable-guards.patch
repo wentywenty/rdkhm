@@ -1,0 +1,123 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] graphic2d/0004-client-drawable-guards.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/rosen/modules/render_service_base/src/pipeline/rs_screen_render_node.cpp
++++ b/rosen/modules/render_service_base/src/pipeline/rs_screen_render_node.cpp
+@@ -19,6 +19,7 @@
+ #include "common/rs_optional_trace.h"
+ #include "common/rs_special_layer_manager.h"
+ #include "params/rs_screen_render_params.h"
++#include "pipeline/rs_render_node.h"
+ #include "pipeline/rs_surface_render_node.h"
+ #include "platform/common/rs_log.h"
+ #include "screen_manager/screen_types.h"
+@@ -146,6 +147,9 @@
+ {
+ #ifdef RS_ENABLE_GPU
+     stagingRenderParams_ = std::make_unique<RSScreenRenderParams>(GetId());
++    if (!IsDrawableGenerationEnabled()) {
++        return;
++    }
+     DrawableV2::RSRenderNodeDrawableAdapter::OnGenerate(shared_from_this());
+     if (renderDrawable_ == nullptr) {
+         RS_LOGE("RSScreenRenderNode::InitRenderParams failed");
+--- a/rosen/modules/render_service_base/src/pipeline/rs_canvas_drawing_render_node.cpp
++++ b/rosen/modules/render_service_base/src/pipeline/rs_canvas_drawing_render_node.cpp
+@@ -518,6 +518,9 @@
+ {
+ #ifdef RS_ENABLE_GPU
+     stagingRenderParams_ = std::make_unique<RSCanvasDrawingRenderParams>(GetId());
++    if (!IsDrawableGenerationEnabled()) {
++        return;
++    }
+     DrawableV2::RSRenderNodeDrawableAdapter::OnGenerate(shared_from_this());
+     if (renderDrawable_ == nullptr) {
+         RS_LOGE("RSCanvasDrawingRenderNode::InitRenderParams failed");
+--- a/rosen/modules/render_service_base/src/pipeline/rs_effect_render_node.cpp
++++ b/rosen/modules/render_service_base/src/pipeline/rs_effect_render_node.cpp
+@@ -244,6 +244,9 @@
+ {
+ #ifdef RS_ENABLE_GPU
+     stagingRenderParams_ = std::make_unique<RSEffectRenderParams>(GetId());
++    if (!IsDrawableGenerationEnabled()) {
++        return;
++    }
+     DrawableV2::RSRenderNodeDrawableAdapter::OnGenerate(shared_from_this());
+     if (renderDrawable_ == nullptr) {
+         RS_LOGE("RSEffectRenderNode::InitRenderParams failed");
+--- a/rosen/modules/render_service_base/src/pipeline/rs_logical_display_render_node.cpp
++++ b/rosen/modules/render_service_base/src/pipeline/rs_logical_display_render_node.cpp
+@@ -32,6 +32,9 @@
+ void RSLogicalDisplayRenderNode::InitRenderParams()
+ {
+     stagingRenderParams_ = std::make_unique<RSLogicalDisplayRenderParams>(GetId());
++    if (!IsDrawableGenerationEnabled()) {
++        return;
++    }
+     DrawableV2::RSRenderNodeDrawableAdapter::OnGenerate(shared_from_this());
+     if (renderDrawable_ == nullptr) {
+         RS_LOGE("RSLogicalDisplayRenderNode::InitRenderParams failed");
+--- a/rosen/modules/render_service_base/src/pipeline/rs_surface_render_node.cpp
++++ b/rosen/modules/render_service_base/src/pipeline/rs_surface_render_node.cpp
+@@ -32,6 +32,7 @@
+ #include "ipc_callbacks/rs_rt_refresh_callback.h"
+ #include "monitor/self_drawing_node_monitor.h"
+ #include "params/rs_surface_render_params.h"
++#include "pipeline/rs_render_node.h"
+ 
+ #include "pipeline/rs_effect_render_node.h"
+ #include "pipeline/rs_root_render_node.h"
+@@ -3171,6 +3172,9 @@
+ {
+ #ifdef RS_ENABLE_GPU
+     stagingRenderParams_ = std::make_unique<RSSurfaceRenderParams>(GetId());
++    if (!IsDrawableGenerationEnabled()) {
++        return;
++    }
+     DrawableV2::RSRenderNodeDrawableAdapter::OnGenerate(shared_from_this());
+     if (renderDrawable_ == nullptr) {
+         RS_LOGE("RSSurfaceRenderNode::InitRenderParams failed");
+--- a/rosen/modules/render_service_base/src/drawable/rs_render_node_drawable_adapter.cpp
++++ b/rosen/modules/render_service_base/src/drawable/rs_render_node_drawable_adapter.cpp
+@@ -30,6 +30,7 @@
+ #include "params/rs_surface_render_params.h"
+ #include "params/rs_rcd_render_params.h"
+ #include "pipeline/rs_context.h"
++#include "pipeline/rs_render_node.h"
+ #include "pipeline/rs_render_node_gc.h"
+ #include "platform/common/rs_log.h"
+ 
+@@ -84,6 +85,9 @@
+ RSRenderNodeDrawableAdapter::SharedPtr RSRenderNodeDrawableAdapter::OnGenerate(
+     const std::shared_ptr<const RSRenderNode>& node)
+ {
++    if (!RSRenderNode::IsDrawableGenerationEnabled()) {
++        return nullptr;
++    }
+     if (node == nullptr) {
+         ROSEN_LOGE("RSRenderNodeDrawableAdapter::OnGenerate, node null");
+         return nullptr;
+--- a/rosen/modules/render_service_base/src/platform/ohos/rs_render_service_client.cpp
++++ b/rosen/modules/render_service_base/src/platform/ohos/rs_render_service_client.cpp
+@@ -48,6 +48,7 @@
+ #include "platform/common/rs_log.h"
+ #include "platform/common/rs_system_properties.h"
+ #include "render/rs_typeface_cache.h"
++#include "pipeline/rs_render_node.h"
+ #include "rs_render_service_connect_hub.h"
+ #include "rs_surface_ohos.h"
+ #include "vsync_iconnection_token.h"
+@@ -59,7 +60,10 @@
+ std::shared_ptr<RSIRenderClient> RSIRenderClient::CreateRenderServiceClient()
+ {
+     static std::once_flag once_flag;
+-    std::call_once(once_flag, []() { client_ = std::make_shared<RSRenderServiceClient>(); });
++    std::call_once(once_flag, []() {
++        RSRenderNode::SetDrawableGenerationEnabled(false);
++        client_ = std::make_shared<RSRenderServiceClient>();
++    });
+     return client_;
+ }
+ 

@@ -1,0 +1,20 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] camera/0005-open-without-await.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/applications/standard/camera/common/src/main/ets/default/camera/CameraService.ts
++++ b/applications/standard/camera/common/src/main/ets/default/camera/CameraService.ts
+@@ -230,7 +230,11 @@
+       let targetCamera = cameras.find(item => item.cameraId === id);
+       this.outputCapability = this.mCameraManager.getSupportedOutputCapability(targetCamera);
+       this.mCameraInput = this.mCameraManager.createCameraInput(targetCamera);
+-      await this.mCameraInput.open();
++      this.mCameraInput.open().then(() => {
++        Log.info(`${TAG} createCameraInput open success`);
++      }).catch((error) => {
++        Log.error(`${TAG} createCameraInput open failed: ${JSON.stringify(error)}`);
++      });
+       const platformCapability = CameraPlatformCapability.getInstance();
+       await platformCapability.calcSupportedSizes(this.mCameraInput, this.outputCapability);
+       SettingManager.getInstance().setCameraPlatformCapability(platformCapability);

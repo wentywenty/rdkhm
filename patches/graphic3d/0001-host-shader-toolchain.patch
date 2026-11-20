@@ -1,5 +1,8 @@
-diff --git a/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh b/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh
-index 40b9718..0e6013d 100755
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] graphic3d/0001-host-shader-toolchain.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh
 +++ b/lume/LumeBinaryCompile/LumeShaderCompiler/build.sh
 @@ -53,7 +53,7 @@ compile()
@@ -11,8 +14,6 @@ index 40b9718..0e6013d 100755
  
      chmod 775 $PROJECT_DIR/LumeShaderCompiler
      cp -r $PROJECT_DIR/LumeShaderCompiler $PROJECT_DIR/Strip
-diff --git a/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake b/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake
-index dcbfb95..3b070bf 100644
 --- a/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake
 +++ b/lume/LumeBinaryCompile/LumeShaderCompiler/shader.compile.toolchain.cmake
 @@ -38,7 +38,7 @@ set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "GNU")

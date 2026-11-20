@@ -1,0 +1,25 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] device-manager/0002-optional-resident-log.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/services/service/src/device_manager_service.cpp
++++ b/services/service/src/device_manager_service.cpp
+@@ -1361,7 +1361,7 @@
+     auto func = (CreateDMServiceFuncPtr)dlsym(so_handle, "CreateDMServiceObject");
+     if (dlerror() != nullptr || func == nullptr) {
+         dlclose(so_handle);
+-        LOGE("Create object function is not exist.");
++        LOGW("optional dm resident create function not present.");
+         return false;
+     }
+ 
+@@ -1614,7 +1614,7 @@
+         residentSoHandle_ = dlopen(LIB_DM_RESIDENT_NAME, RTLD_NOW | RTLD_NODELETE);
+     }
+     if (residentSoHandle_ == nullptr) {
+-        LOGE("load dm service resident so failed.");
++        LOGW("optional dm service resident so not present.");
+         return false;
+     }
+     dlerror();

@@ -1,0 +1,17 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0009-qos-proc-unconditional.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/fs/proc/base.c
++++ b/fs/proc/base.c
+@@ -3603,8 +3603,8 @@
+ 	ONE("limits",	 S_IRUGO, proc_pid_limits),
+ #ifdef CONFIG_SCHED_DEBUG
+ 	REG("sched",     S_IRUGO|S_IWUSR, proc_pid_sched_operations),
++#endif
+ 	REG("sched_qos_ctrl", S_IRUSR|S_IWUSR, proc_sched_qos_ctrl_operations),
+-#endif
+ 	NOD("comm",      S_IFREG|S_IRUGO|S_IWUSR,
+ 			 &proc_tid_comm_inode_operations,
+ 			 &proc_pid_set_comm_operations, {}),

@@ -45,7 +45,7 @@ def main():
         print(run("e2fsck", "-fn", str(rootfs)))
         mapping = {
             "/boot/Image": workspace / "out/kernel/obj/arch/arm64/boot/Image",
-            "/sbin/init": workspace / "bringup/init",
+            "/sbin/init": workspace / "bringup/boot/init",
             "/bin/busybox": workspace / "out/bringup-bin/busybox",
             "/bin/kernel-probe": workspace / "out/bringup-bin/kernel-probe",
             "/boot/hobot/x5-rdk.dtb": workspace / "out/kernel/obj/arch/arm64/boot/dts/hobot/x5-rdk.dtb",

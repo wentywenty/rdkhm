@@ -5,7 +5,8 @@ This is development code, not a security-reviewed or board-qualified release.
 
 ## Sources and changes
 
-All baseline revisions are recorded in `sources.lock.tsv`. The existing local
+All non-OpenHarmony baseline revisions are recorded in `config/sources/repo.xml`;
+the OpenHarmony tree is pinned by `config/sources/openharmony.lock.xml`. The existing local
 RoboParty BSP was inspected only; the implementation uses a fresh official
 D-Robotics kernel checkout.
 
@@ -32,8 +33,10 @@ D-Robotics kernel checkout.
   otherwise refers to symbols in a modular N2D driver. The device-tree graph
   uses an RDK-specific auxiliary-device override retaining only SIF; direct
   display without GC820 composition still needs board-side validation.
-- HDF core is linked using the upstream layout and an X5 HCS configuration with
-  only the base host/kevent service. Board display/input HDIs are not implemented.
+- HDF core is linked using the upstream layout. The initial integration used an
+  X5 HCS configuration with only the base host/kevent service; the current HCS
+  also registers audio, USB serial, WLAN/WPA/hostapd, display composer, allocator
+  and camera hosts. Their runtime behavior still requires board validation.
 - Kernel HDF compilation uses Linux stdarg.h instead of libc headers, inline
   atomics instead of libgcc outline helpers, and GCC's comment-aware fallthrough
   diagnostic level. WERROR remains enabled.
@@ -53,7 +56,7 @@ OpenHarmony init has not started at this point.
 `dc_add_device` allocates each `dc_device` with `devm_kzalloc`, but the
 `dc_get_all_devices` error path used plain `kfree`. That frees storage still
 linked into the owning device's devres list. Patch
-`patches/x5-kernel/0003-display-deferred-probe-devres.patch` uses
+`patches/kernel/0003-display-deferred-probe-devres.patch` uses
 `devm_kfree(dc_dev->dev, dc_dev)` to unlink the managed allocation before freeing
 it. The preparation script applies this patch reproducibly. Deferred probing
 remains enabled; this fix does not establish that all display dependencies
@@ -111,7 +114,7 @@ messages and cannot validate the prior HDMI dependency correction.
 
 ### Binder device creation after SELinux bring-up
 
-The log at `/home/robo/roboparty_repo/bsp/log` confirms DRM initialization,
+The log at `$RDKHM_BSP/log` confirms DRM initialization,
 successful policy loading, and ueventd execution. At 14.61 seconds SAMGR reports
 `set context fail!`, which comes from `IPCSkeleton::SetContextObject`, not SELinux
 label setup. At 15.02 seconds init synchronously invokes sdc, which waits for
@@ -137,7 +140,63 @@ that requires the next physical boot.
 ## Rollback
 
 Port changes are confined to this workspace. Preserve the current working tree
-and construct a fresh checkout from `sources.lock.tsv` to recover the vendor
+and construct a fresh checkout from `config/sources/repo.xml` to recover the vendor
 baseline. Do not reset unrelated BSP repositories. No flash or bootloader changes
 have been made. Kernel patches are exported under `patches/` for review and
 application to clean checkouts.
+
+
+## Opt-in PREEMPT_RT profile
+
+The default kernel build uses the vendor `hobot_x5_rdk_ubuntu_defconfig` and
+does not apply the optional RT patch. The RT path is opt-in:
+
+```sh
+RDKHM_KERNEL_PROFILE=rt ./rdkhm run build
+```
+
+This selects `config/kernel/hobot_x5_rdk_ubuntu_rt_defconfig`,
+applies `patches/optional/preempt-rt/patch-6.1.83-rt28.patch` through the
+`kernel-rt` manifest collection, and requires `CONFIG_PREEMPT_RT=y` after
+`olddefconfig`. Switching back to `default` makes `prepare-kernel.sh`
+reverse-apply the optional patch. The patch applies cleanly to the current
+kernel tree, but the resulting RT kernel has not been booted or validated on
+the board; treat it as a separate profile, not the default image.
+
+## TCAN4x5x SPI clock clamp (2026-11-19)
+
+The X5 RDK device trees request an 18 MHz SPI clock for the TCAN4x5x, but the
+TCAN4550 SPI interface is limited to 10 MHz. At 18 MHz the DEV_ID registers
+read as zero and `m_can` reports `Failed to init module`.
+`patches/kernel/0018-tcan-spi-max-speed.patch` clamps `spi->max_speed_hz` to
+10 MHz in `tcan4x5x_can_probe()` before `spi_setup()` and logs the change.
+
+On the board, the rebuilt module produced DEV_ID `0x4e414354 0x30353534`
+("TCAN4550") and classic CAN plus CAN-FD loopback passed. The patch is in the
+kernel manifest and applies cleanly to a clean tree. The 20:54 unified image
+(kernel #6) includes it; cold-boot loopback tests pass without a manual module.
+External bus validation remains outstanding.
+
+## QoS/RTG compatibility layer
+
+The X5 vendor kernel does not expose the Qualcomm-style
+`/proc/thread-self/sched_qos_ctrl` and `/proc/self/sched_rtg_ctrl` entries that
+OpenHarmony's `qos_manager`/`ffrt` expect. Patch
+`patches/kernel/0007-rtg-qos-proc.patch` adds
+`fs/proc/rtg_qos.c`, wires the entries into the per-tid/per-tgid proc tables,
+and accepts the `0xCC` QoS and `0xAB` RTG-enable ioctl layouts.
+
+QoS levels are mapped to the generic scheduler nice value; RTG enable is
+recorded for ABI compatibility. This is explicitly **not** a vendor hardware
+RTG scheduler, and the proc entries do not pretend to provide vendor frequency
+or frame scheduling. A future vendor RTG patch should replace this layer and
+the unit/board acceptance must check actual frame/QoS behavior.
+
+
+### Tracing module-eval panic guard (2026-11-18)
+
+Enabling tracing exposed a boot panic while `aic8800_bsp` was loaded:
+`trace_event_eval_update()` dereferenced a null eval-map entry or event class.
+`patches/kernel/0008-trace-eval-null-guard.patch` returns early for a null
+map and skips null map entries/classes. This preserves
+`CONFIG_TRACING`/`CONFIG_FTRACE` for tracefs while making module load safe.

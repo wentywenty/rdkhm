@@ -62,7 +62,7 @@ def main():
         ordered.append(name)
         shutil.copyfile(path, module_dir / f"{name}.ko")
 
-    selection = json.loads((workspace / "config/driver-modules.json").read_text())
+    selection = json.loads((workspace / "config/kernel/modules.json").read_text())
     for name, path in selection.get("external", {}).items():
         if name in modules or not (workspace / path).is_file():
             raise RuntimeError(f"Missing or conflicting external module: {name}")
@@ -85,9 +85,9 @@ def main():
     firmware_dir = stage / "etc/firmware"
     firmware_dir.mkdir(parents=True)
     shutil.copyfile(workspace / "out/nearlink/ws73_cfg.ini", stage / "etc/ws73_cfg.ini")
-    lock = json.loads((workspace / "config/firmware-lock.json").read_text())
+    lock = json.loads((workspace / "config/kernel/firmware-lock.json").read_text())
     for entry in lock["files"]:
-        source = workspace / "sources/driver-firmware" / entry["name"]
+        source = workspace / "out/driver-firmware" / entry["name"]
         if sha(source) != entry["sha256"]:
             raise RuntimeError(f"Firmware checksum mismatch: {source}")
         target = firmware_dir / entry["name"]

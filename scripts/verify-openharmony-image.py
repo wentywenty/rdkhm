@@ -7,6 +7,9 @@ import subprocess
 import tempfile
 import zipfile
 
+from image_haps import manifest
+from workspace import environment
+
 
 def run(*args):
     return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
@@ -27,14 +30,16 @@ def require(condition, message):
 
 def main():
     workspace = Path(__file__).resolve().parents[1]
+    env = environment()
     image = workspace / "out/images/rdkhm-x5-openharmony-dev.img"
-    package = workspace / "sources/openharmony-full/out/rdk_x5/packages/phone"
+    package = Path(env["RDKHM_OH_TREE"]) / "out/rdk_x5/packages/phone"
     kernel = workspace / "out/kernel/obj/arch/arm64/boot"
-    kernel_config = run("bash", str(workspace / "sources/x5-kernel/scripts/extract-ikconfig"),
+    kernel_config = run("bash", str(Path(env["RDKHM_KERNEL_TREE"]) / "scripts/extract-ikconfig"),
                         str(kernel / "Image")).splitlines()
     for setting in ("CONFIG_ANDROID_BINDER_IPC=y", "# CONFIG_ANDROID_BINDERFS is not set",
                     'CONFIG_ANDROID_BINDER_DEVICES="binder,hwbinder,vndbinder"'):
         require(setting in kernel_config, f"Missing legacy Binder configuration: {setting}")
+    print(run("python3", str(workspace / "scripts/check-access-token-abi.py")).strip())
     require(image.is_file(), "Expected a regular image file")
     table = json.loads(run("sfdisk", "--json", str(image)))["partitiontable"]
     require(table["label"] == "dos" and table["sectorsize"] == 512, "Invalid MBR")
@@ -69,18 +74,38 @@ def main():
 
         mapping = {
             ("system", "/boot/Image"): kernel / "Image",
-            ("system", "/rdkhm/init"): workspace / "bringup/openharmony-init",
-            ("system", "/rdkhm/load-drivers.sh"): workspace / "bringup/load-drivers.sh",
-            ("system", "/rdkhm/hdmi-status.sh"): workspace / "bringup/hdmi-status.sh",
-            ("system", "/rdkhm/touch-status.sh"): workspace / "bringup/touch-status.sh",
-            ("system", "/rdkhm/capture-hilog.sh"): workspace / "bringup/capture-hilog.sh",
+            ("system", "/rdkhm/init"): workspace / "bringup/boot/openharmony-init",
+            ("system", "/rdkhm/load-drivers.sh"): workspace / "bringup/boot/load-drivers.sh",
+            ("system", "/rdkhm/hdmi-status.sh"): workspace / "bringup/status/hdmi-status.sh",
+            ("system", "/rdkhm/touch-status.sh"): workspace / "bringup/status/touch-status.sh",
+            ("system", "/rdkhm/camera-codec-status.sh"): workspace / "bringup/status/camera-codec-status.sh",
+            ("system", "/rdkhm/system-security-status.sh"): workspace / "bringup/status/system-security-status.sh",
+            ("system", "/rdkhm/screen-status.sh"): workspace / "bringup/status/screen-status.sh",
+            ("system", "/rdkhm/audio-status.sh"): workspace / "bringup/status/audio-status.sh",
+            ("system", "/system/etc/ams_extension_config.json"):
+                workspace / "overlay/vendor/drobotics/rdk_x5/ams_extension_config.json",
+            ("system", "/system/etc/bootanimation/bootanimation_custom_config.json"):
+                workspace / "overlay/vendor/drobotics/rdk_x5/bootanimation/bootanimation_custom_config.json",
+            ("system", "/rdkhm/hardware-status.sh"): workspace / "bringup/status/hardware-status.sh",
+            ("system", "/rdkhm/boot-diagnostics.sh"): workspace / "bringup/status/boot-diagnostics.sh",
+            ("system", "/rdkhm/bluetooth-init.sh"): workspace / "bringup/network/rdkhm-bluetooth-init.sh",
+            ("system", "/rdkhm/ws73-probe.sh"): workspace / "bringup/network/rdkhm-ws73-probe.sh",
+            ("system", "/rdkhm/capture-hilog.sh"): workspace / "bringup/status/capture-hilog.sh",
             ("system", "/rdkhm/busybox"): workspace / "out/bringup-bin/busybox",
+            ("system", "/rdkhm/gpio"): workspace / "out/bringup-bin/rdkhm-gpio",
+            ("system", "/rdkhm/gpio-daemon"): workspace / "out/bringup-bin/rdkhm-gpio-daemon",
+            ("system", "/rdkhm/rdk_x5_40pin.tsv"): workspace / "out/bringup-bin/rdk_x5_40pin.tsv",
+            ("system", "/rdkhm/gpio-status.sh"): workspace / "bringup/gpio/gpio-status.sh",
         }
         for name in ("x5-rdk", "x5-rdk-v1p0"):
             mapping[("system", f"/boot/hobot/{name}.dtb")] = kernel / f"dts/hobot/{name}.dtb"
         for name in ("init", "appspawn", "hdcd", "render_service", "samgr", "hilogd", "hilog"):
             mapping[("system", f"/system/bin/{name}")] = package / f"system/bin/{name}"
         for path in ("lib/ld-musl-aarch64.so.1", "lib64/platformsdk/libace.z.so",
+                     "lib64/platformsdk/libdeviceprofileadapter.z.so",
+                     "lib64/platformsdk/libdevicemanagerresident.z.so",
+                     "lib64/platformsdk/libsecurity_component_client_enhance.z.so",
+                     "lib64/platformsdk/libdsoftbus_client_plugin.z.so",
                      "lib64/libaccountmgr.z.so", "lib64/libsink_adapter.z.so", "lib64/libmodule-hdi-sink.z.so",
                      "etc/selinux/targeted/policy/policy.31",
                      "etc/audio/alsa/share/alsa.conf"):
@@ -88,8 +113,38 @@ def main():
         for bundle, name in (("launcher", "Launcher"), ("systemui", "SystemUI")):
             path = f"system/app/com.ohos.{bundle}/{name}.hap"
             mapping[("system", f"/{path}")] = package / path
+        mapping[("system", "/system/lib64/libtask_controller.z.so")] = package / "system/lib64/libtask_controller.z.so"
+        mapping[("system", "/system/etc/param/syscap.para")] = package / "system/etc/param/syscap.para"
+        staged_haps = []
+        for entry in manifest(workspace):
+            source = next((path for path in entry["sources"] if path.is_file()), None)
+            if source is None:
+                if entry["optional"]:
+                    continue
+                raise ValueError(
+                    f"Missing required HAP for {entry['app']}: {entry['sources'][0]}")
+            with zipfile.ZipFile(source) as archive:
+                require("module.json" in archive.namelist(),
+                        f"HAP has no module.json: {source}")
+                bad = archive.testzip()
+                require(bad is None, f"Corrupt HAP entry {bad}: {source}")
+            mapping[("system", entry["dest"])] = source
+            staged_haps.append(source)
+        if staged_haps:
+            run("python3", str(workspace / "scripts/check-hap-signatures.py"),
+                "--accept-allowlist", *[str(path) for path in staged_haps])
+        preinstall = workspace / "overlay/vendor/drobotics/rdk_x5/preinstall-config"
+        for name in ("install_list.json", "install_list_capability.json",
+                     "install_list_permissions.json", "uninstall_list.json"):
+            source = preinstall / name
+            if source.is_file():
+                mapping[("system", f"/system/etc/app/{name}")] = source
+        buffer_vdi = package / "vendor/lib64/chipset-sdk/libdisplay_buffer_vdi_impl_default.z.so"
+        mapping[("vendor", "/lib64/libdisplay_buffer_vdi_impl_default.z.so")] = buffer_vdi
+        mapping[("vendor", "/lib64/libdisplay_buffer_vdi_impl.z.so")] = buffer_vdi
         for path in (
             "lib64/libdisplay_composer_vdi_impl_default.z.so",
+            "lib64/libdisplay_composer_service_1.3.z.so",
             "lib64/chipset-sdk/libdisplay_buffer_vdi_impl_default.z.so",
             "lib64/passthrough/indirect/libhdi_input_udriver.z.so",
             "lib64/passthrough/libinput_interfaces_service_1.0.z.so",
@@ -104,16 +159,23 @@ def main():
             "lib64/libasound.so", "etc/hdfconfig/audio_adapter.json",
             "etc/hdfconfig/alsa_adapter.json", "etc/audio/audio_policy_config.xml",
             "lib64/librdkhm_ssap.so",
+            "lib64/libcamera_host_service_1.0.z.so",
+            "lib64/libcodec_driver.z.so", "lib64/libcodec_image_driver.z.so",
+            "etc/hdfconfig/camera_host_config.hcb",
         ):
             mapping[("vendor", f"/{path}")] = package / "vendor" / path
         bundle = workspace / "out/driver-bundle"
-        manifest = json.loads((bundle / "etc/rdkhm-drivers.json").read_text())
-        require(manifest["kernel_sha256"] == digest(kernel / "Image"), "Drivers target a different kernel")
-        require("designware_i2s" in manifest["autoload"], "Missing I2S CPU DAI autoload")
+        driver_manifest = json.loads((bundle / "etc/rdkhm-drivers.json").read_text())
+        require(driver_manifest["kernel_sha256"] == digest(kernel / "Image"),
+                "Drivers target a different kernel")
+        require("lib64/rdkhm-accelerator/libGLSLC.so" in driver_manifest["files"],
+                "Accelerator runtime is missing the dlopen'ed GLSL compiler")
+        require("designware_i2s" in driver_manifest["autoload"], "Missing I2S CPU DAI autoload")
         for name in ("plat_soc", "wifi_soc", "ble_soc", "sle_soc"):
-            require(name in manifest.get("manual", []) and name not in manifest["autoload"],
+            require(name in driver_manifest.get("manual", [])
+                    and name not in driver_manifest["autoload"],
                     f"WS73 must remain manual until the loading failure is diagnosed: {name}")
-        for path, expected in manifest["files"].items():
+        for path, expected in driver_manifest["files"].items():
             original = bundle / path
             require(digest(original) == expected, f"Driver source checksum mismatch: {path}")
             mapping[("vendor", f"/{path}")] = original
@@ -127,6 +189,14 @@ def main():
             target = temp / f"artifact-{index}"
             run("debugfs", "-R", f"dump {path} {target}", str(filesystems[partition]))
             require(target.is_file() and digest(target) == digest(original), f"Artifact mismatch: {path}")
+            if path == "/system/etc/param/syscap.para":
+                require("const.SystemCapability.Security.DeviceAuth=true" in target.read_text(),
+                        "DeviceAuth syscap is not declared in syscap.para")
+            if partition == "vendor" and path == "/etc/init/hdf_devhost.cfg":
+                services = json.loads(target.read_text())["services"]
+                usb = [s for s in services if s.get("name") == "usb_serial_host"]
+                require(usb and usb[0].get("sandbox") == 0,
+                        "usb_serial_host must use sandbox 0 for bring-up")
             if partition == "vendor" and path == "/etc/init.rdk_x5.cfg":
                 jobs = json.loads(target.read_text())["jobs"]
                 commands = [cmd for job in jobs if job["name"] == "post-fs-data" for cmd in job["cmds"]]
@@ -134,8 +204,30 @@ def main():
                     for level in ("el3", "el4", "el5"):
                         require(f"mkdir /data/{category}/{level} 0711 root root" in commands,
                                 f"Missing storage parent: {category}/{level}")
+                for setting in ("persist.hdc.port 5555", "persist.hdc.mode.tcp enable"):
+                    require(f"setparam {setting}" in commands,
+                            f"Missing HDC cold-boot setting: {setting}")
+            stub_symbols = {
+                "/system/lib64/platformsdk/libdeviceprofileadapter.z.so": "CreateDPSyncAdaptertObject",
+                "/system/lib64/platformsdk/libdevicemanagerresident.z.so": "CreateDMServiceExtResidentObject",
+                "/system/lib64/platformsdk/libsecurity_component_client_enhance.z.so": "GetClientInstance",
+                "/system/lib64/platformsdk/libdsoftbus_client_plugin.z.so": "DiscRecoveryPolicy",
+                "/system/lib64/libtask_controller.z.so": "RequestAuth",
+            }
+            if path in stub_symbols:
+                require(stub_symbols[path] in run("readelf", "--dyn-syms", "--wide", str(target)),
+                        f"Missing stub export: {stub_symbols[path]}")
             if path == "/lib64/libdisplay_composer_vdi_impl_default.z.so":
                 print(run("python3", str(workspace / "scripts/check-composer-abi.py"), str(target)).strip())
+                require("GPU_COMPOSE_CHECK" in run("strings", str(target)),
+                        "Composer library lacks the GPU composition client")
+            if path == "/lib64/rdkhm-accelerator/accelerator-daemon":
+                require("GPU_COMPOSE_CHECK" in run("strings", str(target)),
+                        "Accelerator daemon lacks the GPU composition protocol")
+            if path == "/lib64/libdisplay_composer_service_1.3.z.so":
+                symbols = run("readelf", "--dyn-syms", "--wide", str(target))
+                for symbol in ("DisplayComposerImplGetInstance", "DisplayComposerImplRelease"):
+                    require(symbol in symbols, f"Missing composer service export: {symbol}")
             if path.startswith("/boot/hobot/") and path.endswith(".dtb"):
                 # Resolve the SoC bus path from the compiled DTB symbols.
                 dc = run("fdtget", "-t", "s", str(target), "/__symbols__", "dc8000_nano").strip()
@@ -154,7 +246,7 @@ def main():
                 require("AArch64" in run("readelf", "-h", str(target)), f"Wrong module architecture: {path}")
             if partition == "vendor" and path.startswith("/lib64/rdkhm-accelerator/"):
                 require("AArch64" in run("readelf", "-h", str(target)), f"Wrong runtime architecture: {path}")
-            if partition == "vendor" and path[1:] in manifest.get("executables", []):
+            if partition == "vendor" and path[1:] in driver_manifest.get("executables", []):
                 info = run("debugfs", "-R", f"stat {path}", str(filesystems[partition]))
                 require("0755" in info and "User:     0" in info, f"Wrong executable mode: {path}")
             if path == "/lib64/libwifi_driver_client.z.so":
@@ -166,16 +258,19 @@ def main():
                 require(json.loads(target.read_text())["adapters"] == [
                     {"name": "primary", "cardId": -1, "cardName": "duplexaudio"}],
                     "Audio must select the X5 codec by stable ALSA ID")
-            if path.startswith(("/boot/", "/rdkhm/")):
+            if path == "/system/etc/bootanimation/bootanimation_custom_config.json":
+                require("bootpic.zip" in target.read_text(),
+                        "Boot animation config must reference the installed picture archive")
+            if path.startswith(("/boot/", "/rdkhm/", "/system/etc/bootanimation/", "/lib64/libdisplay_buffer_vdi_impl")):
                 info = run("debugfs", "-R", f"stat {path}", str(filesystems[partition]))
                 require("User:     0" in info and "Group:     0" in info, f"Wrong owner: {path}")
         boot = temp / "boot.scr"
         run("debugfs", "-R", f"dump /boot/boot.scr {boot}", str(filesystems["system"]))
         print(run("mkimage", "-l", str(boot)).strip())
         # mkimage's legacy script contains a 64-byte header and an 8-byte size table.
-        require(boot.read_bytes()[72:] == (workspace / "bringup/openharmony-boot.cmd").read_bytes(),
+        require(boot.read_bytes()[72:] == (workspace / "bringup/boot/openharmony-boot.cmd").read_bytes(),
                 "Packaged boot commands differ from source")
-        commands = (workspace / "bringup/openharmony-boot.cmd").read_text()
+        commands = (workspace / "bringup/boot/openharmony-boot.cmd").read_text()
         require(" selinux=1 enforcing=0 " in commands and "selinux=0" not in commands,
                 "OH init needs active SELinux with permissive bring-up policy")
     print(f"PASS: MBR, checksum, four filesystems and {len(mapping)} packaged artifact comparisons")

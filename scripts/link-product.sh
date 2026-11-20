@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 workspace=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-tree="$workspace/sources/openharmony-full"
+source "$workspace/env.sh"
+tree="$RDKHM_OH_TREE"
 for path in vendor/drobotics device/board/drobotics; do
     target="$tree/$path"
     source_dir="$workspace/overlay/$path"

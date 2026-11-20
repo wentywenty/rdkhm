@@ -1,5 +1,8 @@
-diff --git a/graphic_config.gni b/graphic_config.gni
-index 9c90596..8507b46 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] graphic2d/0001-software-render-build.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/graphic_config.gni
 +++ b/graphic_config.gni
 @@ -168,8 +168,8 @@ if (graphic_2d_feature_enable_afbc) {
@@ -13,8 +16,6 @@ index 9c90596..8507b46 100644
    gpu_defines += [ "RS_ENABLE_PARALLEL_RENDER" ]
  }
  
-diff --git a/rosen/modules/2d_graphics/include/image/gpu_context.h b/rosen/modules/2d_graphics/include/image/gpu_context.h
-index 8c92df2..603d56b 100644
 --- a/rosen/modules/2d_graphics/include/image/gpu_context.h
 +++ b/rosen/modules/2d_graphics/include/image/gpu_context.h
 @@ -346,7 +346,11 @@ public:
@@ -29,8 +30,6 @@ index 8c92df2..603d56b 100644
  
      void SuppressGpuCacheBelowCertainRatio(const std::function<bool(void)>& nextFrameHasArrived);
  
-diff --git a/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.cpp b/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.cpp
-index aef25ac..fc4a56d 100755
 --- a/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.cpp
 +++ b/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.cpp
 @@ -157,15 +157,17 @@ RectI CoreCanvas::GetRoundInDeviceClipBounds() const
@@ -53,8 +52,6 @@ index aef25ac..fc4a56d 100755
  
  int32_t CoreCanvas::GetWidth() const
  {
-diff --git a/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.h b/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.h
-index 550f7cd..a890200 100755
 --- a/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.h
 +++ b/rosen/modules/2d_graphics/src/drawing/draw/core_canvas.h
 @@ -27,6 +27,8 @@
@@ -80,8 +77,6 @@ index 550f7cd..a890200 100755
  
      /**
       * @brief Gets width of Canvas.
-diff --git a/rosen/modules/2d_graphics/src/drawing/effect/runtime_shader_builder.cpp b/rosen/modules/2d_graphics/src/drawing/effect/runtime_shader_builder.cpp
-index 9626e58..f6dc3d2 100644
 --- a/rosen/modules/2d_graphics/src/drawing/effect/runtime_shader_builder.cpp
 +++ b/rosen/modules/2d_graphics/src/drawing/effect/runtime_shader_builder.cpp
 @@ -96,4 +96,4 @@ void RuntimeShaderBuilder::SetUniformVec4(const std::string& name, float x, floa
@@ -91,8 +86,6 @@ index 9626e58..f6dc3d2 100644
 -} // namespace OHOS
 \ No newline at end of file
 +} // namespace OHOS
-diff --git a/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_texture_info.h b/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_texture_info.h
-index c8f3f28..20bfd32 100644
 --- a/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_texture_info.h
 +++ b/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_texture_info.h
 @@ -35,6 +35,7 @@ namespace Rosen {
@@ -118,8 +111,6 @@ index c8f3f28..20bfd32 100644
 -#endif // SKIA_TEXTURE_INFO_H
 \ No newline at end of file
 +#endif // SKIA_TEXTURE_INFO_H
-diff --git a/rosen/modules/2d_graphics/src/render_context/render_context.cpp b/rosen/modules/2d_graphics/src/render_context/render_context.cpp
-index 3a5d50c..93a0ccb 100644
 --- a/rosen/modules/2d_graphics/src/render_context/render_context.cpp
 +++ b/rosen/modules/2d_graphics/src/render_context/render_context.cpp
 @@ -519,7 +519,6 @@ bool RenderContext::CheckShaderCacheOverSoftLimit() const
@@ -138,8 +129,6 @@ index 3a5d50c..93a0ccb 100644
  
  RenderContextFactory& RenderContextFactory::GetInstance()
  {
-diff --git a/rosen/modules/2d_graphics/src/render_context/render_context.h b/rosen/modules/2d_graphics/src/render_context/render_context.h
-index 15e539b..8d216a1 100644
 --- a/rosen/modules/2d_graphics/src/render_context/render_context.h
 +++ b/rosen/modules/2d_graphics/src/render_context/render_context.h
 @@ -133,11 +133,9 @@ public:
@@ -154,8 +143,6 @@ index 15e539b..8d216a1 100644
      EGLContext CreateShareContext();
  #ifdef ROSEN_IOS
      std::shared_ptr<Drawing::ColorSpace> ColorSpace() const { return color_space_; }
-diff --git a/rosen/modules/create_pixelmap_surface/src/pixel_map_from_surface.cpp b/rosen/modules/create_pixelmap_surface/src/pixel_map_from_surface.cpp
-index bda1ce5..8ba257a 100644
 --- a/rosen/modules/create_pixelmap_surface/src/pixel_map_from_surface.cpp
 +++ b/rosen/modules/create_pixelmap_surface/src/pixel_map_from_surface.cpp
 @@ -70,7 +70,7 @@ namespace OHOS {
@@ -167,8 +154,6 @@ index bda1ce5..8ba257a 100644
  // LCOV_EXCL_START
  static sptr<SurfaceBuffer> LocalDmaMemAlloc(const uint32_t &width, const uint32_t &height,
      const std::unique_ptr<Media::PixelMap>& pixelmap)
-diff --git a/rosen/modules/render_service/BUILD.gn b/rosen/modules/render_service/BUILD.gn
-index 9fda073..b2e7506 100644
 --- a/rosen/modules/render_service/BUILD.gn
 +++ b/rosen/modules/render_service/BUILD.gn
 @@ -307,13 +307,15 @@ ohos_shared_library("librender_service") {
@@ -189,8 +174,6 @@ index 9fda073..b2e7506 100644
  
    if (defined(graphic_2d_feature_subtree_parallel_enable) && graphic_2d_feature_subtree_parallel_enable
        && defined(graphic_2d_subtree_configs.subtree_root)) {
-diff --git a/rosen/modules/render_service/core/drawable/rs_canvas_drawing_render_node_drawable.h b/rosen/modules/render_service/core/drawable/rs_canvas_drawing_render_node_drawable.h
-index d99f422..ed71679 100755
 --- a/rosen/modules/render_service/core/drawable/rs_canvas_drawing_render_node_drawable.h
 +++ b/rosen/modules/render_service/core/drawable/rs_canvas_drawing_render_node_drawable.h
 @@ -115,6 +115,8 @@ private:
@@ -202,8 +185,6 @@ index d99f422..ed71679 100755
  #endif
      std::shared_ptr<RSPaintFilterCanvas> canvas_;
      std::atomic<pid_t> threadId_ = RSUniRenderThread::Instance().GetTid();
-diff --git a/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread.cpp b/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread.cpp
-index c1a136b..433236d 100644
 --- a/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread.cpp
 +++ b/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread.cpp
 @@ -341,7 +341,9 @@ void RSSubThread::DrawableCacheWithSkImage(std::shared_ptr<DrawableV2::RSSurface
@@ -216,8 +197,6 @@ index c1a136b..433236d 100644
      rsSubThreadCache.SetCacheBehindWindowData(rscanvas->GetCacheBehindWindowData());
  
      // uifirst_debug dump img, run following commands to grant permissions before dump, otherwise dump maybe fail:
-diff --git a/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread_cache.h b/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread_cache.h
-index 08ac795..adea90f 100644
 --- a/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread_cache.h
 +++ b/rosen/modules/render_service/core/feature/uifirst/rs_sub_thread_cache.h
 @@ -261,8 +261,8 @@ private:
@@ -237,8 +216,6 @@ index 08ac795..adea90f 100644
 -#endif // RS_SUB_THREAD_CACHE_H
 \ No newline at end of file
 +#endif // RS_SUB_THREAD_CACHE_H
-diff --git a/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.cpp b/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.cpp
-index 40caff4..5ea551c 100644
 --- a/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.cpp
 +++ b/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.cpp
 @@ -76,8 +76,8 @@ RSBaseRenderEngine::~RSBaseRenderEngine() noexcept
@@ -301,8 +278,6 @@ index 40caff4..5ea551c 100644
  }
  } // namespace Rosen
  } // namespace OHOS
-diff --git a/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.h b/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.h
-index b1c037a..ea5b07b 100644
 --- a/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.h
 +++ b/rosen/modules/render_service/core/pipeline/render_thread/rs_base_render_engine.h
 @@ -35,9 +35,7 @@
@@ -345,8 +320,6 @@ index b1c037a..ea5b07b 100644
      using SurfaceId = uint64_t;
  #ifdef USE_VIDEO_PROCESSING_ENGINE
      static bool SetColorSpaceConverterDisplayParameter(
-diff --git a/rosen/modules/render_service_base/include/property/rs_properties.h b/rosen/modules/render_service_base/include/property/rs_properties.h
-index 91bc8d7..e2e8ffe 100644
 --- a/rosen/modules/render_service_base/include/property/rs_properties.h
 +++ b/rosen/modules/render_service_base/include/property/rs_properties.h
 @@ -987,8 +987,8 @@ private:
@@ -359,8 +332,6 @@ index 91bc8d7..e2e8ffe 100644
      static bool blurAdaptiveAdjustEnabled_;
      static const bool IS_UNI_RENDER;
      static const bool FOREGROUND_FILTER_ENABLED;
-diff --git a/rosen/modules/render_service_base/include/render/rs_filter_cache_manager.h b/rosen/modules/render_service_base/include/render/rs_filter_cache_manager.h
-index 687ad15..0d7c6b9 100644
 --- a/rosen/modules/render_service_base/include/render/rs_filter_cache_manager.h
 +++ b/rosen/modules/render_service_base/include/render/rs_filter_cache_manager.h
 @@ -17,7 +17,7 @@
@@ -372,8 +343,6 @@ index 687ad15..0d7c6b9 100644
  #include <condition_variable>
  
  #include "draw/canvas.h"
-diff --git a/rosen/modules/render_service_base/src/pipeline/rs_canvas_drawing_render_node.cpp b/rosen/modules/render_service_base/src/pipeline/rs_canvas_drawing_render_node.cpp
-index eae1de9..19f13f6 100644
 --- a/rosen/modules/render_service_base/src/pipeline/rs_canvas_drawing_render_node.cpp
 +++ b/rosen/modules/render_service_base/src/pipeline/rs_canvas_drawing_render_node.cpp
 @@ -152,8 +152,8 @@ void RSCanvasDrawingRenderNode::ProcessRenderContents(RSPaintFilterCanvas& canva
@@ -393,8 +362,6 @@ index eae1de9..19f13f6 100644
 -} // namespace OHOS
 \ No newline at end of file
 +} // namespace OHOS
-diff --git a/rosen/modules/render_service_base/src/property/rs_properties.cpp b/rosen/modules/render_service_base/src/property/rs_properties.cpp
-index 86e789a..a1f05d7 100644
 --- a/rosen/modules/render_service_base/src/property/rs_properties.cpp
 +++ b/rosen/modules/render_service_base/src/property/rs_properties.cpp
 @@ -107,6 +107,10 @@ void RSProperties::SetFilterCacheEnabledByCCM(bool isCCMFilterCacheEnable)
@@ -408,8 +375,6 @@ index 86e789a..a1f05d7 100644
  #endif
  
  bool RSProperties::blurAdaptiveAdjustEnabled_ = false;
-diff --git a/rosen/modules/render_service_base/src/render/rs_filter_cache_manager.cpp b/rosen/modules/render_service_base/src/render/rs_filter_cache_manager.cpp
-index 209bd5d..c26ac9e 100644
 --- a/rosen/modules/render_service_base/src/render/rs_filter_cache_manager.cpp
 +++ b/rosen/modules/render_service_base/src/render/rs_filter_cache_manager.cpp
 @@ -20,7 +20,7 @@
@@ -428,8 +393,6 @@ index 209bd5d..c26ac9e 100644
 -#endif
 \ No newline at end of file
 +#endif
-diff --git a/rosen/modules/render_service_profiler/rs_profiler.h b/rosen/modules/render_service_profiler/rs_profiler.h
-index dca7298..6d246b1 100644
 --- a/rosen/modules/render_service_profiler/rs_profiler.h
 +++ b/rosen/modules/render_service_profiler/rs_profiler.h
 @@ -111,7 +111,7 @@

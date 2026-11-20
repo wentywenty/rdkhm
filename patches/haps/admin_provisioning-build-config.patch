@@ -1,0 +1,269 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] haps/admin_provisioning-build-config.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/build-profile.json5 b/build-profile.json5
+index 42471ee..199266c 100644
+--- a/build-profile.json5
++++ b/build-profile.json5
+@@ -4,10 +4,9 @@
+     "products": [
+       {
+         "name": "default",
+-        "signingConfig": "default",
+-        "compileSdkVersion": 11,
+-        "compatibleSdkVersion": 11,
+-        "targetSdkVersion": 11,
++        "compileSdkVersion": 20,
++        "compatibleSdkVersion": 20,
++        "targetSdkVersion": 20,
+         "runtimeOS": "OpenHarmony",
+       }
+     ]
+diff --git a/entry/oh-package.json5 b/entry/oh-package.json5
+new file mode 100644
+index 0000000..ab48fa7
+--- /dev/null
++++ b/entry/oh-package.json5
+@@ -0,0 +1,10 @@
++{
++  "modelVersion": "6.0.2",
++  "license": "ISC",
++  "devDependencies": {},
++  "name": "entry",
++  "description": "example description",
++  "repository": {},
++  "version": "1.0.0",
++  "dependencies": {}
++}
+diff --git a/entry/src/main/ets/MainAbility/UIExtensionAbility.ets b/entry/src/main/ets/MainAbility/UIExtensionAbility.ets
+index c2ff48d..c9862a0 100644
+--- a/entry/src/main/ets/MainAbility/UIExtensionAbility.ets
++++ b/entry/src/main/ets/MainAbility/UIExtensionAbility.ets
+@@ -24,6 +24,26 @@ import { BusinessError } from '@ohos.base';
+ 
+ const TAG = 'AutoDeployAbility';
+ 
++interface ProvisionAdminConfig {
++  abilityName: string;
++  bundleName: string;
++}
++
++interface ProvisionAdminInfo {
++  admin: ProvisionAdminConfig;
++  admin_type: string;
++}
++
++interface ProvisionEnterpriseInfo {
++  organization_name: string;
++  description: string;
++}
++
++interface ProvisionConfig {
++  admin_info: ProvisionAdminInfo[];
++  enterprise_info: ProvisionEnterpriseInfo;
++}
++
+ export default class AutoDeployAbility extends UIExtensionAbility {
+   private localStorage: LocalStorage = new LocalStorage();
+ 
+@@ -37,7 +57,7 @@ export default class AutoDeployAbility extends UIExtensionAbility {
+       name: '',
+       description: ''
+     };
+-    let adminType: adminManager.AdminType;
++    let adminType: adminManager.AdminType = adminManager.AdminType.ADMIN_TYPE_NORMAL;
+     try {
+       let realpath = 'etc/edm/edm_provision_config.json';
+       await configPolicy.getOneCfgFile(realpath).then((value: string) => {
+@@ -45,7 +65,7 @@ export default class AutoDeployAbility extends UIExtensionAbility {
+         let configStr = fs.readTextSync(value);
+         logger.info(TAG, 'getOneCfgFile configStr is ' + JSON.stringify(configStr));
+         if (configStr) {
+-          let jsonArray = JSON.parse(configStr);
++          let jsonArray = JSON.parse(configStr) as ProvisionConfig;
+           admin.abilityName = jsonArray.admin_info[0].admin.abilityName;
+           admin.bundleName = jsonArray.admin_info[0].admin.bundleName;
+           enterpriseInfo.name = jsonArray.enterprise_info.organization_name;
+diff --git a/entry/src/main/ets/pages/applicationInfo.ets b/entry/src/main/ets/pages/applicationInfo.ets
+index 40adb2e..a320b4d 100644
+--- a/entry/src/main/ets/pages/applicationInfo.ets
++++ b/entry/src/main/ets/pages/applicationInfo.ets
+@@ -251,21 +251,24 @@ struct ApplicationInfo {
+   }
+ 
+   async isAdminActive() {
++    const bundleName = elementNameVal.bundleName;
++    const abilityName = elementNameVal.abilityName;
++    if (!bundleName || !abilityName ||
++      bundleName === baseData.EMPTY_STR || abilityName === baseData.EMPTY_STR) {
++      logger.info(TAG, 'isAdminActive elementNameVal is null');
++      return;
++    }
+     let wantTemp: Want = {
+-      bundleName: elementNameVal.bundleName,
+-      abilityName: elementNameVal.abilityName,
++      bundleName: bundleName,
++      abilityName: abilityName,
+     };
+     let retAppState: boolean;
+     let retSuperState: boolean;
+-    logger.info(TAG, 'isAdminActive elementNameVal.bundleName=' + elementNameVal.bundleName +
+-    ' | elementNameVal.abilityName=' + elementNameVal.abilityName);
+-    if (elementNameVal.bundleName === baseData.EMPTY_STR || elementNameVal.abilityName === baseData.EMPTY_STR) {
+-      logger.info(TAG, 'isAdminActive elementNameVal is null');
+-      return;
+-    }
++    logger.info(TAG, 'isAdminActive elementNameVal.bundleName=' + bundleName +
++    ' | elementNameVal.abilityName=' + abilityName);
+ 
+     retAppState = await edmEnterpriseDeviceManager.isAdminEnabled(wantTemp);
+-    let name: string = elementNameVal.bundleName;
++    let name: string = bundleName;
+     retSuperState = await edmEnterpriseDeviceManager.isSuperAdmin(name);
+     if (!retAppState) {
+       this.isShowActive = false;
+@@ -335,6 +338,11 @@ struct ApplicationInfo {
+     logger.info(TAG, 'getAbilityWantVal in:');
+     this.storage = LocalStorage.getShared();
+     let data = this.storage.get<Want>('adminProvisioningWant');
++    if (data === undefined) {
++      logger.warn(TAG, 'adminProvisioningWant is undefined');
++      (getContext(this) as common.UIAbilityContext).terminateSelf();
++      return;
++    }
+ 
+     if (!utils.checkObjPropertyValid(data, 'parameters.elementName.abilityName') ||
+     !utils.checkObjPropertyValid(data, 'parameters.enterprise.name') ||
+diff --git a/entry/src/main/ets/pages/autoManager/managerStart.ets b/entry/src/main/ets/pages/autoManager/managerStart.ets
+index 568387b..1c08e4e 100644
+--- a/entry/src/main/ets/pages/autoManager/managerStart.ets
++++ b/entry/src/main/ets/pages/autoManager/managerStart.ets
+@@ -179,6 +179,11 @@ struct ManagerStart {
+   parseManageParameter() {
+     this.storage = LocalStorage.getShared();
+     let data = this.storage.get<Want>('autoManagerAbilityWant');
++    if (data === undefined) {
++      logger.error(TAG, 'autoManagerAbilityWant is undefined');
++      (getContext(this) as common.UIAbilityContext).terminateSelf();
++      return;
++    }
+ 
+     if (!utils.checkObjPropertyValid(data, 'parameters.elementName.abilityName') ||
+     !utils.checkObjPropertyValid(data, 'parameters.enterprise.name') ||
+diff --git a/entry/src/main/ets/pages/component/deployComponent.ets b/entry/src/main/ets/pages/component/deployComponent.ets
+index d0fa8dc..5a8f810 100644
+--- a/entry/src/main/ets/pages/component/deployComponent.ets
++++ b/entry/src/main/ets/pages/component/deployComponent.ets
+@@ -266,10 +266,16 @@ export struct deployComponent {
+   }
+ 
+   private EnableAdmin() {
++    if (!this.abilityInfo || !this.enterpriseInfo || this.adminType === undefined) {
++      logger.error(TAG, 'enableAdmin missing admin, enterprise or admin type');
++      this.terminateAbility(baseData.ENABLE_ADMIN_FAILED);
++      return;
++    }
+     let admin: Want = this.abilityInfo;
+     let entInfo: adminManager.EnterpriseInfo = this.enterpriseInfo;
++    let adminType: adminManager.AdminType = this.adminType;
+     try {
+-      adminManager.enableAdmin(admin, entInfo, this.adminType).then(() => {
++      adminManager.enableAdmin(admin, entInfo, adminType).then(() => {
+         logger.info(TAG, 'enableAdmin success');
+         this.terminateAbility(baseData.OOBE_NEXT_STEP_CODE);
+       }).catch((err: BusinessError) => {
+diff --git a/entry/src/main/module.json b/entry/src/main/module.json
+index 5508f71..3c29b8b 100644
+--- a/entry/src/main/module.json
++++ b/entry/src/main/module.json
+@@ -2,7 +2,7 @@
+   "module": {
+     "name": "adminprovisioning",
+     "type": "entry",
+-    "srcEntrance": "./ets/Application/AbilityStage.ts",
++    "srcEntry": "./ets/Application/AbilityStage.ts",
+     "description": "$string:description_mainability",
+     "mainElement": "com.ohos.adminprovisioning.MainAbility",
+     "deviceTypes": [
+@@ -28,7 +28,7 @@
+         ],
+         "removeMissionAfterTerminate": true,
+         "name": "com.ohos.adminprovisioning.MainAbility",
+-        "srcEntrance": "./ets/MainAbility/MainAbility.ts",
++        "srcEntry": "./ets/MainAbility/MainAbility.ts",
+         "description": "$string:description_mainability",
+         "icon": "$media:icon",
+         "label": "$string:entry_MainAbility",
+@@ -40,7 +40,7 @@
+       {
+         "removeMissionAfterTerminate": true,
+         "name": "com.ohos.automanager.AutoManagerAbility",
+-        "srcEntrance": "./ets/MainAbility/AutoManagerAbility.ts",
++        "srcEntry": "./ets/MainAbility/AutoManagerAbility.ts",
+         "description": "$string:description_mainability",
+         "icon": "$media:icon",
+         "visible": true,
+@@ -52,7 +52,7 @@
+       {
+         "removeMissionAfterTerminate": true,
+         "name": "ByodAdminProvisionAbility",
+-        "srcEntrance": "./ets/MainAbility/ByodAdminProvisionAbility.ts",
++        "srcEntry": "./ets/MainAbility/ByodAdminProvisionAbility.ts",
+         "description": "$string:description_ByodAdminProvisionAbility",
+         "icon": "$media:icon",
+         "exported": true,
+@@ -68,8 +68,8 @@
+         "icon": "$media:icon",
+         "description": "UIExtensionAbility",
+         "exported": false,
+-        "type": "ui",
+-        "srcEntrance": "./ets/MainAbility/UIExtensionAbility.ets"
++        "type": "embeddedUI",
++        "srcEntry": "./ets/MainAbility/UIExtensionAbility.ets"
+       }
+     ],
+     "requestPermissions": [
+diff --git a/entry/src/main/module.json5 b/entry/src/main/module.json5
+index a4d785a..fbf7358 100644
+--- a/entry/src/main/module.json5
++++ b/entry/src/main/module.json5
+@@ -2,7 +2,7 @@
+   "module": {
+     "name": "adminprovisioning",
+     "type": "entry",
+-    "srcEntrance": "./ets/Application/AbilityStage.ts",
++    "srcEntry": "./ets/Application/AbilityStage.ts",
+     "description": "$string:description_adminProvisioning",
+     "mainElement": "com.ohos.adminprovisioning.MainAbility",
+     "deviceTypes": [
+@@ -28,7 +28,7 @@
+         ],
+         "removeMissionAfterTerminate": true,
+         "name": "com.ohos.adminprovisioning.MainAbility",
+-        "srcEntrance": "./ets/MainAbility/MainAbility.ts",
++        "srcEntry": "./ets/MainAbility/MainAbility.ts",
+         "description": "$string:description_mainability",
+         "icon": "$media:icon",
+         "label": "$string:entry_MainAbility",
+@@ -40,7 +40,7 @@
+       {
+         "removeMissionAfterTerminate": true,
+         "name": "com.ohos.automanager.AutoManagerAbility",
+-        "srcEntrance": "./ets/MainAbility/AutoManagerAbility.ts",
++        "srcEntry": "./ets/MainAbility/AutoManagerAbility.ts",
+         "description": "$string:description_autoManagerAbility",
+         "icon": "$media:icon",
+         "visible": true,
+@@ -56,8 +56,8 @@
+         "icon": "$media:icon",
+         "description": "UIExtensionAbility",
+         "exported": false,
+-        "type": "ui",
+-        "srcEntrance": "./ets/MainAbility/UIExtensionAbility.ets"
++        "type": "embeddedUI",
++        "srcEntry": "./ets/MainAbility/UIExtensionAbility.ets"
+       }
+     ],
+     "requestPermissions": [

@@ -1,0 +1,132 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] contacts: migrate workers and mark singleton
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/AppScope/app.json5 b/AppScope/app.json5
+index 382f2fb..39529ae 100644
+--- a/AppScope/app.json5
++++ b/AppScope/app.json5
+@@ -1,5 +1,6 @@
+ {
+   "app": {
++    "singleton": true,
+     "bundleName": "com.ohos.contacts",
+     "vendor": "example",
+     "versionCode": 10004032,
+diff --git a/entry/build-profile.json5 b/entry/build-profile.json5
+index b7b7330..1fab6a7 100644
+--- a/entry/build-profile.json5
++++ b/entry/build-profile.json5
+@@ -3,7 +3,7 @@
+   "buildOption": {
+     "sourceOption": {
+       "workers": [
+-        "./src/main/ets/workers/base/Worker.ts"
++        "./src/main/ets/workers/base/Worker.ets"
+       ]
+     }
+   },
+diff --git a/entry/src/main/ets/Application/MyAbilityStage.ts b/entry/src/main/ets/Application/MyAbilityStage.ets
+similarity index 100%
+rename from entry/src/main/ets/Application/MyAbilityStage.ts
+rename to entry/src/main/ets/Application/MyAbilityStage.ets
+diff --git a/entry/src/main/ets/MainAbility/MainAbility.ts b/entry/src/main/ets/MainAbility/MainAbility.ets
+similarity index 100%
+rename from entry/src/main/ets/MainAbility/MainAbility.ts
+rename to entry/src/main/ets/MainAbility/MainAbility.ets
+diff --git a/entry/src/main/ets/StaticSubscriber/StaticSubscriber.ts b/entry/src/main/ets/StaticSubscriber/StaticSubscriber.ets
+similarity index 100%
+rename from entry/src/main/ets/StaticSubscriber/StaticSubscriber.ts
+rename to entry/src/main/ets/StaticSubscriber/StaticSubscriber.ets
+diff --git a/entry/src/main/ets/model/bean/BatchSelectContactSource.ts b/entry/src/main/ets/model/bean/BatchSelectContactSource.ets
+similarity index 100%
+rename from entry/src/main/ets/model/bean/BatchSelectContactSource.ts
+rename to entry/src/main/ets/model/bean/BatchSelectContactSource.ets
+diff --git a/entry/src/main/ets/model/bean/BatchSelectRecentSource.ts b/entry/src/main/ets/model/bean/BatchSelectRecentSource.ets
+similarity index 100%
+rename from entry/src/main/ets/model/bean/BatchSelectRecentSource.ts
+rename to entry/src/main/ets/model/bean/BatchSelectRecentSource.ets
+diff --git a/entry/src/main/ets/model/bean/CallRecordListDataSource.ts b/entry/src/main/ets/model/bean/CallRecordListDataSource.ets
+similarity index 100%
+rename from entry/src/main/ets/model/bean/CallRecordListDataSource.ts
+rename to entry/src/main/ets/model/bean/CallRecordListDataSource.ets
+diff --git a/entry/src/main/ets/model/bean/ContactListDataSource.ts b/entry/src/main/ets/model/bean/ContactListDataSource.ets
+similarity index 100%
+rename from entry/src/main/ets/model/bean/ContactListDataSource.ts
+rename to entry/src/main/ets/model/bean/ContactListDataSource.ets
+diff --git a/entry/src/main/ets/model/bean/DetailCallLogDataSource.ts b/entry/src/main/ets/model/bean/DetailCallLogDataSource.ets
+similarity index 100%
+rename from entry/src/main/ets/model/bean/DetailCallLogDataSource.ts
+rename to entry/src/main/ets/model/bean/DetailCallLogDataSource.ets
+diff --git a/entry/src/main/ets/model/bean/FavoriteDataSource.ts b/entry/src/main/ets/model/bean/FavoriteDataSource.ets
+similarity index 100%
+rename from entry/src/main/ets/model/bean/FavoriteDataSource.ts
+rename to entry/src/main/ets/model/bean/FavoriteDataSource.ets
+diff --git a/entry/src/main/ets/model/bean/SearchContactsSource.ts b/entry/src/main/ets/model/bean/SearchContactsSource.ets
+similarity index 100%
+rename from entry/src/main/ets/model/bean/SearchContactsSource.ts
+rename to entry/src/main/ets/model/bean/SearchContactsSource.ets
+diff --git a/entry/src/main/ets/workers/base/Worker.ts b/entry/src/main/ets/workers/base/Worker.ets
+similarity index 100%
+rename from entry/src/main/ets/workers/base/Worker.ts
+rename to entry/src/main/ets/workers/base/Worker.ets
+diff --git a/entry/src/main/ets/workers/base/WorkerTask.ts b/entry/src/main/ets/workers/base/WorkerTask.ets
+similarity index 100%
+rename from entry/src/main/ets/workers/base/WorkerTask.ts
+rename to entry/src/main/ets/workers/base/WorkerTask.ets
+diff --git a/entry/src/main/ets/workers/base/WorkerWrapper.ts b/entry/src/main/ets/workers/base/WorkerWrapper.ets
+similarity index 99%
+rename from entry/src/main/ets/workers/base/WorkerWrapper.ts
+rename to entry/src/main/ets/workers/base/WorkerWrapper.ets
+index e4861e3..483b55d 100644
+--- a/entry/src/main/ets/workers/base/WorkerWrapper.ts
++++ b/entry/src/main/ets/workers/base/WorkerWrapper.ets
+@@ -49,7 +49,7 @@ export default class WorkerWrapper {
+ 
+   async initWorker() {
+     HiLog.i(TAG, `WorkerWrapper initWorker ${WorkerType[this.getWorkerType()]}`)
+-    let initWorker = await new worker.ThreadWorker('entry/ets/workers/base/Worker.ts', {
++    let initWorker = await new worker.ThreadWorker('entry/ets/workers/base/Worker.ets', {
+       name: WorkerType[this.getWorkerType()]
+     });
+     let that = this;
+diff --git a/entry/src/main/module.json5 b/entry/src/main/module.json5
+index 06dd30c..9c4eb42 100644
+--- a/entry/src/main/module.json5
++++ b/entry/src/main/module.json5
+@@ -2,7 +2,7 @@
+   "module": {
+     "name": "entry",
+     "type": "entry",
+-    "srcEntry": "./ets/Application/MyAbilityStage.ts",
++    "srcEntry": "./ets/Application/MyAbilityStage.ets",
+     "description": "$string:mainability_description",
+     "mainElement": "com.ohos.contacts.MainAbility",
+     "deviceTypes": [
+@@ -15,12 +15,16 @@
+       {
+         "name": "ArkTSPartialUpdate",
+         "value": "true"
++      },
++      {
++        "name": "Api11ArkTSCheckMode",
++        "value": "DoArkTSCheckInCompatibleModeInApi11"
+       }
+     ],
+     "abilities": [
+       {
+         "name": "com.ohos.contacts.MainAbility",
+-        "srcEntry": "./ets/MainAbility/MainAbility.ts",
++        "srcEntry": "./ets/MainAbility/MainAbility.ets",
+         "description": "$string:mainability_description",
+         "icon": "$media:ic_contact_icon",
+         "label": "$string:app_name",
+@@ -53,7 +57,7 @@
+           }
+         ],
+         "name": "Subscriber",
+-        "srcEntry": "./ets/StaticSubscriber/StaticSubscriber.ts",
++        "srcEntry": "./ets/StaticSubscriber/StaticSubscriber.ets",
+         "type": "staticSubscriber",
+         "exported": true
+       },

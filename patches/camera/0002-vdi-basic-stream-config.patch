@@ -1,0 +1,135 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] camera: emit valid UVC basic stream configurations
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/camera/vdi_base/common/adapter/platform/v4l2/src/device_manager/include/v4l2_device_manager.h
++++ b/camera/vdi_base/common/adapter/platform/v4l2/src/device_manager/include/v4l2_device_manager.h
+@@ -145,7 +145,8 @@ private:
+     void AddDefaultFlashAvailable(std::shared_ptr<CameraMetadata> metadata);
+     void AddDefaultJpegOrientation(std::shared_ptr<CameraMetadata> metadata);
+     void AddDefaultJpegQuality(std::shared_ptr<CameraMetadata> metadata);
+-    void AddDefaultAbilityStreamAvailableBasicConfigurations(std::shared_ptr<CameraMetadata> metadata);
++    void AddDefaultAbilityStreamAvailableBasicConfigurations(std::shared_ptr<CameraMetadata> metadata,
++                                                             const std::vector<DeviceFormat>& deviceFormat);
+     void AddDefaultSensorOrientation(std::shared_ptr<CameraMetadata> metadata);
+     void AddDefaultFocalLength(std::shared_ptr<CameraMetadata> metadata);
+ 
+--- a/camera/vdi_base/common/adapter/platform/v4l2/src/device_manager/v4l2_device_manager.cpp
++++ b/camera/vdi_base/common/adapter/platform/v4l2/src/device_manager/v4l2_device_manager.cpp
+@@ -473,7 +473,7 @@ void V4L2DeviceManager::AddDefaultOhosTag(std::shared_ptr<CameraMetadata> camera
+     AddDefaultFlashAvailable(cameraMetadata);
+     AddDefaultJpegOrientation(cameraMetadata);
+     AddDefaultJpegQuality(cameraMetadata);
+-    AddDefaultAbilityStreamAvailableBasicConfigurations(cameraMetadata);
++    AddDefaultAbilityStreamAvailableBasicConfigurations(cameraMetadata, deviceFormat);
+     AddDefaultSensorOrientation(cameraMetadata);
+     AddDefaultFocalLength(cameraMetadata);
+ }
+@@ -853,12 +853,42 @@ void V4L2DeviceManager::AddDefaultJpegQuality(std::shared_ptr<CameraMetadata> me
+     AddOrUpdateOhosTag(metadata, OHOS_JPEG_QUALITY, jpegQualityVector);
+ }
+ 
+-void V4L2DeviceManager::AddDefaultAbilityStreamAvailableBasicConfigurations(std::shared_ptr<CameraMetadata> metadata)
++void V4L2DeviceManager::AddDefaultAbilityStreamAvailableBasicConfigurations(
++    std::shared_ptr<CameraMetadata> metadata, const std::vector<DeviceFormat>& deviceFormat)
+ {
+-    std::vector<uint8_t> abilityStreamAvailableBasicConfigurationsVector;
+-    abilityStreamAvailableBasicConfigurationsVector.push_back(OHOS_CAMERA_FORMAT_RGBA_8888);
+-    AddOrUpdateOhosTag(metadata, OHOS_ABILITY_STREAM_AVAILABLE_BASIC_CONFIGURATIONS,
+-                       abilityStreamAvailableBasicConfigurationsVector);
++    std::vector<int32_t> basicConfigurations;
++    for (const auto& format : deviceFormat) {
++        if (format.fmtdesc.fps.numerator == 0) {
++            continue;
++        }
++        int32_t ohosFormat = -1;
++        if (format.fmtdesc.description == "Motion-JPEG") {
++            ohosFormat = OHOS_CAMERA_FORMAT_MJPEG;
++        } else if (format.fmtdesc.description == "YUYV 4:2:2") {
++            ohosFormat = OHOS_CAMERA_FORMAT_422_YUYV;
++        }
++        if (ohosFormat < 0) {
++            continue;
++        }
++        bool duplicate = false;
++        for (size_t i = 0; i + 2 < basicConfigurations.size(); i += 3) {
++            if (basicConfigurations[i] == ohosFormat &&
++                basicConfigurations[i + 1] == static_cast<int32_t>(format.fmtdesc.width) &&
++                basicConfigurations[i + 2] == static_cast<int32_t>(format.fmtdesc.height)) {
++                duplicate = true;
++                break;
++            }
++        }
++        if (!duplicate) {
++            basicConfigurations.push_back(ohosFormat);
++            basicConfigurations.push_back(static_cast<int32_t>(format.fmtdesc.width));
++            basicConfigurations.push_back(static_cast<int32_t>(format.fmtdesc.height));
++        }
++    }
++    if (basicConfigurations.empty()) {
++        basicConfigurations = { OHOS_CAMERA_FORMAT_YCRCB_420_SP, 640, 480 };
++    }
++    AddOrUpdateOhosTag(metadata, OHOS_ABILITY_STREAM_AVAILABLE_BASIC_CONFIGURATIONS, basicConfigurations);
+ }
+ 
+ void V4L2DeviceManager::AddDefaultSensorOrientation(std::shared_ptr<CameraMetadata> metadata)
+--- a/camera/vdi_base/usb_camera/adapter/platform/v4l2/src/device_manager/v4l2_device_manager.cpp
++++ b/camera/vdi_base/usb_camera/adapter/platform/v4l2/src/device_manager/v4l2_device_manager.cpp
+@@ -465,7 +465,7 @@ void V4L2DeviceManager::AddDefaultOhosTag(std::shared_ptr<CameraMetadata> camera
+     AddDefaultFlashAvailable(cameraMetadata);
+     AddDefaultJpegOrientation(cameraMetadata);
+     AddDefaultJpegQuality(cameraMetadata);
+-    AddDefaultAbilityStreamAvailableBasicConfigurations(cameraMetadata);
++    AddDefaultAbilityStreamAvailableBasicConfigurations(cameraMetadata, deviceFormat);
+     AddDefaultSensorOrientation(cameraMetadata);
+     AddDefaultFocalLength(cameraMetadata);
+ }
+@@ -884,12 +884,42 @@ void V4L2DeviceManager::AddDefaultJpegQuality(std::shared_ptr<CameraMetadata> me
+     AddOrUpdateOhosTag(metadata, OHOS_JPEG_QUALITY, jpegQualityVector);
+ }
+ 
+-void V4L2DeviceManager::AddDefaultAbilityStreamAvailableBasicConfigurations(std::shared_ptr<CameraMetadata> metadata)
++void V4L2DeviceManager::AddDefaultAbilityStreamAvailableBasicConfigurations(
++    std::shared_ptr<CameraMetadata> metadata, const std::vector<DeviceFormat>& deviceFormat)
+ {
+-    std::vector<uint8_t> abilityStreamAvailableBasicConfigurationsVector;
+-    abilityStreamAvailableBasicConfigurationsVector.push_back(OHOS_CAMERA_FORMAT_RGBA_8888);
+-    AddOrUpdateOhosTag(metadata, OHOS_ABILITY_STREAM_AVAILABLE_BASIC_CONFIGURATIONS,
+-                       abilityStreamAvailableBasicConfigurationsVector);
++    std::vector<int32_t> basicConfigurations;
++    for (const auto& format : deviceFormat) {
++        if (format.fmtdesc.fps.numerator == 0) {
++            continue;
++        }
++        int32_t ohosFormat = -1;
++        if (format.fmtdesc.description == "Motion-JPEG") {
++            ohosFormat = OHOS_CAMERA_FORMAT_MJPEG;
++        } else if (format.fmtdesc.description == "YUYV 4:2:2") {
++            ohosFormat = OHOS_CAMERA_FORMAT_422_YUYV;
++        }
++        if (ohosFormat < 0) {
++            continue;
++        }
++        bool duplicate = false;
++        for (size_t i = 0; i + 2 < basicConfigurations.size(); i += 3) {
++            if (basicConfigurations[i] == ohosFormat &&
++                basicConfigurations[i + 1] == static_cast<int32_t>(format.fmtdesc.width) &&
++                basicConfigurations[i + 2] == static_cast<int32_t>(format.fmtdesc.height)) {
++                duplicate = true;
++                break;
++            }
++        }
++        if (!duplicate) {
++            basicConfigurations.push_back(ohosFormat);
++            basicConfigurations.push_back(static_cast<int32_t>(format.fmtdesc.width));
++            basicConfigurations.push_back(static_cast<int32_t>(format.fmtdesc.height));
++        }
++    }
++    if (basicConfigurations.empty()) {
++        basicConfigurations = { OHOS_CAMERA_FORMAT_YCRCB_420_SP, 640, 480 };
++    }
++    AddOrUpdateOhosTag(metadata, OHOS_ABILITY_STREAM_AVAILABLE_BASIC_CONFIGURATIONS, basicConfigurations);
+ }
+ 
+ void V4L2DeviceManager::AddDefaultSensorOrientation(std::shared_ptr<CameraMetadata> metadata)

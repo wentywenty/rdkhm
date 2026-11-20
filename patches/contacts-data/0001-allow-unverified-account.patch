@@ -1,0 +1,21 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] contacts_data: allow data ability without verified account
+Date: Thu, 19 Nov 2026 18:30:00 +0800
+---
+--- a/dataBusiness/contacts/src/contacts_data_ability.cpp
++++ b/dataBusiness/contacts/src/contacts_data_ability.cpp
+@@ -89,9 +89,12 @@ ContactsDataAbility* ContactsDataAbility::Create()
+     HILOG_INFO("ContactsDataBase IsOsAccountVerified result :%{public}d", result);
+     HILOG_INFO("ContactsDataBase IsOsAccountVerified isAccountVerified :%{public}s",
+         std::to_string(isAccountVerified).c_str());
+-    if (result != OHOS::NativeRdb::E_OK || !isAccountVerified) {
++    if (result != OHOS::NativeRdb::E_OK) {
+         return nullptr;
+     }
++    if (!isAccountVerified) {
++        HILOG_INFO("ContactsDataBase account is not verified; allow data ability for bring-up");
++    }
+     return new ContactsDataAbility();
+ }
+ 
+Signed-off-by: RDKHM <rdkhm@localhost>

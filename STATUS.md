@@ -1,10 +1,143 @@
-# RDKHM status - 2026-11-16
+# RDKHM status - 2026-11-19
+
+## Current state (2026-11-19)
+
+The 2026-11-19 20:54 image includes the USB HDC and CAN-FD fixes; the source
+tree still has uncommitted documentation and HAP work. The sections below are
+the 2026-11-17 session and earlier history unless explicitly marked as 2026-11-19.
+See [board-validation-20261119.md](docs/board-validation-20261119.md).
+
+### 2026-11-20 SLE userspace probe
+
+- All 22 HAPs were rebuilt; 25 image HAPs passed official-key verification and
+  were injected. The re-signed allowlist bundles were updated to the official
+  leaf fingerprint.
+- Image `db0a75bb...` was assembled and verified (215 artifact comparisons);
+  the board booted kernel `#6`.
+- `open("/dev/hwsle")` and the SLE_OPEN handshake succeed. DLI advertising
+  commands return status `0x01` (PENDING); 30 seconds of fd holding produced no
+  command-complete, ACB or ICB events. Advertising is not confirmed and no
+  second SLE scanner is available. See [nearlink.md](docs/nearlink.md).
+- Direct `build-openharmony.sh --build-target images` requires
+  `scripts/install-system-sdk-api.sh` first; `./build oh` now performs that
+  step.
+
+- Board: `10.43.9.213:5555`, model `D-Robotics RDK X5 V1.0`. The latest boot,
+  after the 2026-11-19 20:54 unified image build, reports boot_id
+  `9ade3a96-6eb4-4876-a3dc-f407990d6b5e` and kernel `6.1.83-rdkhm`; earlier
+  hot-HAP tests used boot_id `00836ef8-c49c-4a6e-8c58-a0bf1da68998`
+  (`#5`, 2026-11-19 16:13 CST).
+- Board image SHA256 was not captured from the running system. The current
+  local `out/images/rdkhm-x5-openharmony-dev.img.sha256` is
+  `db0a75bbda4bf3ccc61e57d4cb90699624144b6824cd0d1ca09e4901439dbd78`;
+  earlier `4368578f...`, `883c8123...` and `8f1f4ea9...` references are
+  historical.
+- Current 20:54 image boot: display is black; Launcher is not running and BMS
+  has no installed bundle information. SystemUI status/navigation windows
+  exist, but WindowManager reports `Focus window: 0`. This boot is not yet
+  validated.
+- USB HDC: TCP `hdcd` works. The source `rdkhm-usb.sh` guards an
+  already-mounted configfs and mounts functionfs idempotently. The 20:54
+  unified image boot already created the `1d6b:0104` gadget, `ep0/ep1/ep2`,
+  a high-speed `configured` UDC and hdcd USB endpoints. Host-side USB
+  enumeration is still to be confirmed on the PC connected to the board.
+- CAN-FD: TCAN4550 at the DT's 18 MHz SPI returns DEV_ID 0 and `m_can`
+  reports `Failed to init module`. `kernel/0018-tcan-spi-max-speed.patch`
+  clamps SPI to 10 MHz; classic CAN and CAN-FD loopback pass on the board,
+  including a cold boot of the 20:54 image. External bus, termination and a
+  second node remain unverified.
+- 2026-11-19 multimedia: USB camera preview works on the hot-deployed HAP
+  (`camera/0004..0006`); Photos opens an empty gallery with MediaLibraryData
+  provider connected, and `/dev/fuse` + media-fuse mount were fixed on the
+  board. Camera controls/photo-save are not yet verified. Details:
+  [camera-media-photos-20261119.md](docs/camera-media-photos-20261119.md).
+  Full patch inventory: [patch-inventory-20261119.md](docs/patch-inventory-20261119.md).
+  Image build preparation (not built): [image-build-prep-20261119.md](docs/image-build-prep-20261119.md).
+- Power/suspend: the image overlay now includes `rdkhm-powermgr-off`, a boot
+  service that stops `powermgr` after boot to avoid suspend/HDC loss. This is
+  source-only and not cold-boot tested.
+- 2026-11-19 partition build: `system_image` + `vendor_image` succeeded and
+  system/vendor partitions were assembled under `out/fastboot/`; a later full
+  SD image build produced
+  `db0a75bbda4bf3ccc61e57d4cb90699624144b6824cd0d1ca09e4901439dbd78` and
+  passed the image verifier. The board was not flashed. See
+  `docs/image-build-prep-20261119.md`.
+- HAPs: `admin_provisioning` and `theme` build and are patched under
+  `patches/haps/`; `config/build/haps.json` marks them verified. Settings
+  builds to `out/settings/Settings.hap`. Image assembly now injects every
+  built app with a defined upstream directory through the single `image`
+  manifest in `config/build/haps.json` (`scripts/image_haps.py`), including
+  SystemUI, ScreenLock, Note, Contacts, MMS, CallUI and FilePicker.
+  Injected HAPs must be signed by the official release key or match the
+  bundle's preinstall allowlist fingerprint. The `haps` pipeline stage is
+  configured to build every app in `image.apps`, plus SystemUI modules and
+  PinTool, so a clean `./rdkhm run build` no longer depends on stale
+  `out/haps` files. Note uses a local JSON fallback
+  because the board RDB open callback does not return; the Web editor is
+  unavailable. See [Note validation](docs/board-validation-20261119-note.md).
+  The 20:54 image contains the matching Note HAP, but the current boot is black
+  and BMS has no Launcher/Note bundles; cold-boot validation is still pending.
+- 2026-11-19 HAP fixes: source-built Settings shows the NearLink entry; CallUI
+  starts after strict-null/import/exported fixes; Contacts DataAbility and the
+  dialer/contacts pages were board-tested. FilePicker still cannot start
+  because BMS does not return the `ExternalFileManager` fileAccess extension;
+  TEE remains a HiSilicon `tc_ns_client` vs X5 OP-TEE mismatch. Details and
+  evidence: [hap-fixes-20261119.md](docs/hap-fixes-20261119.md).
+- 2026-11-19 GPIO/PinTool: 6 gpiochips (base 347/379/411/434/466/498);
+  `gpio-daemon` runs with `/dev/rdkhm-gpio.sock` and TCP `127.0.0.1:9800`;
+  `/rdkhm/gpio list` and `show 7` work; Pin 7 was re-tested on the 20:54
+  image with `export/set/dir/get/unexport`, all rc=0. GPIO hardening is in
+  source only: CLI rejects non-usable/claimed pins, daemon defaults to socket
+  `0660`, TCP off, peer credentials, SELinux `rdkhm_gpio` types and a Pintool
+  capability entry. The board still runs the old 0666/TCP daemon until rebuild.
+  `PinTool.hap` is present in
+  `/system/app/com.rdkhm.pintool/`, but BMS does not register the bundle
+  (`bm dump -n com.rdkhm.pintool` fails), so the UI cannot start on the
+  current black-screen boot. `gpio-status.sh` `head -100` was fixed in source
+  to `head -n 100`.
+  See [gpio.md](docs/gpio.md).
+- Account activation is blocked by missing `hmdfs`: the image sets
+  `const.distributed_file_property.enabled=true`, but the flashed X5 kernel has no
+  `hmdfs` driver. `dfs/0001-disable-hmdfs-for-bringup.patch` disables the property
+  so StorageDaemon uses `LocalMount`; a rebuilt image and cold boot are required
+  to confirm `account.ready=true` and user 100.
+- 2026-11-20 HMDFS backport: the 6.6 `fs/hmdfs` source now compiles for 6.1.83;
+  `hmdfs.ko` is staged in the driver bundle autoload list. A new kernel Image
+  exports `filemap_remove_folio`. The current board is still running the old
+  kernel, so `insmod` fails with `Unknown symbol filemap_remove_folio`; mount,
+  `account.ready=true`, user 100 and Launcher are **not yet board-verified**.
+  See [hmdfs-backport-20261120.md](docs/hmdfs-backport-20261120.md).
+- RT: `RDKHM_KERNEL_PROFILE=rt` is an opt-in profile; the default remains
+  non-RT and no RT kernel has been built or board-validated.
+
+The previous 2026-11-17 and earlier records follow.
+
+## 2026-11-17 session (historical)
 
 The OpenHarmony 6.0 ARM64 standard-system `images` target builds successfully.
 This is an experimental integration, not a board-qualified release.
 Kernel #8 survived over 40 minutes before the WS73 loading experiment lost
 network access. HDMI presents 800x480; touch reaches SystemUI. The previous
 VBlank panic did not recur in the captured interval.
+
+The 2026-11-17 board session (image assembled before the composer-release and
+diagnostic fixes) reached HDMI connected/enabled with a 256-byte EDID, running
+render_service/composer/Launcher and QDtech MPI5001 event1, but the panel
+remained black. HDC TCP worked only after manually starting hdcd. See
+[board-validation-20261117.md](docs/board-validation-20261117.md).
+The latest image `4368578ffed5043c1ac74be22556f61b1bf99a52c435e18928b6905b955a6727`
+adds the composer service release export and color-gamut answer, the render-service
+guards, the BusyBox-safe hardware report, optional-vendor ABI stubs (including
+`libtask_controller.z.so`), tracefs mounts, PSI and RTG/QoS compatibility proc entries. It has not been flashed. A temporary live deployment of the new display libs on the running board produced a visible lock screen at 800x480; see `out/board-logs/20261118-live/screen-final.jpeg`.
+The first tracing-enabled boot then panicked in `trace_event_eval_update()` while
+loading `aic8800_bsp`; `patches/kernel/0008-trace-eval-null-guard.patch` adds
+null guards and the kernel/image were rebuilt. The panic log is
+`out/board-logs/20261118-panic/boot.log`. The `be7d715d` image booted on
+<board-ip> with kernel `#13`, stubs/syscap/tracefs/PSI and audio working; the
+lock screen was visible after wake (`out/board-logs/20261118-new-image/screen-lock.jpeg`).
+`/proc/thread-self/sched_qos_ctrl` was still missing because `CONFIG_SCHED_DEBUG`
+is off; `kernel/0009` makes that proc entry unconditional and the current
+image is `4368578f...` (not yet flashed).
 
 Live fixes on 2026-11-16 established account.ready=true and
 bms.main.bundles.ready=true. User 100 now has Launcher and the input method.
@@ -68,8 +201,8 @@ device names and reads all advertised ABS axis ranges using bitmap bit indices.
   OpenGL/Vulkan, parallel rendering and graphics profiling are disabled.
 - Uses Linux evdev input with the userspace input HDI backend.
 - Includes board HDF/init permissions and FunctionFS HDC setup.
-- Includes 33 kernel modules and 21 pinned firmware assets. Five modules remain
-  manual-only, including WS73 and its additional Bluetooth dependency.
+- Includes 38 kernel modules and 21 pinned firmware assets. Ten modules remain
+  manual-only, including WS73, Bluetooth HCI and their dependencies.
 - Connects WLAN/WPA/hostapd HDF services to the Linux nl80211 backend.
 - Registers the USB serial DDK service with its existing permission checks.
 - Connects ES8326 ALSA playback/capture hooks, Audio HDI and primary audio policy.
@@ -81,24 +214,33 @@ device names and reads all advertised ABS axis ranges using bitmap bit indices.
   domain and bounded GPU/NPU capability socket. QEMU can load the real vendor
   libraries and read DNN version 1.24.5; the BPU probe exposes model tensor
   descriptors. The service explicitly reports NNRT backend unavailable and
-  does not claim hardware inference or rendering. It consumes the init-owned
-  socket fd, while OH RenderService remains on software rendering.
+  does not claim hardware inference. GPU bring-up found that `eglCreateContext`
+  failed with `0x3005` because the private runtime omitted the `dlopen`ed
+  `libGLSLC.so`; adding it makes offscreen pbuffer and GBM-window contexts pass
+  on the current board (`Vivante GC8000L`, `OpenGL ES 3.1`). The staging script
+  and asset lock now include it, but the flashed image has not been rebuilt;
+  OH RenderService remains on software rendering.
 - Assembles CONFIG, system, vendor and userdata partitions into a regular SD file.
 
 Current kernel Image SHA256:
-`1fcd76db579b98b135861e21acd95af02562f5f8a76b37f09449c7dfe459cf0e`.
+`6dff50179ba7567a892ac0cfca2dcf8f853165cc84ef5e07d167f7bad2f61833`.
 
 ## Complete-system development image
 
 `out/images/rdkhm-x5-openharmony-dev.img` (7172 MiB).
 Its companion `.img.sha256` records the checksum of the latest assembly.
+The current SHA256 is
+`4368578ffed5043c1ac74be22556f61b1bf99a52c435e18928b6905b955a6727`
+(run `out/runs/20261118T053124Z-0nkn4n3v`).
 Rebuild and inspect with:
 
 ```sh
+bash scripts/prepare-openharmony.sh
 JOBS=64 bash scripts/build-openharmony.sh --build-target images
 python3 scripts/prepare-accelerators.py
 bash scripts/build-accelerator-modules.sh
 bash scripts/build-nearlink.sh
+python3 scripts/import-driver-firmware.py
 python3 scripts/prepare-driver-bundle.py
 bash scripts/make-openharmony-image.sh
 python3 scripts/verify-openharmony-image.py
@@ -113,6 +255,10 @@ HDMI, input, HDC enumeration or HAP execution on X5.
 
 - Cold-boot validation of the latest assembled image, full Launcher window
   startup, HAP lifecycle, audio I/O and extended stability.
+- The composer release export is packaged; `RegRefreshCallback` and the HDMI
+  backlight fallback are in 0002/0004. `graphic2d/0003` splits app/server
+  drawable generation and the `render_service` target builds incrementally.
+  No visible first frame is proven; connector state is not display acceptance.
 - Upstream post-build startup guard reports service start-mode/job, DAC identity
   and init-library whitelist findings despite a successful build exit status.
   These remain to be reviewed against actual service startup.
@@ -123,17 +269,29 @@ HDMI, input, HDC enumeration or HAP execution on X5.
   are not qualified. GPU/BPU
   kernel/runtime integration has started; RenderService GPU buffers/window-system
   adaptation and executable NNRT inference remain incomplete.
-  USB camera and codec HDI components are selected; provider HCS, VPU ABI and
-  runtime stream tests remain outstanding.
+  USB camera HDF host registration and the common provider HCS are packaged;
+  `/dev/video*` and real stream tests remain board-dependent. Codec HDI/OMX
+  libraries are packaged, but no X5 VPU capability table is advertised until
+  the vendor userspace ABI is identified and tested.
 - Wi-Fi association, USB role selection and DRM modeset/fences/hotplug need the real board.
 - Audio mute/gain, headset detection, actual playback/capture and routing require
   further work. Bluetooth UART/firmware initialization remains board-specific;
-  `bringup/rdkhm-bluetooth-init.sh` provides a guarded probe/attach entrypoint,
+  `bringup/network/rdkhm-bluetooth-init.sh` provides a guarded probe/attach entrypoint,
   but no UART path, baud rate or controller firmware protocol is asserted.
 - WS73 Linux 6.1 modules compile; loading interrupted board connectivity and
   requires serial diagnosis. See `docs/nearlink.md`. SLE is not exposed as
   an IP network or HAP API.
   See `docs/drivers.md` for the per-device integration boundary.
+- USB 4G/LTE: `lsusb` finds a SIMCom SIM7600G-H (`1e0e:9001`) on the
+  2026-11-19 board session. `option`/`usb_wwan` and `qmi_wwan`/`cdc-wdm`/`usbnet`
+  are now selected in `config/kernel/modules.json`, but the current image and
+  driver bundle predate that change and were not rebuilt. The modem reported
+  `SIM not inserted`; registration, `wwan0` data and RIL integration are unverified.
+- Wi-Fi: the 2026-11-19 board session loaded the AIC8800D80 firmware and created
+  `wlan0`, but `ifconfig wlan0 up` hit `rwnx_open ... close time out`, then
+  `cmd queue crashed` and `add_if: Status Error(255)`. `kernel/0016` adds
+  command-queue recovery and open-failure unwinding; it is not built or tested.
+  Kernel logs for the first timeout are lost because AVC denials flood the ring.
 
 ## Earlier bring-up artifact
 
@@ -143,5 +301,18 @@ image, with no OpenHarmony desktop or services. Its SHA256 is
 Its embedded kernel predates the current complete-system image.
 
 Details: `docs/system-integration.md`, `docs/kernel-port.md`, `docs/userspace.md`.
-Logs: `out/logs/`; exact source revisions: `sources.lock.tsv` and
+Logs: `out/logs/`; exact source revisions: `config/sources/repo.xml` and
 `out/openharmony-resolved.xml`.
+
+
+The `a788c4d2` image panicked in `of_get_mac_addr()` during `hobot_gmac`
+probe because the driver passed a NULL buffer to `of_get_mac_address()`.
+`kernel/0011-fix-ethernet-mac-buffer.patch` changes `mac_resource.mac`
+to an `ETH_ALEN` array and uses `is_zero_ether_addr()` for the fallback.
+The image was rebuilt as `4368578f...`; it has not been board-tested.
+
+
+The `4368578f` image adds `kernel/0013-wdt-disable-on-suspend.patch`:
+`dw_wdt_suspend()` now clears the watchdog enable bit before gating clocks,
+preventing a watchdog reset while the userspace watchdog daemon is frozen.
+It has not been board-tested.

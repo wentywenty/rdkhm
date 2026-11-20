@@ -1,0 +1,179 @@
+{
+  "apps": {
+    "admin_provisioning": {
+      "bundle": "com.ohos.adminprovisioning",
+      "dir": "applications/standard/admin_provisioning",
+      "product": "default",
+      "verified": true
+    },
+    "applications_auth_widget": {
+      "bundle": "com.ohos.useriam.authwidget",
+      "dir": "applications/standard/applications_auth_widget",
+      "product": "default",
+      "verified": true
+    },
+    "calendardata": {
+      "bundle": "com.ohos.calendardata",
+      "dir": "applications/standard/calendardata",
+      "product": "default",
+      "verified": true
+    },
+    "call": {
+      "bundle": "com.ohos.callui",
+      "dir": "applications/standard/call",
+      "product": "default",
+      "verified": true
+    },
+    "camera": {
+      "bundle": "com.ohos.camera",
+      "dir": "applications/standard/camera",
+      "product": "default",
+      "verified": true
+    },
+    "contacts": {
+      "bundle": "com.ohos.contacts",
+      "dir": "applications/standard/contacts",
+      "product": "default",
+      "verified": true
+    },
+    "dlp_manager": {
+      "bundle": "com.ohos.dlpmanager",
+      "dir": "applications/standard/dlp_manager",
+      "product": "default",
+      "verified": true
+    },
+    "filepicker": {
+      "bundle": "com.ohos.filepicker",
+      "dir": "applications/standard/filepicker",
+      "product": "default",
+      "verified": true
+    },
+    "launcher": {
+      "bundle": "com.ohos.launcher",
+      "dir": "applications/standard/launcher",
+      "product": "default",
+      "verified": true
+    },
+    "mms": {
+      "bundle": "com.ohos.mms",
+      "dir": "applications/standard/mms",
+      "product": "default",
+      "verified": true
+    },
+    "notes": {
+      "bundle": "com.ohos.note",
+      "dir": "applications/standard/notes",
+      "product": "default",
+      "verified": true
+    },
+    "permission_manager": {
+      "bundle": "com.ohos.permissionmanager",
+      "dir": "applications/standard/permission_manager",
+      "product": "default",
+      "verified": true
+    },
+    "photos": {
+      "bundle": "com.ohos.photos",
+      "dir": "applications/standard/photos",
+      "product": "default",
+      "verified": true
+    },
+    "printspooler": {
+      "bundle": "com.ohos.spooler",
+      "dir": "applications/standard/printspooler",
+      "product": "default",
+      "verified": true
+    },
+    "screenlock": {
+      "bundle": "com.ohos.systemui",
+      "dir": "applications/standard/screenlock",
+      "product": "default",
+      "verified": true
+    },
+    "screenshot": {
+      "bundle": "com.ohos.screenshot",
+      "dir": "applications/standard/screenshot",
+      "product": "default",
+      "verified": true
+    },
+    "security_privacy_center": {
+      "bundle": "com.ohos.security.privacycenter",
+      "dir": "applications/standard/security_privacy_center",
+      "product": "default",
+      "verified": true
+    },
+    "settings": {
+      "bundle": "com.ohos.settings",
+      "dir": "applications/standard/settings",
+      "product": "default",
+      "verified": true
+    },
+    "settings_data": {
+      "bundle": "com.ohos.settingsdata",
+      "dir": "applications/standard/settings_data",
+      "product": "default",
+      "verified": true
+    },
+    "systemui": {
+      "bundle": "com.ohos.systemui",
+      "dir": "applications/standard/systemui",
+      "product": "default",
+      "verified": true,
+      "modules": {
+        "SystemUI.hap": "phone_entry-default-unsigned.hap",
+        "SystemUI-StatusBar.hap": "phone_statusbar-phone_entry-default-unsigned.hap",
+        "SystemUI-NavigationBar.hap": "default_navigationBar-phone_entry-default-unsigned.hap",
+        "SystemUI-DropdownPanel.hap": "phone_dropdownpanel-phone_entry-default-unsigned.hap",
+        "SystemUI-NotificationManagement.hap": "default_notificationmanagement-phone_entry-default-unsigned.hap",
+        "SystemUI-VolumePanel.hap": "default_volumepanel-phone_entry-default-unsigned.hap",
+        "SystemUI-SystemDialog.hap": "default_dialog-phone_entry-default-unsigned.hap"
+      }
+    },
+    "theme": {
+      "bundle": "com.ohos.wallpaper",
+      "dir": "applications/standard/theme",
+      "product": "default",
+      "verified": true
+    },
+    "user_certificate_manager": {
+      "bundle": "com.ohos.certmanager",
+      "dir": "applications/standard/user_certificate_manager",
+      "product": "default",
+      "verified": true
+    }
+  },
+  "image": {
+    "system_app_dir": "/system/app",
+    "apps": {
+      "applications_auth_widget": "AuthWidget.hap",
+      "calendardata": "CalendarData.hap",
+      "call": "CallUI.hap",
+      "camera": "Camera.hap",
+      "contacts": "Contacts.hap",
+      "dlp_manager": "dlp_manager.hap",
+      "filepicker": "FilePicker.hap",
+      "launcher": "Launcher.hap",
+      "mms": "Mms.hap",
+      "notes": "Note.hap",
+      "photos": "Photos.hap",
+      "printspooler": "PrintSpooler.hap",
+      "screenshot": "ScreenShot.hap",
+      "screenlock": "SystemUI-ScreenLock.hap",
+      "security_privacy_center": "SecurityPrivacyCenter.hap",
+      "settings": "Settings.hap",
+      "settings_data": "SettingsData.hap"
+    },
+    "modules": {
+      "systemui": "out/haps/systemui"
+    },
+    "extra": [
+      {
+        "name": "rdkhm_pintool",
+        "source": "out/haps/rdkhm_pintool.hap",
+        "dest": "/system/app/com.rdkhm.pintool/PinTool.hap",
+        "optional": true
+      }
+    ]
+  },
+  "schema_version": 1
+}

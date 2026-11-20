@@ -1,0 +1,20 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0013-wdt-disable-on-suspend.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/drivers/watchdog/dw_wdt.c
++++ b/drivers/watchdog/dw_wdt.c
+@@ -397,6 +397,12 @@ static int dw_wdt_suspend(struct device *dev)
+ 	dw_wdt->control = readl(dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
+ 	dw_wdt->timeout = readl(dw_wdt->regs + WDOG_TIMEOUT_RANGE_REG_OFFSET);
+ 
++	/* The userspace watchdog daemon cannot feed the watchdog while the
++	 * system is suspended. Stop the hardware watchdog before gating its
++	 * clocks, otherwise it resets the board during deep suspend. */
++	writel(dw_wdt->control & ~WDOG_CONTROL_REG_WDT_EN_MASK,
++	       dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
++
+ 	clk_disable_unprepare(dw_wdt->pclk);
+ 	clk_disable_unprepare(dw_wdt->clk);
+ 

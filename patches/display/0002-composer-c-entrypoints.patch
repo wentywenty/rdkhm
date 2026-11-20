@@ -1,27 +1,88 @@
-diff --git a/display/composer/vdi_base/src/display_composer_vdi_impl.cpp b/display/composer/vdi_base/src/display_composer_vdi_impl.cpp
-index b61a0c7..a14ff8d 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0002-composer-c-entrypoints.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/display/composer/vdi_base/src/display_composer_vdi_impl.cpp
 +++ b/display/composer/vdi_base/src/display_composer_vdi_impl.cpp
-@@ -17,10 +17,15 @@
+@@ -17,10 +17,37 @@
  #include <hdf_base.h>
  #include "display_log.h"
  #include "hdf_log.h"
 +#include "common/include/display_vdi_adapter_interface.h"
 +#include <type_traits>
++#include <mutex>
  
  namespace OHOS {
  namespace HDI {
  namespace DISPLAY {
 +using OHOS::HDI::Display::Composer::V1_0::DispPowerStatus;
 +using OHOS::HDI::Display::Composer::V1_0::CompositionType;
++using OHOS::HDI::Display::Composer::ColorGamut;
++
++namespace {
++std::mutex g_refreshCallbackMutex;
++RefreshCallback g_refreshCallback = nullptr;
++void *g_refreshCallbackData = nullptr;
++
++void NotifyRefresh(uint32_t devId)
++{
++    RefreshCallback callback = nullptr;
++    void *data = nullptr;
++    {
++        std::lock_guard<std::mutex> lock(g_refreshCallbackMutex);
++        callback = g_refreshCallback;
++        data = g_refreshCallbackData;
++    }
++    if (callback != nullptr) {
++        callback(devId, data);
++    }
++}
++} // namespace
 +
  DisplayComposerVdiImpl::DisplayComposerVdiImpl()
  {
  }
-@@ -336,6 +341,62 @@ extern "C" void DestroyComposerVdi(IDisplayComposerVdi* vdi)
+@@ -86,6 +113,12 @@
+ {
+     int32_t ec = HdiSession::GetInstance().CallDisplayFunction(devId, &HdiDisplay::SetDisplayPowerStatus, status);
+     DISPLAY_CHK_RETURN(ec != DISPLAY_SUCCESS, HDF_FAILURE, DISPLAY_LOGE("failed, ec=%{public}d", ec));
++    if (status == DispPowerStatus::POWER_STATUS_ON) {
++        /* The v1.1 refresh callback lets RenderService request a fresh frame
++         * after the panel is powered on. The callback is optional; a null
++         * registration is ignored. */
++        NotifyRefresh(devId);
++    }
+     return HDF_SUCCESS;
+ }
+ 
+@@ -336,6 +369,85 @@
  {
      delete vdi;
  }
++
++/* v1.1 optional entry point. The service dlsym's this name independently of
++ * the v1.0 factory; it must remain optional for older VDI consumers. */
++extern "C" int32_t RegRefreshCallback(RefreshCallback cb, void *data)
++{
++    if (cb == nullptr) {
++        return DISPLAY_FAILURE;
++    }
++    std::lock_guard<std::mutex> lock(g_refreshCallbackMutex);
++    g_refreshCallback = cb;
++    g_refreshCallbackData = data;
++    return DISPLAY_SUCCESS;
++}
++
++/* v1.1 optional entry point. X5 HDMI has no wide-gamut/EDID gamut parser in
++ * this port, so report the mandatory sRGB mode instead of failing the screen. */
++extern "C" int32_t GetDisplaySupportedColorGamuts(uint32_t devId, std::vector<ColorGamut>& gamuts)
++{
++    (void)devId;
++    gamuts.clear();
++    gamuts.push_back(ColorGamut::COLOR_GAMUT_SRGB);
++    return DISPLAY_SUCCESS;
++}
 +
 +// The current composer service resolves C entry points, not the legacy factory.
 +static DisplayComposerVdiImpl& GetDefaultComposer()

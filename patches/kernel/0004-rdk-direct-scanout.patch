@@ -1,0 +1,14 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0004-rdk-direct-scanout.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/arch/arm64/boot/dts/hobot/x5-rdk.dtsi
++++ b/arch/arm64/boot/dts/hobot/x5-rdk.dtsi
+@@ -531,3 +531,6 @@
+ &dc8000_nano {
++	/* RDKHM uses direct scanout without the optional GC820 compositor. */
++	aux-names = "vs_sif";
++	aux-devs = <&vs_sif>;
+ 	status = "okay";
+ };

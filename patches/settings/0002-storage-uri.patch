@@ -1,0 +1,16 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] settings/0002-storage-uri.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/product/phone/src/main/ets/MainAbility/MainAbility.ts
++++ b/product/phone/src/main/ets/MainAbility/MainAbility.ts
+@@ -46,6 +46,8 @@ export default class MainAbility extends Ability {
+       url = 'pages/volumeControl';
+     } else if (this.funcAbilityWant?.uri === "locationServices") {
+       url = 'pages/locationServices';
++    } else if (this.funcAbilityWant?.uri === "storage") {
++      url = 'pages/storage';
+     }
+     windowStage.setUIContent(this.context, url, null);
+     GlobalContext.getContext().setObject(GlobalContext.globalKeySettingsAbilityContext, this.context);

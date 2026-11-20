@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 workspace=$(cd "$(dirname "$0")/.." && pwd)
+source "$workspace/env.sh"
 python3 "$workspace/scripts/prepare-nearlink.py"
-stack="$workspace/sources/nearlink-ssap"
+# nearlink-ssap is generated beside the OpenHarmony tree under sources/oh.
+stack="$(dirname "$RDKHM_OH_TREE")/nearlink-ssap"
 mkdir -p "$workspace/out/tests/nearlink"
 if [[ "${1:-}" == --ohos ]]; then
-    tree="$workspace/sources/openharmony-full"
+    tree="$RDKHM_OH_TREE"
     for suite in codec server feature link; do
         "$tree/prebuilts/clang/ohos/linux-x86_64/llvm/bin/clang" \
           --target=aarch64-linux-ohos --sysroot="$tree/out/rdk_x5/obj/third_party/musl" \

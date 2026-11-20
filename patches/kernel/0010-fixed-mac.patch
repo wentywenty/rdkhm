@@ -1,0 +1,15 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0010-fixed-mac.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/arch/arm64/boot/dts/hobot/x5-rdk.dtsi
++++ b/arch/arm64/boot/dts/hobot/x5-rdk.dtsi
+@@ -780,6 +780,7 @@
+ 
+ &horizon_tsn {
+ 	status = "okay";
++	local-mac-address = [02 52 44 4b 48 4d];
+ 
+ 	phy-mode = "rgmii-id";
+ 	pinctrl-names = "default";

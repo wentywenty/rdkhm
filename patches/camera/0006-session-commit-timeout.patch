@@ -1,0 +1,29 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] camera/0006-session-commit-timeout.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/applications/standard/camera/common/src/main/ets/default/camera/CameraService.ts
++++ b/applications/standard/camera/common/src/main/ets/default/camera/CameraService.ts
+@@ -373,10 +373,19 @@
+     Log.info(`${TAG} createSession commitConfig.`);
+     Log.start(Log.OPEN_CAMERA);
+     try {
+-      await this.mCaptureSession?.commitConfig();
++      await Promise.race([
++        this.mCaptureSession?.commitConfig().catch((error) => {
++          Log.error(`${TAG} commitConfig failed: ${JSON.stringify(error)}`);
++        }),
++        new Promise<void>((resolve) => setTimeout(resolve, 1000))
++      ]);
+       Log.end(Log.OPEN_CAMERA);
+       Log.end(Log.STREAM_DISTRIBUTION);
+-      await this.mCaptureSession?.start();
++      this.mCaptureSession?.start().then(() => {
++        Log.info(`${TAG} createSession start success`);
++      }).catch((error) => {
++        Log.error(`${TAG} createSession start failed: ${JSON.stringify(error)}`);
++      });
+     } catch (err) {
+       if (err) {
+         ReportUtil.write(ReportUtil.OPEN_FAIL);

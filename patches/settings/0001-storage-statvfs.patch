@@ -1,0 +1,41 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] settings/0001-storage-statvfs.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/product/phone/src/main/ets/model/storageImpl/StorageModel.ts
++++ b/product/phone/src/main/ets/model/storageImpl/StorageModel.ts
+@@ -16,7 +16,7 @@
+ import BaseModel from '../../../../../../../common/utils/src/main/ets/default/model/BaseModel';
+ import {LogAll} from '../../../../../../../common/utils/src/main/ets/default/baseUtil/LogDecorator';
+ import { BaseData } from '../../../../../../../common/utils/src/main/ets/default/bean/BaseData';
+-import storage from '@ohos.statfs';
++import statfs from '@ohos.file.statvfs';
+ import Environment from '@ohos.file.environment'
+ 
+ /**
+@@ -43,14 +43,22 @@ export class StorageModel extends BaseModel {
+    * get TotalSpace
+    */
+   getTotalSpace(storageDataDir, callback){
+-    storage.getTotalBytes(storageDataDir, callback);
++    try {
++      callback(null, statfs.getTotalSizeSync(storageDataDir));
++    } catch (err) {
++      callback(err, 0);
++    }
+   }
+ 
+   /**
+    * get FreeBytes
+    */
+   getFreeBytes(storageDataDir, callback){
+-    storage.getFreeBytes(storageDataDir, callback);
++    try {
++      callback(null, statfs.getFreeSizeSync(storageDataDir));
++    } catch (err) {
++      callback(err, 0);
++    }
+   }
+ 
+ }

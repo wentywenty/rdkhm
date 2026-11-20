@@ -1,0 +1,15 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] dfs: disable hmdfs for X5 bring-up
+Date: Thu, 19 Nov 2026 20:55:00 +0800
+---
+--- a/services/distributed_file.para
++++ b/services/distributed_file.para
+@@ -12,6 +12,6 @@
+ # limitations under the License.
+ 
+ 
+-const.distributed_file_property.enabled=true
++const.distributed_file_property.enabled=false
+ const.distributed_file_only_for_same_account_test=true
+ 
+Signed-off-by: RDKHM <rdkhm@localhost>

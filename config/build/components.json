@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "components": {
+    "kernel": {
+      "description": "X5 kernel Image, DTBs, modules and bring-up binaries",
+      "build": [
+        ["bash", "scripts/prepare-kernel.sh"],
+        ["bash", "scripts/build-kernel.sh", "Image"],
+        ["bash", "scripts/build-kernel.sh", "dtbs"],
+        ["bash", "scripts/build-kernel.sh", "modules"],
+        ["bash", "scripts/build-bringup-userspace.sh"]
+      ],
+      "package": {
+        "artifacts": [
+          {"path": "out/kernel/obj/arch/arm64/boot/Image", "remote": "/boot/Image"},
+          {"path": "out/kernel/obj/arch/arm64/boot/dts/hobot/x5-rdk.dtb", "remote": "/boot/hobot/x5-rdk.dtb"},
+          {"path": "out/kernel/obj/arch/arm64/boot/dts/hobot/x5-rdk-v1p0.dtb", "remote": "/boot/hobot/x5-rdk-v1p0.dtb"}
+        ]
+      },
+      "deploy": {"kind": "image", "reason": "kernel changes must be assembled into the image and flashed"}
+    },
+    "oh": {
+      "description": "OpenHarmony userspace images",
+      "build": [
+        ["bash", "scripts/prepare-openharmony.sh"],
+        ["bash", "scripts/build-openharmony.sh"]
+      ],
+      "package": {
+        "artifacts": [
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/images/system.img"},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/images/vendor.img"},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/images/userdata.img"}
+        ]
+      },
+      "deploy": {"kind": "image", "reason": "userspace images feed image assembly"}
+    },
+    "display": {
+      "description": "Display composer VDI and HDI service",
+      "build": [
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/display/composer/vdi_base:display_composer_vdi_impl_default"],
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/display/composer/hdi_service:libdisplay_composer_service_1.3"]
+      ],
+      "package": {
+        "artifacts": [
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/libdisplay_composer_vdi_impl_default.z.so", "remote": "/vendor/lib64/libdisplay_composer_vdi_impl_default.z.so", "mount": "/vendor"},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/libdisplay_composer_service_1.3.z.so", "remote": "/vendor/lib64/libdisplay_composer_service_1.3.z.so", "mount": "/vendor"}
+        ]
+      },
+      "deploy": {
+        "kind": "libs",
+        "restart": [["stop", "composer_host"], ["start", "composer_host"], ["stop", "render_service"], ["start", "render_service"]],
+        "serial_required": true
+      }
+    },
+    "audio": {
+      "description": "Audio HDI vendor libs plus the verified system-side boot fix",
+      "build": [
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/audio/hdi_service/primary:audio_primary_driver"],
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/audio/hdi_service/primary_impl:audio_primary_impl_vendor"],
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/audio/hdi_service/supportlibs:audio_render_adapter"],
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/audio/hdi_service/supportlibs:audio_capture_adapter"]
+      ],
+      "package": {
+        "artifacts": [
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/libaudio_primary_driver.z.so", "remote": "/vendor/lib64/libaudio_primary_driver.z.so", "mount": "/vendor", "deploy": false},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/libaudio_primary_impl_vendor.z.so", "remote": "/vendor/lib64/libaudio_primary_impl_vendor.z.so", "mount": "/vendor", "deploy": false},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/libaudio_render_adapter.z.so", "remote": "/vendor/lib64/libaudio_render_adapter.z.so", "mount": "/vendor", "deploy": false},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/libaudio_capture_adapter.z.so", "remote": "/vendor/lib64/libaudio_capture_adapter.z.so", "mount": "/vendor", "deploy": false},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/system/lib64/libaccountmgr.z.so", "remote": "/system/lib64/libaccountmgr.z.so", "mount": "/"},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/system/lib64/libsink_adapter.z.so", "remote": "/system/lib64/libsink_adapter.z.so", "mount": "/"},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/system/lib64/libmodule-hdi-sink.z.so", "remote": "/system/lib64/libmodule-hdi-sink.z.so", "mount": "/"}
+        ]
+      },
+      "deploy": {
+        "kind": "libs",
+        "modules": [{"path": "out/driver-bundle/lib/modules/${KERNEL_RELEASE}/designware_i2s.ko", "name": "designware_i2s"}],
+        "directories": ["/data/app/el3", "/data/app/el4", "/data/app/el5", "/data/service/el3", "/data/service/el4", "/data/service/el5"],
+        "restart": [["stop", "audio_server"], ["stop", "accountmgr"], ["start", "accountmgr"], ["start", "audio_server"]],
+        "note": "vendor HDI libs are packaged but not hot-deployed; only the paths verified by deploy-boot-audio-fix.sh are applied"
+      }
+    },
+    "input": {
+      "description": "Input HDI udriver and service",
+      "build": [
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/input/udriver:hdi_input_udriver"],
+        ["bash", "scripts/build-target.sh", "drivers/peripheral/input/hdi_service:libinput_interfaces_service_1.0"]
+      ],
+      "package": {
+        "artifacts": [
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/passthrough/indirect/libhdi_input_udriver.z.so", "remote": "/vendor/lib64/passthrough/indirect/libhdi_input_udriver.z.so", "mount": "/vendor"},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/passthrough/libinput_interfaces_service_1.0.z.so", "remote": "/vendor/lib64/passthrough/libinput_interfaces_service_1.0.z.so", "mount": "/vendor"}
+        ]
+      },
+      "deploy": {"kind": "image", "reason": "no verified HDF host reload path for input; use image assembly"}
+    },
+    "settings": {
+      "description": "Rebuilt Settings HAP",
+      "build": [["bash", "scripts/build-settings-hap.sh"]],
+      "package": {
+        "artifacts": [
+          {"path": "out/settings/Settings.hap", "remote": "/system/app/com.ohos.settings/Settings.hap"}
+        ]
+      },
+      "deploy": {"kind": "image", "reason": "hot HAP replacement is unverified; use image assembly"}
+    },
+    "nearlink": {
+      "description": "WS73 kernel modules, configuration and SSAP library",
+      "build": [
+        ["python3", "scripts/prepare-nearlink.py"],
+        ["bash", "scripts/build-nearlink.sh"],
+        ["bash", "scripts/build-target.sh", "device/board/drobotics/rdk_x5/nearlink:rdkhm_ssap"],
+        ["python3", "scripts/prepare-driver-bundle.py"]
+      ],
+      "package": {
+        "artifacts": [
+          {"path": "out/driver-bundle/lib/modules/${KERNEL_RELEASE}/plat_soc.ko"},
+          {"path": "out/driver-bundle/lib/modules/${KERNEL_RELEASE}/wifi_soc.ko"},
+          {"path": "out/driver-bundle/lib/modules/${KERNEL_RELEASE}/bluetooth.ko"},
+          {"path": "out/driver-bundle/lib/modules/${KERNEL_RELEASE}/ble_soc.ko"},
+          {"path": "out/driver-bundle/lib/modules/${KERNEL_RELEASE}/sle_soc.ko"},
+          {"path": "out/nearlink/ws73_cfg.ini", "remote": "/vendor/etc/ws73_cfg.ini", "mount": "/vendor"},
+          {"path": "sources/oh/openharmony-full/out/rdk_x5/packages/phone/vendor/lib64/librdkhm_ssap.so", "remote": "/vendor/lib64/librdkhm_ssap.so", "deploy": false}
+        ]
+      },
+      "deploy": {
+        "kind": "modules",
+        "load_order": ["plat_soc", "wifi_soc", "bluetooth", "ble_soc", "sle_soc"],
+        "serial_required": true
+      }
+    },
+    "accelerators": {
+      "description": "GPU/BPU runtime, kernel modules and driver bundle",
+      "build": [
+        ["python3", "scripts/prepare-accelerators.py"],
+        ["bash", "scripts/build-accelerator-modules.sh"],
+        ["bash", "scripts/build-kernel.sh", "modules"],
+        ["python3", "scripts/prepare-driver-bundle.py"]
+      ],
+      "package": {
+        "artifacts": [
+          {"path": "out/accelerator-runtime"},
+          {"path": "out/driver-bundle/etc/rdkhm-accelerators.json", "remote": "/vendor/etc/rdkhm-accelerators.json", "deploy": false}
+        ]
+      },
+      "deploy": {"kind": "image", "reason": "runtime, firmware and modules are delivered through the driver bundle; use image assembly"}
+    },
+    "pintool": {
+      "description": "RDK X5 40-pin PinTool HAP",
+      "build": [["bash", "scripts/build-pintool-hap.sh"]],
+      "package": {
+        "artifacts": [
+          {"path": "out/haps/rdkhm_pintool.hap", "remote": "/system/app/com.rdkhm.pintool/PinTool.hap"}
+        ]
+      },
+      "deploy": {"kind": "image", "reason": "system HAP injection is part of image assembly"}
+    },
+    "image": {
+      "description": "Assemble the full SD image from existing build outputs",
+      "build": [["bash", "scripts/make-openharmony-image.sh"]],
+      "package": {
+        "artifacts": [
+          {"path": "out/images/rdkhm-x5-openharmony-dev.img"}
+        ]
+      },
+      "deploy": {"kind": "image", "reason": "flashing an SD card is outside this tool; use the recorded image hash"}
+    }
+  }
+}

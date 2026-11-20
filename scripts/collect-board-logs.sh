@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -u
 workspace=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-hdc="$workspace/sources/openharmony-full/prebuilts/ohos-sdk/linux/20/toolchains/hdc"
-target=${1:-10.43.10.159:5555}
+source "$workspace/env.sh"
+hdc="$RDKHM_HDC"
+target=${1:?usage: $0 <hdc-target:port>}
 output="$workspace/out/board-logs/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$output"
 printf '%s\n' "$output"

@@ -1,0 +1,27 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] dsoftbus/0001-optional-client-plugin.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/sdk/frame/init/src/g_enhance_sdk_func.c
++++ b/sdk/frame/init/src/g_enhance_sdk_func.c
+@@ -51,7 +51,7 @@
+     void *soHandle = NULL;
+     (void)SoftBusDlopen(SOFTBUS_HANDLE_CLIENT_PLUGIN, &soHandle);
+     if (soHandle == NULL) {
+-        COMM_LOGE(COMM_SDK, "dlopen libdsoftbus_client_plugin.z.so failed.");
++        COMM_LOGW(COMM_SDK, "optional libdsoftbus_client_plugin.z.so not present.");
+         return;
+     }
+     ClientRegisterEnhanceFunc(soHandle);
+--- a/sdk/frame/common/src/softbus_client_frame_manager.c
++++ b/sdk/frame/common/src/softbus_client_frame_manager.c
+@@ -194,7 +194,7 @@
+     void *soHandle = NULL;
+     (void)SoftBusDlopen(SOFTBUS_HANDLE_CLIENT_PLUGIN, &soHandle);
+     if (soHandle == NULL) {
+-        COMM_LOGE(COMM_SDK, "dlopen libdsoftbus_client_plugin.z.so failed.");
++        COMM_LOGW(COMM_SDK, "optional libdsoftbus_client_plugin.z.so not present.");
+         return;
+     }
+ 

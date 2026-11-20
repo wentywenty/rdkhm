@@ -1,0 +1,197 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] launcher: capture remaining bring-up fallbacks
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/common/src/main/ets/default/layoutconfig/PageDesktopAppModeConfig.ts
++++ b/common/src/main/ets/default/layoutconfig/PageDesktopAppModeConfig.ts
+@@ -99,7 +99,7 @@ export class PageDesktopAppModeConfig extends ILayoutConfig {
+     globalThis.RdbStoreManagerInstance.queryDesktopApplication()
+       .then((config) => {
+         Log.showDebug(TAG, 'loadPersistConfig configFromRdb success.');
+-        this.mAppListInfo = config;
++        this.mAppListInfo = (config && config.length > 0) ? config : defaultConfig;
+     }).catch((err) => {
+       Log.showError(TAG, `loadPersistConfig configFromRdb err: ${err.toString()}`);
+       this.mAppListInfo = defaultConfig;
+--- a/common/src/main/ets/default/layoutconfig/PageDesktopLayoutConfig.ts
++++ b/common/src/main/ets/default/layoutconfig/PageDesktopLayoutConfig.ts
+@@ -132,7 +132,7 @@ export class PageDesktopLayoutConfig extends ILayoutConfig {
+       defaultConfig = JSON.parse(configFromFile);
+     }
+     const configFromRdb = await globalThis.RdbStoreManagerInstance.queryGridLayoutInfo();
+-    if (configFromRdb) {
++    if (configFromRdb && configFromRdb.length > 0) {
+       defaultConfig.layoutInfo = configFromRdb;
+     }
+     this.mGridLayoutInfo = defaultConfig;
+--- a/common/src/main/ets/default/manager/LauncherAbilityManager.ts
++++ b/common/src/main/ets/default/manager/LauncherAbilityManager.ts
+@@ -41,7 +41,7 @@ interface BundleStatusCallback {
+  * Wrapper class for innerBundleManager and formManager interfaces.
+  */
+ class LauncherAbilityManager {
+-  private static readonly CURRENT_USER_ID = 100;
++  private static readonly CURRENT_USER_ID = -2;
+   private readonly mAppMap = new Map<string, AppItemInfo>();
+   private mUserId: number = 100;
+   private mIsNeedRegisterBundleCallback = false;
+@@ -177,15 +177,14 @@ class LauncherAbilityManager {
+    * get all app List info from BMS
+    */
+   async getLauncherAbilityList(): Promise<AppItemInfo[]> {
+-    const specs = [
+-      ['设置', 'com.ohos.settings', 'com.ohos.settings.MainAbility', 'phone'],
+-      ['相机', 'com.ohos.camera', 'com.ohos.camera.MainAbility', 'phone'],
+-      ['图库', 'com.ohos.photos', 'com.ohos.photos.MainAbility', 'phone_photos'],
+-      ['联系人', 'com.ohos.contacts', 'com.ohos.contacts.MainAbility', 'entry'],
+-      ['备忘录', 'com.ohos.note', 'MainAbility', 'default'],
+-      ['文件', 'com.ohos.filepicker', 'MainAbility', 'entry'],
+-      ['信息', 'com.ohos.mms', 'com.ohos.mms.MainAbility', 'phone'],
+-      ['权限', 'com.ohos.permissionmanager', 'com.ohos.permissionmanager.MainAbility', 'entry']
++    const specs: Array<[string, string, string, string, number, number]> = [
++      ['设置', 'com.ohos.settings', 'com.ohos.settings.MainAbility', 'phone', 33554434, 33554432],
++      ['相机', 'com.ohos.camera', 'com.ohos.camera.MainAbility', 'phone', 50331651, 50331648],
++      ['图库', 'com.ohos.photos', 'com.ohos.photos.MainAbility', 'phone_photos', 16777218, 16777216],
++      ['联系人', 'com.ohos.contacts', 'com.ohos.contacts.MainAbility', 'entry', 100663297, 100663296],
++      ['备忘录', 'com.ohos.note', 'MainAbility', 'default', 33554441, 33554435],
++      ['文件', 'com.ohos.filepicker', 'AudiopickerAbility', 'entry', 33554433, 33554432],
++      ['信息', 'com.ohos.mms', 'com.ohos.mms.MainAbility', 'entry', 16777218, 16777330]
+     ];
+     const list = new Array<AppItemInfo>();
+     for (const spec of specs) {
+@@ -195,14 +194,24 @@ class LauncherAbilityManager {
+       item.abilityName = spec[2];
+       item.moduleName = spec[3];
+       item.keyName = spec[1];
+-      item.appIconId = 0;
+-      item.appLabelId = 0;
++      item.appIconId = spec[4];
++      item.appLabelId = spec[5];
++      item.typeId = CommonConstants.TYPE_APP;
++      item.isSystemApp = true;
++      item.isUninstallAble = false;
++      ResourceManager.getInstance().updateIconCache(item.appIconId, item.bundleName, item.moduleName);
+       list.push(item);
+     }
+     Log.showInfo(TAG, `static launcher list length: ${list.length}`);
+     return list;
+   }
+ 
++  /**
++   * get AbilityInfos by bundleName from BMS
++   *
++   * @params bundleName Application package name
++   * @return List of entry capabilities information of the target application
++   */
+   async getLauncherAbilityInfo(bundleName: string): Promise<AppItemInfo[]> {
+     let abilityInfos: launcherBundleManager.LauncherAbilityInfo[];
+     await launcherBundleManager.getLauncherAbilityInfo(bundleName, this.mUserId)
+--- a/common/src/main/ets/default/manager/ResourceManager.ts
++++ b/common/src/main/ets/default/manager/ResourceManager.ts
+@@ -79,7 +79,7 @@ export class ResourceManager {
+       let resMgr: resourceManager.ResourceManager = globalThis.desktopContext.createModuleResourceManager(bundleName, moduleName);
+       let imageDescriptor: DrawableDescriptor = (resMgr.getDrawableDescriptor(Number(iconId), undefined));
+       let value: image.PixelMap = imageDescriptor.getPixelMap();
+-      if (imageDescriptor instanceof LayeredDrawableDescriptor) {
++      if (imageDescriptor instanceof LayeredDrawableDescriptor && value != null) {
+         Log.showDebug(TAG, 'updateIconCache layered icon');
+         this.setAppResourceCache(cacheKey, KEY_ICON, value);
+       } else {
+--- a/feature/pagedesktop/src/main/ets/default/common/components/GridSwiper.ets
++++ b/feature/pagedesktop/src/main/ets/default/common/components/GridSwiper.ets
+@@ -162,9 +162,7 @@ export default struct GridSwiper {
+           }
+           .id(`${TAG}_Swiper`)
+           .padding({
+-            top: this.navigationBarStatusValue ?
+-              this.mPageDesktopViewModel!.getPageDesktopStyleConfig().mDesktopMarginTop :
+-              this.mPageDesktopViewModel!.getPageDesktopStyleConfig().mDesktopMarginTop + 0
++            top: this.mPageDesktopViewModel?.getPageDesktopStyleConfig()?.mDesktopMarginTop ?? 0
+           })
+           .height(StyleConstants.PERCENTAGE_100)
+           .width(StyleConstants.PERCENTAGE_100)
+--- a/feature/pagedesktop/src/main/ets/default/layout/PageDesktopLayout.ets
++++ b/feature/pagedesktop/src/main/ets/default/layout/PageDesktopLayout.ets
+@@ -64,6 +64,7 @@ export struct PageDesktopLayout {
+     mPageDesktopViewModel = PageDesktopViewModel.getInstance();
+     this.gridConfig = mPageDesktopViewModel.getGridConfig().layout;
+     this.updateStyle();
++    mPageDesktopViewModel.updateDesktopInfo();
+     if (this.deviceType != CommonConstants.PAD_DEVICE_TYPE) {
+       mPageDesktopViewModel.registerAppListChangeCallback();
+     }
+--- a/product/phone/src/main/ets/MainAbility/MainAbility.ts
++++ b/product/phone/src/main/ets/MainAbility/MainAbility.ts
+@@ -15,6 +15,7 @@
+ 
+ import ServiceExtension from '@ohos.app.ability.ServiceExtensionAbility';
+ import display from '@ohos.display';
++import screen from '@ohos.screen';
+ import Want from '@ohos.app.ability.Want';
+ import {
+   Log,
+@@ -67,9 +68,23 @@ export default class MainAbility extends ServiceExtension {
+     windowManager.createWindow(globalThis.desktopContext, windowManager.DESKTOP_WINDOW_NAME,
+       windowManager.DESKTOP_RANK, 'pages/' + windowManager.DESKTOP_WINDOW_NAME, true, registerWinEvent);
+ 
++    screen.setScreenRotationLocked(false).then(() => {
++      Log.showInfo(TAG, 'setScreenRotationLocked(false) success');
++    }).catch((err: Error) => {
++      Log.showError(TAG, `setScreenRotationLocked failed: ${JSON.stringify(err)}`);
++    });
++    window.getLastWindow(this.context).then((lastWindow: Window.Window) => {
++      lastWindow.setPreferredOrientation(window.Orientation.PORTRAIT).catch((err: Error) => {
++        Log.showError(TAG, `setPreferredOrientation failed: ${JSON.stringify(err)}`);
++      });
++    }).catch((err: Error) => {
++      Log.showError(TAG, `getLastWindow failed: ${JSON.stringify(err)}`);
++    });
++
+     let dbStore = RdbStoreManager.getInstance();
+     await dbStore.initRdbConfig();
+     await dbStore.createTable();
++    AppStorage.setOrCreate('loaded', true);
+ 
+     await PreferencesHelper.getInstance().initPreference(this.context);
+     AppStorage.setOrCreate('firstActivate', true);
+--- a/product/phone/src/main/ets/pages/EntryView.ets
++++ b/product/phone/src/main/ets/pages/EntryView.ets
+@@ -53,10 +53,8 @@ struct EntryView {
+ 
+   onPageShow(): void {
+     Log.showInfo(TAG, 'onPageShow');
+-    let firstActivate:boolean | undefined = AppStorage.get('firstActivate');
+-    if (firstActivate) {
+-      this.voteBootEvent();
+-    }
++    AppStorage.setOrCreate('loaded', true);
++    this.voteBootEvent();
+   }
+ 
+   onPageHide(): void {
+@@ -65,6 +63,13 @@ struct EntryView {
+ 
+   aboutToAppear(): void {
+     Log.showInfo(TAG, 'aboutToAppear');
++    AppStorage.setOrCreate('loaded', true);
++    try {
++      PageDesktopViewModel.getInstance().updateDesktopInfo();
++      Log.showInfo(TAG, 'PageDesktopViewModel initialized');
++    } catch (error) {
++      Log.showError(TAG, `PageDesktopViewModel init error: ${JSON.stringify(error)}`);
++    }
+     this.mStage.onCreate();
+     this.navigationBarStatus = SettingsModel.getInstance().getValue();
+     this.getWindowSize();
+--- a/product/phone/src/main/module.json5
++++ b/product/phone/src/main/module.json5
+@@ -34,7 +34,7 @@
+             ]
+           }
+         ],
+-        "exported": false,
++        "exported": true,
+         "name": "com.ohos.launcher.MainAbility",
+         "icon": "$media:icon",
+         "description": "$string:mainability_description",

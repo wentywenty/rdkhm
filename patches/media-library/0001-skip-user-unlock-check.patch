@@ -1,0 +1,27 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] media-library/0001-skip-user-unlock-check.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/foundation/multimedia/media_library/frameworks/innerkitsimpl/medialibrary_data_extension/src/media_datashare_ext_ability.cpp
++++ b/foundation/multimedia/media_library/frameworks/innerkitsimpl/medialibrary_data_extension/src/media_datashare_ext_ability.cpp
+@@ -166,17 +166,8 @@
+ 
+ static bool IsStartBeforeUserUnlock()
+ {
+-    int32_t activeUserId = 0;
+-    ErrCode ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(activeUserId);
+-    CHECK_AND_RETURN_RET_LOG(ret == ERR_OK, false,
+-        "GetForegroundOsAccountLocalId fail, ret code %{public}d, result is not credible", ret);
+-    MEDIA_INFO_LOG("Current active account is %{public}d ", activeUserId);
+-    bool isAccountVerified = true; // Assume verified to avoid unknown killing
+-    ErrCode err = AccountSA::OsAccountManager::IsOsAccountVerified(activeUserId, isAccountVerified);
+-    CHECK_AND_RETURN_RET_LOG(err == ERR_OK, false,
+-        "Check activeUserId fail caused by %{public}d, check result is not credible", err);
+-    MEDIA_INFO_LOG("Current user verification result: %{public}d", isAccountVerified);
+-    return !isAccountVerified;
++    // RDKHM: this development image is unlocked without an account credential.
++    return false;
+ }
+ 
+ void MediaDataShareExtAbility::InitPermissionHandler()

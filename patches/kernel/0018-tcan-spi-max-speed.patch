@@ -1,0 +1,32 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0018-tcan-spi-max-speed.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/drivers/net/can/m_can/tcan4x5x-core.c
++++ b/drivers/net/can/m_can/tcan4x5x-core.c
+@@ -6,6 +6,12 @@
+ 
+ #define TCAN4X5X_EXT_CLK_DEF 20000000
+ 
++/* TCAN4550 SPI interface is limited to 10 MHz. The X5 RDK device trees
++ * request 18 MHz, which makes the device ID read back as zero and leaves
++ * m_can unable to initialize the controller. Clamp to the datasheet limit.
++ */
++#define TCAN4X5X_SPI_MAX_HZ 10000000
++
+ #define TCAN4X5X_DEV_ID0 0x00
+ #define TCAN4X5X_DEV_ID1 0x04
+ #define TCAN4X5X_REV 0x08
+@@ -350,6 +356,11 @@ static int tcan4x5x_can_probe(struct spi_device *spi)
+ 
+ 	/* Configure the SPI bus */
+ 	spi->bits_per_word = 8;
++	if (spi->max_speed_hz > TCAN4X5X_SPI_MAX_HZ) {
++		dev_info(&spi->dev, "clamping SPI speed %u -> %u Hz\n",
++			 spi->max_speed_hz, TCAN4X5X_SPI_MAX_HZ);
++		spi->max_speed_hz = TCAN4X5X_SPI_MAX_HZ;
++	}
+ 	ret = spi_setup(spi);
+ 	if (ret)
+ 		goto out_m_can_class_free_dev;

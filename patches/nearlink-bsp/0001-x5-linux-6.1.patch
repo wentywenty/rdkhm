@@ -1,5 +1,8 @@
-diff --git a/driver/bsle/ble_driver/linux/ble_host_hcc.c b/driver/bsle/ble_driver/linux/ble_host_hcc.c
-index 5bf3c1b..4a8d1c7 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] nearlink-bsp/0001-x5-linux-6.1.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/driver/bsle/ble_driver/linux/ble_host_hcc.c
 +++ b/driver/bsle/ble_driver/linux/ble_host_hcc.c
 @@ -5,7 +5,7 @@
@@ -21,8 +24,6 @@ index 5bf3c1b..4a8d1c7 100644
  
  static oal_int32 set_bt_addr(void)
  {
-diff --git a/driver/bsle/sle_driver/sle_dev/sle_dev.c b/driver/bsle/sle_driver/sle_dev/sle_dev.c
-index ad6ce20..7475f3e 100755
 --- a/driver/bsle/sle_driver/sle_dev/sle_dev.c
 +++ b/driver/bsle/sle_driver/sle_dev/sle_dev.c
 @@ -313,13 +313,13 @@ static void sle_misc_device_deregister(void)
@@ -48,8 +49,6 @@ index ad6ce20..7475f3e 100755
 -}
 \ No newline at end of file
 +}
-diff --git a/driver/bsle/sle_driver/sle_host_register.c b/driver/bsle/sle_driver/sle_host_register.c
-index 17b21a5..7b05a96 100644
 --- a/driver/bsle/sle_driver/sle_host_register.c
 +++ b/driver/bsle/sle_driver/sle_host_register.c
 @@ -1,7 +1,7 @@
@@ -61,8 +60,6 @@ index 17b21a5..7b05a96 100644
  #include "sle_dev.h"
  #include "sle_tm_chba_proc.h"
  #include "sle_hcc_proc.h"
-diff --git a/driver/platform/libc_sec/include/securec.h b/driver/platform/libc_sec/include/securec.h
-index b035a18..91f40dc 100644
 --- a/driver/platform/libc_sec/include/securec.h
 +++ b/driver/platform/libc_sec/include/securec.h
 @@ -17,8 +17,12 @@
@@ -78,8 +75,6 @@ index b035a18..91f40dc 100644
  
  #ifndef SECUREC_HAVE_ERRNO_H
  #define SECUREC_HAVE_ERRNO_H 1
-diff --git a/driver/platform/osal/include/soc_osal.h b/driver/platform/osal/include/soc_osal.h
-index d9619d1..33e9f88 100644
 --- a/driver/platform/osal/include/soc_osal.h
 +++ b/driver/platform/osal/include/soc_osal.h
 @@ -9,8 +9,12 @@
@@ -95,8 +90,6 @@ index d9619d1..33e9f88 100644
  #ifdef CONFIG_NO_SUPPORT_OSAL
  #include <linux/vmalloc.h>
  #include <linux/slab.h>
-diff --git a/driver/platform/osal/linux/osal_timer.c b/driver/platform/osal/linux/osal_timer.c
-index 9802b49..f77359f 100644
 --- a/driver/platform/osal/linux/osal_timer.c
 +++ b/driver/platform/osal/linux/osal_timer.c
 @@ -99,7 +99,7 @@ int osal_timer_stop(osal_timer *timer)
@@ -117,8 +110,6 @@ index 9802b49..f77359f 100644
      kfree(time_info);
      timer->timer = NULL;
      return 0;
-diff --git a/driver/platform/pm/plat_pm_board.c b/driver/platform/pm/plat_pm_board.c
-index abeedd7..e24e999 100644
 --- a/driver/platform/pm/plat_pm_board.c
 +++ b/driver/platform/pm/plat_pm_board.c
 @@ -638,11 +638,11 @@ err_init:
@@ -135,8 +126,6 @@ index abeedd7..e24e999 100644
  }
  
  #if defined(_PRE_OS_VERSION) && defined(_PRE_OS_VERSION_LINUX) && (_PRE_OS_VERSION_LINUX == _PRE_OS_VERSION)
-diff --git a/driver/wifi/inc/oal/oal_net.h b/driver/wifi/inc/oal/oal_net.h
-index 63781b6..3985a37 100644
 --- a/driver/wifi/inc/oal/oal_net.h
 +++ b/driver/wifi/inc/oal/oal_net.h
 @@ -1364,6 +1364,7 @@ static inline td_s32 oal_nla_type(const oal_nlattr_stru *nla)
@@ -155,8 +144,6 @@ index 63781b6..3985a37 100644
  
  static inline td_u16  oal_csum_ipv6_magic(oal_in6_addr *ipv6_s,       oal_in6_addr *ipv6_d,
      td_u32 len, td_u16 proto, td_u32 sum)
-diff --git a/driver/wifi/inc/oal/oal_net_cfg80211.h b/driver/wifi/inc/oal/oal_net_cfg80211.h
-index 6b0f3d4..0d00ded 100644
 --- a/driver/wifi/inc/oal/oal_net_cfg80211.h
 +++ b/driver/wifi/inc/oal/oal_net_cfg80211.h
 @@ -15,6 +15,7 @@
@@ -175,8 +162,6 @@ index 6b0f3d4..0d00ded 100644
  
  #include <linux/version.h>
  #include <linux/netdevice.h>
-diff --git a/driver/wifi/wal/release/linux/wal_linux_cfg80211.c b/driver/wifi/wal/release/linux/wal_linux_cfg80211.c
-index 8d69ba7..7fb06d9 100644
 --- a/driver/wifi/wal/release/linux/wal_linux_cfg80211.c
 +++ b/driver/wifi/wal/release/linux/wal_linux_cfg80211.c
 @@ -1892,7 +1892,7 @@ OAL_STATIC osal_s32 uapi_cfg80211_set_channel(oal_wiphy_stru *wiphy, oal_net_dev

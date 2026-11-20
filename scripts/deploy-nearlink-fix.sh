@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-hdc="$root/sources/openharmony-full/prebuilts/ohos-sdk/linux/20/toolchains/hdc"
-target=${1:-10.43.10.159:5555}
+source "$root/env.sh"
+hdc="$RDKHM_HDC"
+target=${1:?usage: $0 <hdc-target:port>}
 stage="/data/rdkhm-fixes/ws73-$(date +%Y%m%d-%H%M%S)"
 remote() {
     local output status
@@ -14,8 +15,12 @@ remote() {
 }
 remote "mkdir -p $stage"
 printf 'WS73 staging directory: %s\n' "$stage"
+release_file="$root/out/kernel/obj/include/config/kernel.release"
+[[ -f "$release_file" ]] || { echo "Missing $release_file; build the kernel first" >&2; exit 1; }
+release=$(cat "$release_file")
 for name in plat_soc wifi_soc ble_soc sle_soc bluetooth; do
-    file="$root/out/driver-bundle/lib/modules/6.1.83-rdkhm/$name.ko"
+    file="$root/out/driver-bundle/lib/modules/$release/$name.ko"
+    [[ -f "$file" ]] || { echo "Missing module: $file" >&2; exit 1; }
     timeout 30 "$hdc" -t "$target" file send "$file" "$stage/$name.ko"
     expected=$(sha256sum "$file" | awk '{print $1}')
     actual=$(remote "/rdkhm/busybox sha256sum $stage/$name.ko" | awk '{print $1}')

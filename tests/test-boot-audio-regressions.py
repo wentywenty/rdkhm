@@ -2,10 +2,14 @@
 """Run production initialization functions with controlled service dependencies."""
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 root = Path(__file__).resolve().parents[1]
-tree = root / 'sources/openharmony-full'
+sys.path.insert(0, str(root / 'scripts'))
+from workspace import environment
+
+tree = Path(environment(root)['RDKHM_OH_TREE'])
 audio = (tree / 'foundation/multimedia/audio_framework/frameworks/native/pulseaudio/modules/hdi/hdi_adapter_intf/sink/sink_adapter.cpp').read_text()
 audio = audio[audio.index('int32_t SinkAdapterInit('):audio.index('void SinkAdapterDeInit(')]
 account = (tree / 'base/account/os_account/services/accountmgr/src/osaccount/os_account_control_file_manager.cpp').read_text()

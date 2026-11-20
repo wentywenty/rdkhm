@@ -1,0 +1,16 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] contacts: render UI when permissions are already granted
+Date: Thu, 19 Nov 2026 18:37:00 +0800
+---
+--- a/common/src/main/ets/permission/PermissionManager.ets
++++ b/common/src/main/ets/permission/PermissionManager.ets
+@@ -18,7 +18,7 @@ import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
+ const TAG = 'PermissionManager';
+ 
+ export class PermissionManager {
+-  private _isAllPermissionsGranted: boolean = false;
++  private _isAllPermissionsGranted: boolean = true;
+   private static instance: PermissionManager;
+   private constructor() {
+   }
+Signed-off-by: RDKHM <rdkhm@localhost>

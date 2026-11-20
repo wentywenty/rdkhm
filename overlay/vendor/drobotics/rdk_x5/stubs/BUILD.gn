@@ -1,0 +1,87 @@
+import("//build/ohos.gni")
+
+ohos_shared_library("deviceprofileadapter") {
+  sources = [ "deviceprofileadapter.cpp" ]
+  include_dirs = [
+    "//foundation/deviceprofile/device_info_manager/common/include/interfaces",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//commonlibrary/c_utils/base/include",
+    "//third_party/json/single_include",
+    "//third_party/bounds_checking_function/include",
+  ]
+  part_name = "product_rdk_x5"
+  subsystem_name = "product_rdk_x5"
+  install_images = [ "system" ]
+  module_install_dir = "lib64/platformsdk"
+}
+
+ohos_shared_library("devicemanagerresident") {
+  sources = [ "devicemanagerresident.cpp" ]
+  include_dirs = [
+    "//foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//commonlibrary/c_utils/base/include",
+    "//third_party/json/single_include",
+    "//third_party/bounds_checking_function/include",
+  ]
+  part_name = "product_rdk_x5"
+  subsystem_name = "product_rdk_x5"
+  install_images = [ "system" ]
+  module_install_dir = "lib64/platformsdk"
+}
+
+ohos_shared_library("security_component_client_enhance") {
+  sources = [ "security_component_client_enhance.cpp" ]
+  include_dirs = [
+    "//base/security/security_component_manager/interfaces/inner_api/security_component/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//commonlibrary/c_utils/base/include",
+    "//third_party/json/single_include",
+    "//third_party/bounds_checking_function/include",
+  ]
+  part_name = "product_rdk_x5"
+  subsystem_name = "product_rdk_x5"
+  install_images = [ "system" ]
+  module_install_dir = "lib64/platformsdk"
+}
+
+ohos_shared_library("dsoftbus_client_plugin") {
+  sources = [ "dsoftbus_client_plugin.cpp" ]
+  defines = [ "FILLP_LINUX" ]
+  include_dirs = [
+    "//foundation/communication/dsoftbus/sdk/frame/init/include",
+    "//foundation/communication/dsoftbus/interfaces/kits/sdk",
+    "//foundation/communication/dsoftbus/interfaces/kits/transport",
+    "//foundation/communication/dsoftbus/interfaces/kits/common",
+    "//foundation/communication/dsoftbus/components/nstackx/fillp/include",
+    "//foundation/communication/dsoftbus/core/common/include",
+    "//foundation/communication/dsoftbus/adapter/common/include",
+    "//foundation/communication/dsoftbus/dfx/interface/include",
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+  ]
+  part_name = "product_rdk_x5"
+  subsystem_name = "product_rdk_x5"
+  install_images = [ "system" ]
+  module_install_dir = "lib64/platformsdk"
+}
+
+ohos_shared_library("task_controller") {
+  sources = [ "task_controller.cpp" ]
+  include_dirs = [
+    "//foundation/resourceschedule/qos_manager/interfaces/inner_api",
+  ]
+  part_name = "product_rdk_x5"
+  subsystem_name = "product_rdk_x5"
+  install_images = [ "system" ]
+  module_install_dir = "lib64"
+}
+
+group("stubs") {
+  deps = [
+    ":deviceprofileadapter",
+    ":devicemanagerresident",
+    ":security_component_client_enhance",
+    ":dsoftbus_client_plugin",
+    ":task_controller",
+  ]
+}

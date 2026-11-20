@@ -19,7 +19,9 @@ while :; do
 done
 g=/config/usb_gadget/g1
 "$bb" mkdir -p /config /dev/usb-ffs/hdc
-"$bb" mount -t configfs none /config
+# init may already mount configfs at /config; a second mount returns busy.
+"$bb" grep -q ' /config configfs ' /proc/mounts ||
+    "$bb" mount -t configfs none /config
 "$bb" mkdir -p "$g"
 echo 0x1d6b > "$g/idVendor"
 echo 0x0104 > "$g/idProduct"
@@ -36,9 +38,11 @@ echo 'RDKHM development HDC' > "$g/strings/0x409/product"
 echo 250 > "$g/configs/b.1/MaxPower"
 echo 1 > "$g/os_desc/b_vendor_code"
 echo MSFT100 > "$g/os_desc/qw_sign"
-"$bb" ln -s "$g/configs/b.1" "$g/os_desc/b.1"
-"$bb" mount -t functionfs -o uid=2000,gid=2000 hdc /dev/usb-ffs/hdc
+[ -e "$g/os_desc/b.1" ] || "$bb" ln -s "$g/configs/b.1" "$g/os_desc/b.1"
+# mkdir functions/ffs.hdc registers the functionfs filesystem lazily.
+"$bb" grep -q ' /dev/usb-ffs/hdc functionfs ' /proc/mounts ||
+    "$bb" mount -t functionfs -o uid=2000,gid=2000 hdc /dev/usb-ffs/hdc
 param set sys.usb.controller "$udc"
 param set sys.usb.configfs 1
-param set persist.hdc.mode.tcp disable
 param set sys.usb.config hdc
+param set persist.sys.usb.config hdc

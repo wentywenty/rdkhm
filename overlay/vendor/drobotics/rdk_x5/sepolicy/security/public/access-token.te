@@ -1,0 +1,4 @@
+# The X5 access-token kernel ABI uses the same ioctl number as upstream OHOS.
+# Keep the rule explicit; the kernel-side magic/structure check remains separate.
+allow time_service dev_at_file:chr_file { ioctl };
+allowxperm time_service dev_at_file:chr_file ioctl { 0x5413 };

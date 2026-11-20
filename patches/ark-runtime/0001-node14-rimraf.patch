@@ -1,5 +1,8 @@
-diff --git a/static_core/plugins/ets/tools/declgen_ts2sts/package.json b/static_core/plugins/ets/tools/declgen_ts2sts/package.json
-index 764b7679..db77d5ec 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] ark-runtime/0001-node14-rimraf.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/static_core/plugins/ets/tools/declgen_ts2sts/package.json
 +++ b/static_core/plugins/ets/tools/declgen_ts2sts/package.json
 @@ -36,7 +36,7 @@

@@ -1,0 +1,245 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] audio/0004-optional-running-lock.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/frameworks/native/hdiadapter_new/sink/audio_render_sink.cpp
++++ b/frameworks/native/hdiadapter_new/sink/audio_render_sink.cpp
+@@ -599,7 +599,9 @@
+ int32_t AudioRenderSink::UpdateAppsUid(const int32_t appsUid[MAX_MIX_CHANNELS], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+ #endif
+     return SUCCESS;
+@@ -608,7 +610,9 @@
+ int32_t AudioRenderSink::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+--- a/frameworks/native/hdiadapter_new/sink/bluetooth_audio_render_sink.cpp
++++ b/frameworks/native/hdiadapter_new/sink/bluetooth_audio_render_sink.cpp
+@@ -309,7 +309,9 @@
+     }
+     int32_t ret = DoRenderFrame(data, len, writeLen);
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+     return ret;
+@@ -534,7 +536,9 @@
+ int32_t BluetoothAudioRenderSink::UpdateAppsUid(const int32_t appsUid[MAX_MIX_CHANNELS], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+ #endif
+     return SUCCESS;
+@@ -543,7 +547,9 @@
+ int32_t BluetoothAudioRenderSink::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+--- a/frameworks/native/hdiadapter_new/sink/direct_audio_render_sink.cpp
++++ b/frameworks/native/hdiadapter_new/sink/direct_audio_render_sink.cpp
+@@ -341,7 +341,9 @@
+ int32_t DirectAudioRenderSink::UpdateAppsUid(const int32_t appsUid[MAX_MIX_CHANNELS], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+ #endif
+     return SUCCESS;
+@@ -350,7 +352,9 @@
+ int32_t DirectAudioRenderSink::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+--- a/frameworks/native/hdiadapter_new/sink/fast_audio_render_sink.cpp
++++ b/frameworks/native/hdiadapter_new/sink/fast_audio_render_sink.cpp
+@@ -418,7 +418,9 @@
+ int32_t FastAudioRenderSink::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+--- a/frameworks/native/hdiadapter_new/sink/multichannel_audio_render_sink.cpp
++++ b/frameworks/native/hdiadapter_new/sink/multichannel_audio_render_sink.cpp
+@@ -452,7 +452,9 @@
+ int32_t MultichannelAudioRenderSink::UpdateAppsUid(const int32_t appsUid[MAX_MIX_CHANNELS], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+ #endif
+     return SUCCESS;
+@@ -461,7 +463,9 @@
+ int32_t MultichannelAudioRenderSink::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+--- a/frameworks/native/hdiadapter_new/sink/offload_audio_render_sink.cpp
++++ b/frameworks/native/hdiadapter_new/sink/offload_audio_render_sink.cpp
+@@ -435,7 +435,9 @@
+ int32_t OffloadAudioRenderSink::UpdateAppsUid(const int32_t appsUid[MAX_MIX_CHANNELS], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+ #endif
+     return SUCCESS;
+@@ -444,7 +446,9 @@
+ int32_t OffloadAudioRenderSink::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+ #endif
+     return SUCCESS;
+--- a/frameworks/native/hdiadapter_new/sink/remote_offload_audio_render_sink.cpp
++++ b/frameworks/native/hdiadapter_new/sink/remote_offload_audio_render_sink.cpp
+@@ -745,7 +745,9 @@
+ int32_t RemoteOffloadAudioRenderSink::UpdateAppsUid(const int32_t appsUid[MAX_MIX_CHANNELS], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+ #endif
+     return SUCCESS;
+@@ -754,7 +756,9 @@
+ int32_t RemoteOffloadAudioRenderSink::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+ #endif
+     return SUCCESS;
+--- a/frameworks/native/hdiadapter_new/source/audio_capture_source.cpp
++++ b/frameworks/native/hdiadapter_new/source/audio_capture_source.cpp
+@@ -531,7 +531,9 @@
+ int32_t AudioCaptureSource::UpdateAppsUid(const int32_t appsUid[PA_MAX_OUTPUTS_PER_SOURCE], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+@@ -541,7 +543,9 @@
+ int32_t AudioCaptureSource::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+--- a/frameworks/native/hdiadapter_new/source/bluetooth_audio_capture_source.cpp
++++ b/frameworks/native/hdiadapter_new/source/bluetooth_audio_capture_source.cpp
+@@ -363,7 +363,9 @@
+ int32_t BluetoothAudioCaptureSource::UpdateAppsUid(const int32_t appsUid[PA_MAX_OUTPUTS_PER_SOURCE], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+@@ -373,7 +375,9 @@
+ int32_t BluetoothAudioCaptureSource::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif
+--- a/frameworks/native/hdiadapter_new/source/fast_audio_capture_source.cpp
++++ b/frameworks/native/hdiadapter_new/source/fast_audio_capture_source.cpp
+@@ -276,7 +276,9 @@
+ int32_t FastAudioCaptureSource::UpdateAppsUid(const int32_t appsUid[PA_MAX_OUTPUTS_PER_SOURCE], const size_t size)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid, appsUid + size);
+ #endif
+     return SUCCESS;
+@@ -285,7 +287,9 @@
+ int32_t FastAudioCaptureSource::UpdateAppsUid(const std::vector<int32_t> &appsUid)
+ {
+ #ifdef FEATURE_POWER_MANAGER
+-    CHECK_AND_RETURN_RET_LOG(runningLock_, ERR_INVALID_HANDLE, "running lock is nullptr");
++    if (runningLock_ == nullptr) {
++        return SUCCESS;
++    }
+     runningLock_->UpdateAppsUid(appsUid.cbegin(), appsUid.cend());
+     runningLock_->UpdateAppsUidToPowerMgr();
+ #endif

@@ -1,0 +1,42 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] media-library/0002-datashare-config.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/foundation/multimedia/media_library/MediaLibraryExt/entry/src/main/module.json
++++ b/foundation/multimedia/media_library/MediaLibraryExt/entry/src/main/module.json
+@@ -46,7 +46,13 @@
+         "description": "mediadatashare",
+         "type": "dataShare",
+         "uri": "datashare://media",
+-        "visible": true
++        "visible": true,
++        "metadata": [
++          {
++            "name": "ohos.extension.dataShare",
++            "resource": "$profile:media_data_share_config"
++          }
++        ]
+       },
+       {
+         "srcEntrance": "./ets/MediaBackupExtensionAbility/MediaBackupExtensionAbility.ts",
+--- /dev/null
++++ b/foundation/multimedia/media_library/MediaLibraryExt/entry/src/main/resources/base/profile/media_data_share_config.json
+@@ -0,0 +1,17 @@
++{
++  "tableConfig": [
++    {
++      "uri": "*",
++      "crossUserMode": 1
++    },
++    {
++      "uri": "datashare:///media",
++      "crossUserMode": 1
++    },
++    {
++      "uri": "datashare:///media/*",
++      "crossUserMode": 1
++    }
++  ],
++  "storeMetaDataFromUri": true
++}

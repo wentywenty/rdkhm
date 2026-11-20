@@ -1,0 +1,21 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] bundlemanager/0001-optional-bms-extension.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/interfaces/inner_api/bundlemgr_extension/src/bms_extension_profile.cpp
++++ b/interfaces/inner_api/bundlemgr_extension/src/bms_extension_profile.cpp
+@@ -36,6 +36,13 @@
+     const std::string &jsonPath, BmsExtension &bmsExtension) const
+ {
+     APP_LOGD("Parse BmsExtension from %{private}s", jsonPath.c_str());
++    if (access(jsonPath.c_str(), F_OK) != 0) {
++        /* bms-extensions is optional; a missing product file must not fail
++         * bundle verification or spam the boot log. */
++        APP_LOGW("optional bms extension not present: %{public}s", jsonPath.c_str());
++        bmsExtension = {};
++        return ERR_OK;
++    }
+     nlohmann::json jsonBuf;
+     if (!ReadFileIntoJson(jsonPath, jsonBuf)) {
+         APP_LOGE("Parse failed, jsonPath: %{public}s", jsonPath.c_str());

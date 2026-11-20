@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 
 workspace = Path(__file__).resolve().parents[1]
-source = (workspace / "bringup/capture-hilog.sh").read_text()
+source = (workspace / "bringup/status/capture-hilog.sh").read_text()
 with tempfile.TemporaryDirectory(prefix="rdkhm-hilog-") as directory:
     root = Path(directory)
     logs = root / "logs"

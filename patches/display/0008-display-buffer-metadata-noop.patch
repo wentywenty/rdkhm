@@ -1,0 +1,59 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0008-display-buffer-metadata-noop.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/display/buffer/vdi_base/src/display_buffer_vdi_impl.cpp
++++ b/display/buffer/vdi_base/src/display_buffer_vdi_impl.cpp
+@@ -82,32 +82,41 @@ int32_t DisplayBufferVdiImpl::IsSupportedAlloc(const std::vector<VerifyAllocInfo
+ 
+ int32_t DisplayBufferVdiImpl::RegisterBuffer(const BufferHandle& handle)
+ {
+-    DISPLAY_LOGE("%s is not supported", __func__);
+-    return DISPLAY_NOT_SUPPORT;
++    /* X5 bring-up uses GBM buffers for CPU composition; metadata registration is
++     * not required by the software render path. Return success so allocation
++     * does not fail before a real metadata backend is available. */
++    (void)handle;
++    return HDF_SUCCESS;
+ }
+ 
+ int32_t DisplayBufferVdiImpl::SetMetadata(const BufferHandle& handle, uint32_t key, const std::vector<uint8_t>& value)
+ {
+-    DISPLAY_LOGE("%s is not supported", __func__);
+-    return DISPLAY_NOT_SUPPORT;
++    (void)handle;
++    (void)key;
++    (void)value;
++    return HDF_SUCCESS;
+ }
+ 
+ int32_t DisplayBufferVdiImpl::GetMetadata(const BufferHandle& handle, uint32_t key, std::vector<uint8_t>& value)
+ {
+-    DISPLAY_LOGE("%s is not supported", __func__);
+-    return DISPLAY_NOT_SUPPORT;
++    (void)handle;
++    (void)key;
++    value.clear();
++    return HDF_SUCCESS;
+ }
+ 
+ int32_t DisplayBufferVdiImpl::ListMetadataKeys(const BufferHandle& handle, std::vector<uint32_t>& keys)
+ {
+-    DISPLAY_LOGE("%s is not supported", __func__);
+-    return DISPLAY_NOT_SUPPORT;
++    (void)handle;
++    keys.clear();
++    return HDF_SUCCESS;
+ }
+ 
+ int32_t DisplayBufferVdiImpl::EraseMetadataKey(const BufferHandle& handle, uint32_t key)
+ {
+-    DISPLAY_LOGE("%s is not supported", __func__);
+-    return DISPLAY_NOT_SUPPORT;
++    (void)handle;
++    (void)key;
++    return HDF_SUCCESS;
+ }
+ 
+ int32_t DisplayBufferVdiImpl::GetImageLayout(const BufferHandle& handle, ImageLayout& layout) const

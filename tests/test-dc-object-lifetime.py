@@ -7,7 +7,10 @@ import sys
 import tempfile
 
 workspace = Path(__file__).resolve().parents[1]
-kernel = workspace / "sources/x5-kernel"
+sys.path.insert(0, str(workspace / "scripts"))
+from workspace import environment
+
+kernel = Path(environment(workspace)["RDKHM_KERNEL_TREE"])
 source = Path(sys.argv[1]) if len(sys.argv) > 1 else kernel / "drivers/gpu/drm/verisilicon/dc/dc_proc/dc_proc.c"
 text = source.read_text()
 functions = []

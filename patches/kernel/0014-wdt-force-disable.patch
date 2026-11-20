@@ -1,0 +1,21 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0014-wdt-force-disable.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/drivers/watchdog/dw_wdt.c
++++ b/drivers/watchdog/dw_wdt.c
+@@ -299,6 +299,13 @@ static int dw_wdt_stop(struct watchdog_device *wdd)
+ {
+ 	struct dw_wdt *dw_wdt = to_dw_wdt(wdd);
+ 
++	/* Some X5 firmwares leave the watchdog enabled even when the reset
++	 * control is unavailable. Clear the enable bit directly so userspace
++	 * can stop the watchdog and suspend can disarm it. */
++	writel(readl(dw_wdt->regs + WDOG_CONTROL_REG_OFFSET) &
++	       ~WDOG_CONTROL_REG_WDT_EN_MASK,
++	       dw_wdt->regs + WDOG_CONTROL_REG_OFFSET);
++
+ 	if (!dw_wdt->rst) {
+ 		set_bit(WDOG_HW_RUNNING, &wdd->status);
+ 		return 0;

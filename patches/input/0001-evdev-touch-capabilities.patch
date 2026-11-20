@@ -1,5 +1,8 @@
-diff --git a/input/udriver/src/input_device_manager.cpp b/input/udriver/src/input_device_manager.cpp
-index cb7cf3e..06bf23b 100644
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] input/0001-evdev-touch-capabilities.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/input/udriver/src/input_device_manager.cpp
 +++ b/input/udriver/src/input_device_manager.cpp
 @@ -230,6 +230,8 @@ int32_t InputDeviceManager::GetInputDeviceInfo(int32_t fd, InputDeviceInfo *deta

@@ -1,0 +1,43 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] photos: defer media library init until after UI
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/product/phone/src/main/ets/MainAbility/MainAbility.ts
++++ b/product/phone/src/main/ets/MainAbility/MainAbility.ts
+@@ -65,18 +65,22 @@ export default class MainAbility extends Ability {
+ 
+     this.parseWantParameter(false, want);
+ 
++    appBroadCast.on(BroadCastConstants.THIRD_ROUTE_PAGE, this.thirdRouterPage.bind(this));
++
++    Log.info(TAG, 'Application onCreate end');
++  }
++
++  private initMediaLibrary(): void {
++    // MediaLibrary/DataShare can block for seconds; run it after the UI window
++    // exists so the ability lifecycle does not hit LIFECYCLE_TIMEOUT.
+     UserFileManagerAccess.getInstance().onCreate(AppStorage.get<common.UIAbilityContext>('photosAbilityContext'));
+     MediaObserver.getInstance().registerForAllPhotos();
+     MediaObserver.getInstance().registerForAllAlbums();
+     if (!isFromCard && !isFromCamera) {
+       TimelineDataSourceManager.getInstance();
+     }
+-
+-    appBroadCast.on(BroadCastConstants.THIRD_ROUTE_PAGE, this.thirdRouterPage.bind(this));
+-
+-    // Init system album information
+     UserFileManagerAccess.getInstance().prepareSystemAlbums();
+-    Log.info(TAG, 'Application onCreate end');
++    Log.info(TAG, 'Application media library init end');
+   }
+ 
+   onNewWant(want: Want): void {
+@@ -201,6 +205,7 @@ export default class MainAbility extends Ability {
+         ScreenManager.getInstance().initWindowMode();
+         // @ts-ignore
+         windowStage.setUIContent(this.context, 'pages/index', null);
++        setTimeout(() => this.initMediaLibrary(), 0);
+       }).catch(() => {
+         Log.error(TAG, `get device screen info failed.`);
+       });

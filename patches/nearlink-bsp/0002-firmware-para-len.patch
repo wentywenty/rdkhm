@@ -1,0 +1,16 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] nearlink-bsp/0002-firmware-para-len.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/driver/platform/pm/plat_firmware.h
++++ b/driver/platform/pm/plat_firmware.h
+@@ -114,7 +114,7 @@
+ } firmware_cfg_cmd_enum;
+ 
+ #define FIRMWARE_BOARD_INFO_NAME_LEN       10
+-#define FIRMWARE_BOARD_INFO_PARA_LEN       50
++#define FIRMWARE_BOARD_INFO_PARA_LEN       128
+ 
+ #define FIRMWARE_DOWNLOAD_BT_ROM_OFFSET    1
+ #define FIRMWARE_DOWNLOAD_BT_RAM_OFFSET    2

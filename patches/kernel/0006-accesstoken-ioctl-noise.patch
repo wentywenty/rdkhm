@@ -1,0 +1,20 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0006-accesstoken-ioctl-noise.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/drivers/accesstokenid/access_tokenid.c
++++ b/drivers/accesstokenid/access_tokenid.c
+@@ -339,9 +339,9 @@
+ 	}
+ 
+ 	if (_IOC_TYPE(cmd) != ACCESS_TOKEN_ID_IOCTL_BASE) {
+-		pr_err("%s: access tokenid magic fail, TYPE=%d\n",
+-		       __func__, _IOC_TYPE(cmd));
+-		return -EINVAL;
++		/* Unrelated ioctls such as TCGETS also reach this handler when a
++		 * service probes its descriptors. Report ENOTTY without log spam. */
++		return -ENOTTY;
+ 	}
+ 
+ 	if (func_cmd >= ACCESS_TOKENID_MAX_NR) {

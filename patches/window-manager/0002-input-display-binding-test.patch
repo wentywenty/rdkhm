@@ -1,0 +1,37 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] window-manager/0002-input-display-binding-test.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/wmserver/test/unittest/input_window_monitor_test.cpp
++++ b/wmserver/test/unittest/input_window_monitor_test.cpp
+@@ -53,6 +53,29 @@ void InputWindowMonitorTest::TearDown()
+ }
+ 
+ namespace {
++HWTEST_F(InputWindowMonitorTest, TraverseWindowNodesPreservesDisplayBinding, TestSize.Level1)
++{
++    // Nonzero IDs catch accidental hard-coding to the primary display.
++    for (DisplayId displayId : {DisplayId(0), DisplayId(7)}) {
++        sptr<WindowProperty> property = new WindowProperty();
++        property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
++        sptr<WindowNode> node = new WindowNode(property);
++        node->SetDisplayId(displayId);
++        std::vector<sptr<WindowNode>> nodes {node};
++        std::vector<MMI::WindowInfo> windows;
++        input_monitor_->TraverseWindowNodes(nodes, windows);
++        ASSERT_EQ(windows.size(), 1u);
++        EXPECT_EQ(windows.front().displayId, static_cast<int32_t>(displayId));
++
++        // The next publication must reflect migration to another display.
++        node->SetDisplayId(displayId + 1);
++        windows.clear();
++        input_monitor_->TraverseWindowNodes(nodes, windows);
++        ASSERT_EQ(windows.size(), 1u);
++        EXPECT_EQ(windows.front().displayId, static_cast<int32_t>(displayId + 1));
++    }
++}
++
+ /**
+  * @tc.name: UpdateInputWindow
+  * @tc.desc: Update Input Window

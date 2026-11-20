@@ -1,0 +1,423 @@
+From: rdkhm <rdkhm@localhost>
+Subject: [PATCH] notes: add local persistence fallback when rdb is unavailable
+Signed-off-by: rdkhm <rdkhm@localhost>
+
+---
+--- a/common/utils/src/main/ets/default/baseUtil/RdbStoreUtil.ets
++++ b/common/utils/src/main/ets/default/baseUtil/RdbStoreUtil.ets
+@@ -40,19 +40,195 @@
+ const TAG: string = 'RdbStoreUtil';
+ 
+ const FileMaxSize: number = 20 * 1024 * 1024;
++const LocalStoreFileName: string = 'notes.json';
+ let rdbStore = AppStorage.Get<relationalStore.RdbStore>('rdbStore');
++
++interface LocalStoreData {
++  folders: FolderData[];
++  notes: NoteData[];
++}
+ 
+ /**
+  * db instance
+  */
+ class RdbStoreUtil {
++  private localFilePath(): string {
++    let context = AppStorage.Get<common.UIAbilityContext>('noteContext');
++    if (context == undefined || context == null) {
++      return '';
++    }
++    return context.filesDir + '/' + LocalStoreFileName;
++  }
++
++  private loadLocalData(): boolean {
++    let path = this.localFilePath();
++    if (path.length == 0) {
++      return false;
++    }
++    try {
++      fileio.accessSync(path);
++      let text = fileio.readTextSync(path);
++      let data = JSON.parse(text) as LocalStoreData;
++      if (data == undefined || data.folders == undefined || data.notes == undefined ||
++        data.folders.length == 0) {
++        return false;
++      }
++      let folders: FolderData[] = [];
++      data.folders.forEach((item) => {
++        folders.push(new FolderData(item.id, item.name, item.uuid, item.color, item.folder_type,
++          item.is_deleted, item.created_time, item.modified_time));
++      });
++      let notes: NoteData[] = [];
++      data.notes.forEach((item) => {
++        notes.push(new NoteData(item.id, item.title, item.uuid, item.folder_uuid, item.content_text,
++          item.content_img, item.note_type, item.is_top, item.is_favorite, item.is_deleted,
++          item.created_time, item.modified_time, item.deleted_time, item.slider_value));
++      });
++      let selectedFolder = FolderUtil.getFolderData(folders, SysDefFolderUuid.AllNotes);
++      if (selectedFolder == undefined) {
++        selectedFolder = folders[0];
++      }
++      AppStorage.SetOrCreate('AllFolderArray', folders)
++      AppStorage.SetOrCreate('AllNoteArray', notes)
++      AppStorage.SetOrCreate('Folder', selectedFolder)
++      AppStorage.SetOrCreate('Note', NoteUtil.getFirstNoteData(notes, selectedFolder.uuid))
++      AppStorage.SetOrCreate('Section', 3)
++      AppStorage.SetOrCreate('DBQueryFinished', 1)
++      LogUtil.info(TAG, 'loadLocalData success, notes: ' + notes.length)
++      return true;
++    } catch (err) {
++      LogUtil.warn(TAG, 'loadLocalData failed : ' + err)
++      return false;
++    }
++  }
++
++  private saveLocalData(): void {
++    let path = this.localFilePath();
++    if (path.length == 0) {
++      return;
++    }
++    let folders = AppStorage.Get<FolderData[]>('AllFolderArray');
++    let notes = AppStorage.Get<NoteData[]>('AllNoteArray');
++    if (folders == undefined || notes == undefined) {
++      return;
++    }
++    let data: LocalStoreData = {
++      folders: folders,
++      notes: notes
++    };
++    try {
++      let fd = fileio.openSync(path, 0o2 | 0o100, 0o600);
++      fileio.writeSync(fd, JSON.stringify(data));
++      fileio.closeSync(fd);
++    } catch (err) {
++      LogUtil.error(TAG, 'saveLocalData failed : ' + err)
++    }
++  }
++
++  saveNote(noteData: NoteData): void {
++    let notes = AppStorage.Get<NoteData[]>('AllNoteArray');
++    if (notes != undefined) {
++      let index = notes.findIndex((item) => item.uuid == noteData.uuid);
++      if (index >= 0) {
++        notes[index] = noteData;
++      }
++    }
++    this.saveLocalData();
++  }
++
++  private openStore(context: common.UIAbilityContext): Promise<relationalStore.RdbStore> {
++    return new Promise<relationalStore.RdbStore>((resolve, reject) => {
++      relationalStore.getRdbStore(context, SysDefData.dbInfo.db_name,
++        (err: BusinessError, store: relationalStore.RdbStore) => {
++          if (err) {
++            reject(err);
++          } else {
++            resolve(store);
++          }
++        });
++    });
++  }
++
++  private async ensureSchema(store: relationalStore.RdbStore): Promise<void> {
++    await store.executeSql(TableSql.FolderTableSQL.toString(), null);
++    await store.executeSql(TableSql.NoteTableSQL.toString(), null);
++    await store.executeSql(TableSql.AttachmentTableSQL.toString(), null);
++    await store.executeSql(TableSql.FormTableSQL.toString(), null);
++  }
++
++  private async seedDefaultData(store: relationalStore.RdbStore): Promise<void> {
++    let resultSet = await store.query(new relationalStore.RdbPredicates(TableName.FolderTable), [FolderTableColumn.Id]);
++    let hasFolder = resultSet.goToNextRow();
++    resultSet.close();
++    if (hasFolder) {
++      return;
++    }
++    let sysDefFolderArray = [SysDefData.sys_def_allNotes, SysDefData.sys_def_unClassified,
++      SysDefData.sys_def_myFavorites, SysDefData.sys_def_recentDeletes,
++      SysDefData.sys_def_personal, SysDefData.sys_def_life, SysDefData.sys_def_work];
++    for (let sysDefFolder of sysDefFolderArray) {
++      await store.insert(TableName.FolderTable, sysDefFolder);
++    }
++    let sysDefNoteArray = [SysDefData.sys_def_note1, SysDefData.sys_def_note2,
++      SysDefData.sys_def_note3, SysDefData.sys_def_note4];
++    for (let sysDefNote of sysDefNoteArray) {
++      await store.insert(TableName.NoteTable, sysDefNote);
++    }
++    LogUtil.info(TAG, "seedDefaultData success")
++  }
++
++  private setDefaultState(): void {
++    let folderDataArray: FolderData[] = [];
++    let sysDefFolderArray = [SysDefData.sys_def_allNotes, SysDefData.sys_def_unClassified,
++      SysDefData.sys_def_myFavorites, SysDefData.sys_def_recentDeletes,
++      SysDefData.sys_def_personal, SysDefData.sys_def_life, SysDefData.sys_def_work];
++    sysDefFolderArray.forEach((sysDefFolder) => {
++      let folderData = new FolderData(sysDefFolder.id as number, sysDefFolder.name as string, sysDefFolder.uuid as string, sysDefFolder.color as string,
++        sysDefFolder.folder_type as FolderType, sysDefFolder.is_deleted as Delete, sysDefFolder.created_time as number,
++        sysDefFolder.modified_time as number);
++      folderDataArray.push(folderData);
++    })
++    let noteDataArray: NoteData[] = [];
++    let sysDefNoteArray = [SysDefData.sys_def_note1, SysDefData.sys_def_note2,
++      SysDefData.sys_def_note3, SysDefData.sys_def_note4];
++    sysDefNoteArray.forEach((sysDefNote) => {
++      let noteData = new NoteData(sysDefNote.id as number, sysDefNote.title as string, sysDefNote.uuid as string, sysDefNote.folder_uuid as string,
++        sysDefNote.content_text as string, sysDefNote.content_img as string, sysDefNote.note_type as NoteType, sysDefNote.is_top as Top,
++        sysDefNote.is_favorite as Favorite, sysDefNote.is_deleted as Delete, sysDefNote.created_time as number,
++        sysDefNote.modified_time as number, sysDefNote.deleted_time as number, sysDefNote.slider_value as number);
++      noteDataArray.push(noteData);
++    })
++    AppStorage.SetOrCreate('AllFolderArray', folderDataArray)
++    AppStorage.SetOrCreate('AllNoteArray', noteDataArray)
++    AppStorage.SetOrCreate('Folder', folderDataArray[0])
++    AppStorage.SetOrCreate('Note', NoteUtil.getFirstNoteData(noteDataArray, SysDefFolderUuid.AllNotes))
++    AppStorage.SetOrCreate('Section', 3)
++    AppStorage.SetOrCreate('DBQueryFinished', 1)
++  }
++
++  createRdbStore(context: common.UIAbilityContext) {
++    this.initAppStorage(context)
++  }
++
++  initAppStorage(context: common.UIAbilityContext) {
++    this.setDefaultState()
++    if (this.loadLocalData()) {
++      return
++    }
++    this.saveLocalData()
++  }
++
+   /**
+    * create db and table
+    */
+-  createRdbStore(context: common.UIAbilityContext) {
+-    try {
+-      relationalStore.getRdbStore(context, SysDefData.dbInfo.db_name)
++  private rdbCreateStore(context: common.UIAbilityContext) {
++    this.setDefaultState()
++    try {
++      this.openStore(context)
+         .then(async (store) => {
++          rdbStore = store;
++          await this.ensureSchema(store);
++          await this.seedDefaultData(store);
+           // add sys-def folder and note to AppStorage
+           let folderDataArray: FolderData[] = [];
+           let sysDefFolderArray = [SysDefData.sys_def_allNotes, SysDefData.sys_def_unClassified,
+@@ -148,46 +324,31 @@
+           AppStorage.SetOrCreate('DBQueryFinished', 1)
+           LogUtil.info(TAG, "createRdbStore, set DBQueryFinished 1")
+           LogUtil.info(TAG, "createRdbStore, store is " + store)
+-          rdbStore = store;
+-
+-          // create table
+-          rdbStore.executeSql(TableSql.FolderTableSQL.toString(), null);
+-          rdbStore.executeSql(TableSql.NoteTableSQL.toString(), null);
+-          rdbStore.executeSql(TableSql.AttachmentTableSQL.toString(), null);
+-          rdbStore.executeSql(TableSql.FormTableSQL.toString(), null);
+-          LogUtil.info(TAG, "create table success")
+-          // insert system defined folder
+-          await rdbStore.insert(TableName.FolderTable, SysDefData.sys_def_allNotes);
+-          await rdbStore.insert(TableName.FolderTable, SysDefData.sys_def_unClassified);
+-          await rdbStore.insert(TableName.FolderTable, SysDefData.sys_def_myFavorites);
+-          await rdbStore.insert(TableName.FolderTable, SysDefData.sys_def_recentDeletes);
+-          await rdbStore.insert(TableName.FolderTable, SysDefData.sys_def_personal);
+-          await rdbStore.insert(TableName.FolderTable, SysDefData.sys_def_life);
+-          await rdbStore.insert(TableName.FolderTable, SysDefData.sys_def_work);
+-          LogUtil.info(TAG, "insert system defined folder success")
+-          // insert system defined note and attachment
+-          await rdbStore.insert(TableName.NoteTable, SysDefData.sys_def_note1);
+-          await rdbStore.insert(TableName.NoteTable, SysDefData.sys_def_note2);
+-          await rdbStore.insert(TableName.NoteTable, SysDefData.sys_def_note3);
+-          await rdbStore.insert(TableName.NoteTable, SysDefData.sys_def_note4);
+-          LogUtil.info(TAG, "insert system defined note and attachment success")
++        })
++        .catch((err: BusinessError) => {
++          LogUtil.error(TAG, "createRdbStore failed : " + JSON.stringify(err))
++          this.setDefaultState()
+         })
+     } catch (err) {
+       LogUtil.warn(TAG, "createRdbStore, error : " + err)
++      this.setDefaultState()
+     }
+   }
+ 
+   /**
+    * query folders and notes from the database, then save them to the AppStorage.
+    */
+-  initAppStorage(context: common.UIAbilityContext) {
++  private rdbInitAppStorage(context: common.UIAbilityContext) {
++    this.setDefaultState()
+     let folderDataArray: FolderData[] = [];
+     let noteDataArray: NoteData[] = [];
+     try {
+-      relationalStore.getRdbStore(context, SysDefData.dbInfo.db_name)
++      this.openStore(context)
+         .then(async (store) => {
+           LogUtil.info(TAG, "initAppStorage, store is " + store)
+           rdbStore = store;
++          await this.ensureSchema(store);
++          await this.seedDefaultData(store);
+           // query folder
+           let columns_folder: string[] = [];
+           let predicates_folder = new relationalStore.RdbPredicates(TableName.FolderTable)
+@@ -322,8 +483,13 @@
+           AppStorage.SetOrCreate('DBQueryFinished', 1)
+           LogUtil.info(TAG, "initAppStorage, set DBQueryFinished 1")
+         })
++        .catch((err: BusinessError) => {
++          LogUtil.error(TAG, "initAppStorage failed : " + JSON.stringify(err))
++          this.setDefaultState()
++        })
+     } catch (err) {
+       LogUtil.error(TAG, "initAppStorage, error : " + err)
++      this.setDefaultState()
+     }
+   }
+ 
+@@ -438,6 +604,13 @@
+    * @param callback
+    */
+   insert(tableName: string, valueBucket: relationalStore.ValuesBucket, callback: Callback<number> | null) {
++    if (rdbStore == undefined) {
++      this.saveLocalData();
++      if (callback != null) {
++        callback(0);
++      }
++      return;
++    }
+     rdbStore!.insert(tableName, valueBucket).then((rowId: number) => {
+       LogUtil.info(TAG, "insert success, rowId is " + rowId)
+       if (callback != null) {
+@@ -454,6 +627,13 @@
+    * @param callback
+    */
+   delete(predicates: relationalStore.RdbPredicates, callback: Callback<number> | null) {
++    if (rdbStore == undefined) {
++      this.saveLocalData();
++      if (callback != null) {
++        callback(0);
++      }
++      return;
++    }
+     rdbStore!.delete(predicates).then((affectedRowCount: number) => {
+       LogUtil.info(TAG, "delete success, affectedRowCount is " + affectedRowCount)
+       if (callback != null) {
+@@ -473,6 +653,10 @@
+   update(valueBucket: relationalStore.ValuesBucket, predicates: relationalStore.RdbPredicates,
+          callback: Callback<number> | null) {
+     if (!rdbStore) {
++      this.saveLocalData();
++      if (callback != null) {
++        callback(0);
++      }
+       return;
+     }
+     rdbStore!.update(valueBucket, predicates).then((affectedRowCount: number) => {
+--- a/common/utils/src/main/ets/default/baseUtil/GlobalResourceManager.ets
++++ b/common/utils/src/main/ets/default/baseUtil/GlobalResourceManager.ets
+@@ -18,7 +18,10 @@
+ import { LogUtil } from './LogUtil';
+ 
+ const TAG: string = 'Note_GlobalResourceManager';
+-let context = getContext(this) as common.UIAbilityContext;
++
++function getNoteContext(): common.UIAbilityContext | undefined {
++  return AppStorage.Get<common.UIAbilityContext>('noteContext');
++}
+ 
+ export class GlobalResourceManager {
+   public async getStringByResource(res: Resource): Promise<string> {
+@@ -30,6 +33,12 @@
+ 
+   public getStringById(id: number): Promise<string> {
+     let promise = new Promise<string>(resolve => {
++      let context = getNoteContext();
++      if (context == undefined || context == null) {
++        LogUtil.error(TAG, 'getStringById context is unavailable');
++        resolve('');
++        return;
++      }
+       let resourceMgr = context.resourceManager;
+       resourceMgr.getStringValue(id)
+         .then((resource) => {
+@@ -40,6 +49,7 @@
+         })
+         .catch((err: BusinessError) => {
+           LogUtil.error(TAG, 'getStringById err : ' + JSON.stringify(err));
++          resolve('');
+         });
+     });
+     LogUtil.info(TAG, 'getStringById promise: ' + JSON.stringify(promise));
+--- a/features/src/main/ets/components/NoteContentComp.ets
++++ b/features/src/main/ets/components/NoteContentComp.ets
+@@ -280,60 +280,17 @@
+           Text(this.refreshFlag.toString()).visibility(Visibility.None)
+           Text(this.AllNoteArray.length.toString()).visibility(Visibility.None) // 用于强制刷新使用
+ 
+-          Web({ src: $rawfile('editor.html'), controller: this.controllerShow })
+-            .javaScriptAccess(true)
+-            .javaScriptProxy({
+-              object: this.noteContent,
+-              name: 'callBackToApp', // html-->  name.method
+-              methodList: ['callbackhtml', 'callbackhtmlSave', 'callbackScheduledSave', 'callbackGetSize',
+-                'callbackPasteImage', 'callbackImagePath'],
+-              controller: this.controllerShow
+-            })
+-            .enabled(this.sectionStatus !== 1 ? false : true)
+-            .onPageEnd((e) => {
+-              try {
+-                if (this.dpi <= 240) {
+-                  this.controllerShow.runJavaScript('changeSizeToRk()');
+-                } else if (this.dpi <= 320 && this.dpi > 240) {
+-                  this.controllerShow.runJavaScript('changeSizeToPhone()');
+-                } else {
+-                  this.controllerShow.runJavaScript('changeSizeToTablet()');
+-                }
+-                if (AppStorage.Get('breakPoint') !== 'sm') {
+-                  this.controllerShow.runJavaScript('hiddenButton()');
+-                }
+-                LogUtil.info(TAG, 'finish loadurl');
+-                if (this.selectedNoteData) {
+-                  let self = this;
+-                  this.controllerShow.runJavaScript(
+-                    "RICH_EDITOR.setHtml('" + this.selectedNoteData.content_text + "')",
+-                    () => {
+-                      // wait for the image in the note to load
+-                      setTimeout(() => {
+-                        self.restoreScrollTop();
+-                        self.restoreFocus();
+-                      }, 100)
+-                    }
+-                  );
+-                }
+-                // 初次加载为为小屏预览模式
+-                if (this.sectionStatus != 1) {
+-                  this.controllerShow.runJavaScript('RICH_EDITOR.setInputEnabled(false)');
+-                }
+-              } catch (error) {
+-                LogUtil.info(TAG,
+-                  `runJavaScript onPageEnd error. code:${JSON.stringify(error.code)},message:${error.message}`);
+-              }
+-            })
+-            .imageAccess(true)
+-            .onlineImageAccess(true)
+-            .fileAccess(true)
+-            .domStorageAccess(true)
+-            .zoomAccess(false)
++          TextArea({ text: this.selectedNoteData ? this.selectedNoteData.content_text : '', placeholder: '输入笔记内容' })
+             .height('88%')
+             .width('100%')
+-            .onScroll((event) => {
+-              this.storeScrollTop(event.yOffset);
++            .backgroundColor($r('app.color.notecontent_color_ffffff'))
++            .enabled(this.sectionStatus === 1)
++            .onChange((value: string) => {
++              if (this.selectedNoteData) {
++                this.selectedNoteData.content_text = value;
++                this.selectedNoteData.modified_time = new Date().getTime();
++                RdbStoreUtil.saveNote(this.selectedNoteData);
++              }
+             })
+         }
+         .margin({ left: 24, right: 24 })

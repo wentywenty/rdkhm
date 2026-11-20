@@ -1,0 +1,59 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] kernel/0011-fix-ethernet-mac-buffer.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/drivers/net/ethernet/horizon/hobot_eth_jplus.c
++++ b/drivers/net/ethernet/horizon/hobot_eth_jplus.c
+@@ -722,7 +722,7 @@ static void get_axi_cfg_dt(struct device_node *np, struct plat_config_data *plat
+  * Description: get config from device tree
+  * Return: >0:struct plat_config_data; <0:error
+  */
+-static struct plat_config_data *eth_probe_config_dt(struct platform_device *pdev, const char **mac)
++static struct plat_config_data *eth_probe_config_dt(struct platform_device *pdev, u8 *mac)
+ {
+ 	struct device_node *np = pdev->dev.of_node;
+ 	struct plat_config_data *plat;
+@@ -735,10 +735,7 @@ static struct plat_config_data *eth_probe_config_dt(struct platform_device *pdev
+ 		err_ptr = ERR_PTR(-ENOMEM);
+ 		goto err_kalloc;
+ 	}
+-	ret = of_get_mac_address(np, (u8 *)*mac);
+-	if (!ret) {
+-		*mac = NULL;
+-	}
++	ret = of_get_mac_address(np, mac);
+ 
+ 	of_get_phy_mode(np, (phy_interface_t *)&plat->interface);
+ 
+@@ -7254,8 +7251,8 @@ static s32 eth_drv_probe(struct device *device, struct plat_config_data *plat_da
+ 	priv->ndev->base_addr = (unsigned long)mac_res->addr;
+ 	priv->ndev->irq = mac_res->irq;
+ 	priv->wol_irq = mac_res->wol_irq;
+-	if (!IS_ERR_OR_NULL(mac_res->mac)) {
+-		eth_hw_addr_set(ndev,mac_res->mac);
++	if (!is_zero_ether_addr(mac_res->mac)) {
++		eth_hw_addr_set(ndev, mac_res->mac);
+ 	} else 	{
+ 		get_random_bytes(mac_addr, ETH_ALEN);
+ 		mac_addr[0] &= ~SZ_1;		/* clear multicast bit */ /*PRQA S 1851, 4434, 4532*/
+@@ -7434,7 +7431,7 @@ static s32 eth_probe(struct platform_device *pdev)
+ 		dev_dbg(&pdev->dev, "get platform resources err\n"); /*PRQA S 1294, 0685*/
+ 		goto err_dt;
+ 	}
+-	plat_dat = eth_probe_config_dt(pdev, &mac_res.mac);
++	plat_dat = eth_probe_config_dt(pdev, mac_res.mac);
+ 	if (IS_ERR((void *)plat_dat)) {
+ 		ret = PTR_ERR((void *)plat_dat);/*PRQA S 4460*/
+ 		goto err_dt;
+--- a/drivers/net/ethernet/horizon/hobot_eth_jplus.h
++++ b/drivers/net/ethernet/horizon/hobot_eth_jplus.h
+@@ -259,7 +259,7 @@ struct dma_features {
+ struct mac_resource {
+ 	void __iomem *addr;
+ 	void __iomem *addr_sub;
+-	const char *mac;
++	u8 mac[ETH_ALEN];
+ 	s32 irq;
+ 	s32 wol_irq;
+ };

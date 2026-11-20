@@ -1,0 +1,573 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] display/0009-gpu-composition.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/display/composer/vdi_base/BUILD.gn b/display/composer/vdi_base/BUILD.gn
+index 9dc8569..3ddc4fc 100644
+--- a/display/composer/vdi_base/BUILD.gn
++++ b/display/composer/vdi_base/BUILD.gn
+@@ -26,6 +26,7 @@ ohos_shared_library("display_composer_vdi_impl_default") {
+     "src/drm_encoder.cpp",
+     "src/drm_plane.cpp",
+     "src/drm_vsync_worker.cpp",
++    "src/gpu_compose_client.cpp",
+     "src/hdi_composer.cpp",
+     "src/hdi_device_interface.cpp",
+     "src/hdi_display.cpp",
+diff --git a/display/composer/vdi_base/include/gpu_compose_client.h b/display/composer/vdi_base/include/gpu_compose_client.h
+new file mode 100644
+index 0000000..33eb6b4
+--- /dev/null
++++ b/display/composer/vdi_base/include/gpu_compose_client.h
+@@ -0,0 +1,26 @@
++#ifndef GPU_COMPOSE_CLIENT_H
++#define GPU_COMPOSE_CLIENT_H
++
++#include <vector>
++#include "hdi_layer.h"
++
++namespace OHOS {
++namespace HDI {
++namespace DISPLAY {
++
++class GpuComposeClient {
++public:
++    static bool Available();
++    static bool CanCompose(const std::vector<HdiLayer *> &layers, HdiLayer *target);
++    static int32_t Compose(const std::vector<HdiLayer *> &layers, HdiLayer *target);
++    static void Disable();
++
++private:
++    static bool Probe();
++};
++
++} // DISPLAY
++} // HDI
++} // OHOS
++
++#endif
+diff --git a/display/composer/vdi_base/include/hdi_drm_composition.h b/display/composer/vdi_base/include/hdi_drm_composition.h
+index 69214bc..478cfe0 100644
+--- a/display/composer/vdi_base/include/hdi_drm_composition.h
++++ b/display/composer/vdi_base/include/hdi_drm_composition.h
+@@ -67,6 +67,9 @@ private:
+     std::vector<std::shared_ptr<DrmPlane>> mPrimPlanes;
+     std::vector<std::shared_ptr<DrmPlane>> mOverlayPlanes;
+     std::vector<std::shared_ptr<DrmPlane>> mPlanes;
++    HdiLayer *mClientLayer = nullptr;
++    std::vector<HdiLayer *> mGpuLayers;
++    bool mGpuComposed = false;
+ };
+ } // OHOS
+ } // HDI
+diff --git a/display/composer/vdi_base/include/rdkhm_accel_wire.h b/display/composer/vdi_base/include/rdkhm_accel_wire.h
+new file mode 100644
+index 0000000..0382957
+--- /dev/null
++++ b/display/composer/vdi_base/include/rdkhm_accel_wire.h
+@@ -0,0 +1,74 @@
++#ifndef RDKHM_ACCEL_WIRE_H
++#define RDKHM_ACCEL_WIRE_H
++
++#include <stdint.h>
++
++#define RDKHM_WIRE_MAGIC 0x314B4452u
++#define RDKHM_WIRE_VERSION 1u
++#define RDKHM_WIRE_MAX_FDS 16u
++#define RDKHM_WIRE_MAX_LAYERS 8u
++
++#define RDKHM_WIRE_COMPOSE 6
++
++enum rdkhm_wire_status {
++    RDKHM_STATUS_OK = 0,
++    RDKHM_STATUS_NOT_SUPPORT = 11,
++    RDKHM_STATUS_DEVICE_ERROR = 13,
++    RDKHM_STATUS_TIME_OUT = 17,
++    RDKHM_STATUS_INVALID_PARAMETER = 3,
++    RDKHM_STATUS_INVALID_BUFFER = 27,
++};
++
++struct rdkhm_wire_header {
++    uint32_t magic;
++    uint16_t version;
++    uint16_t command;
++    uint32_t session;
++    uint32_t payload;
++    uint16_t fds;
++    uint16_t flags;
++    uint32_t reserved;
++} __attribute__((packed));
++
++struct rdkhm_compose_layer {
++    uint32_t fd_index;
++    uint32_t fence_fd_index;
++    uint32_t format;
++    uint32_t width;
++    uint32_t height;
++    uint32_t stride;
++    uint64_t modifier;
++    uint32_t crop_x;
++    uint32_t crop_y;
++    uint32_t crop_w;
++    uint32_t crop_h;
++    int32_t dst_x;
++    int32_t dst_y;
++    uint32_t dst_w;
++    uint32_t dst_h;
++    uint32_t alpha;
++    uint32_t transform;
++    uint32_t blend;
++    uint32_t reserved;
++} __attribute__((packed));
++
++struct rdkhm_compose_request {
++    uint32_t target_fd_index;
++    uint32_t target_fence_fd_index;
++    uint32_t target_format;
++    uint32_t target_width;
++    uint32_t target_height;
++    uint32_t target_stride;
++    uint64_t target_modifier;
++    uint32_t layer_count;
++    uint32_t flags;
++} __attribute__((packed));
++
++struct rdkhm_compose_response {
++    uint32_t status;
++    uint32_t elapsed_ms;
++    uint32_t layers;
++    uint32_t reserved;
++} __attribute__((packed));
++
++#endif
+diff --git a/display/composer/vdi_base/src/gpu_compose_client.cpp b/display/composer/vdi_base/src/gpu_compose_client.cpp
+new file mode 100644
+index 0000000..0616a9f
+--- /dev/null
++++ b/display/composer/vdi_base/src/gpu_compose_client.cpp
+@@ -0,0 +1,347 @@
++#include "gpu_compose_client.h"
++
++#include <algorithm>
++#include <cerrno>
++#include <cstdint>
++#include <cstring>
++#include <ctime>
++#include <poll.h>
++#include <sys/socket.h>
++#include <sys/time.h>
++#include <sys/un.h>
++#include <unistd.h>
++
++#include "display_log.h"
++#include "drm_device.h"
++#include "rdkhm_accel_wire.h"
++
++namespace OHOS {
++namespace HDI {
++namespace DISPLAY {
++namespace {
++constexpr const char *SOCKET_PATH = "/dev/unix/socket/rdkhm_accel";
++constexpr int PROBE_TIMEOUT_MS = 200;
++constexpr int COMPOSE_TIMEOUT_MS = 1500;
++
++int gpuState = -1;
++long long gpuCheckedAt = 0;
++
++long long NowMs()
++{
++    struct timespec now;
++    clock_gettime(CLOCK_MONOTONIC, &now);
++    return static_cast<long long>(now.tv_sec) * 1000 + now.tv_nsec / 1000000;
++}
++
++int Connect()
++{
++    int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
++    if (fd < 0) {
++        return -1;
++    }
++    struct sockaddr_un address = {};
++    address.sun_family = AF_UNIX;
++    if (strlen(SOCKET_PATH) >= sizeof(address.sun_path)) {
++        close(fd);
++        return -1;
++    }
++    strcpy(address.sun_path, SOCKET_PATH);
++    if (connect(fd, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0) {
++        close(fd);
++        return -1;
++    }
++    return fd;
++}
++
++bool WriteAll(int fd, const void *buffer, size_t length)
++{
++    const char *cursor = static_cast<const char *>(buffer);
++    while (length > 0) {
++        ssize_t written = send(fd, cursor, length, MSG_NOSIGNAL);
++        if (written < 0 && errno == EINTR) {
++            continue;
++        }
++        if (written <= 0) {
++            return false;
++        }
++        cursor += written;
++        length -= static_cast<size_t>(written);
++    }
++    return true;
++}
++
++bool ReadAll(int fd, void *buffer, size_t length)
++{
++    char *cursor = static_cast<char *>(buffer);
++    while (length > 0) {
++        ssize_t got = recv(fd, cursor, length, 0);
++        if (got < 0 && errno == EINTR) {
++            continue;
++        }
++        if (got <= 0) {
++            return false;
++        }
++        cursor += got;
++        length -= static_cast<size_t>(got);
++    }
++    return true;
++}
++
++void SetTimeouts(int fd, int milliseconds)
++{
++    struct timeval timeout = {milliseconds / 1000, (milliseconds % 1000) * 1000};
++    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
++    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
++}
++
++uint32_t AddFd(std::vector<int> &fds, int fd)
++{
++    if (fd < 0) {
++        return UINT32_MAX;
++    }
++    fds.push_back(fd);
++    return static_cast<uint32_t>(fds.size() - 1);
++}
++
++bool FillLayer(HdiLayer *layer, std::vector<int> &fds, struct rdkhm_compose_layer &wire)
++{
++    HdiLayerBuffer *buffer = layer->GetCurrentBuffer();
++    if (buffer == nullptr) {
++        return false;
++    }
++    IRect crop = layer->GetLayerCrop();
++    IRect dst = layer->GetLayerDisplayRect();
++    LayerAlpha alpha = layer->GetAlpha();
++    BlendType blend = layer->GetLayerBlenType();
++    memset(&wire, 0, sizeof(wire));
++    wire.fd_index = AddFd(fds, buffer->mHandle.fd);
++    wire.fence_fd_index = AddFd(fds, layer->GetAcquireFenceFd());
++    wire.format = DrmDevice::ConvertToDrmFormat(static_cast<PixelFormat>(buffer->GetFormat()));
++    wire.width = static_cast<uint32_t>(buffer->GetWight());
++    wire.height = static_cast<uint32_t>(buffer->GetHeight());
++    wire.stride = static_cast<uint32_t>(buffer->GetStride());
++    wire.crop_x = static_cast<uint32_t>(crop.x);
++    wire.crop_y = static_cast<uint32_t>(crop.y);
++    wire.crop_w = static_cast<uint32_t>(crop.w);
++    wire.crop_h = static_cast<uint32_t>(crop.h);
++    wire.dst_x = dst.x;
++    wire.dst_y = dst.y;
++    wire.dst_w = static_cast<uint32_t>(dst.w);
++    wire.dst_h = static_cast<uint32_t>(dst.h);
++    wire.alpha = alpha.enGlobalAlpha ? alpha.gAlpha : 255;
++    wire.blend = blend == BLEND_SRCOVER ? 1 : 0;
++    return wire.fd_index != UINT32_MAX && wire.format != 0;
++}
++} // namespace
++
++void GpuComposeClient::Disable()
++{
++    gpuState = 0;
++    gpuCheckedAt = NowMs();
++}
++
++bool GpuComposeClient::Probe()
++{
++    int fd = Connect();
++    if (fd < 0) {
++        return false;
++    }
++    SetTimeouts(fd, PROBE_TIMEOUT_MS);
++    const char request[] = "GPU_COMPOSE_CHECK\n";
++    bool ok = WriteAll(fd, request, sizeof(request) - 1);
++    char response[64] = {};
++    if (ok) {
++        struct pollfd ready = {.fd = fd, .events = POLLIN};
++        ok = poll(&ready, 1, PROBE_TIMEOUT_MS) > 0 &&
++             recv(fd, response, sizeof(response) - 1, 0) > 0;
++    }
++    close(fd);
++    return ok && strstr(response, "GPU_COMPOSE_READY") != nullptr;
++}
++
++bool GpuComposeClient::Available()
++{
++    long long now = NowMs();
++    if (gpuState == 1) {
++        return true;
++    }
++    if (gpuState == 0 && now - gpuCheckedAt < 2000) {
++        return false;
++    }
++    gpuState = Probe() ? 1 : 0;
++    gpuCheckedAt = now;
++    return gpuState == 1;
++}
++
++bool GpuComposeClient::CanCompose(const std::vector<HdiLayer *> &layers, HdiLayer *target)
++{
++    if (target == nullptr || layers.empty() || layers.size() > RDKHM_WIRE_MAX_LAYERS) {
++        return false;
++    }
++    HdiLayerBuffer *targetBuffer = target->GetCurrentBuffer();
++    if (targetBuffer == nullptr || targetBuffer->mHandle.fd < 0 ||
++        targetBuffer->GetWight() <= 0 || targetBuffer->GetHeight() <= 0 ||
++        targetBuffer->GetStride() <= 0 ||
++        DrmDevice::ConvertToDrmFormat(static_cast<PixelFormat>(targetBuffer->GetFormat())) == 0) {
++        return false;
++    }
++    size_t fdCount = 1 + (target->GetAcquireFenceFd() >= 0 ? 1 : 0);
++    for (HdiLayer *layer : layers) {
++        if (layer == nullptr || layer->GetCompositionType() != COMPOSITION_DEVICE ||
++            layer->GetTransFormType() != ROTATE_NONE) {
++            return false;
++        }
++        BlendType blend = layer->GetLayerBlenType();
++        if (blend != BLEND_NONE && blend != BLEND_SRC && blend != BLEND_SRCOVER) {
++            return false;
++        }
++        HdiLayerBuffer *buffer = layer->GetCurrentBuffer();
++        if (buffer == nullptr || buffer->mHandle.fd < 0 || buffer->GetWight() <= 0 ||
++            buffer->GetHeight() <= 0 || buffer->GetStride() <= 0 ||
++            DrmDevice::ConvertToDrmFormat(static_cast<PixelFormat>(buffer->GetFormat())) == 0) {
++            return false;
++        }
++        IRect crop = layer->GetLayerCrop();
++        IRect dst = layer->GetLayerDisplayRect();
++        if (crop.x < 0 || crop.y < 0 || crop.w <= 0 || crop.h <= 0 ||
++            crop.x + crop.w > buffer->GetWight() || crop.y + crop.h > buffer->GetHeight() ||
++            dst.w <= 0 || dst.h <= 0) {
++            return false;
++        }
++        fdCount += 1 + (layer->GetAcquireFenceFd() >= 0 ? 1 : 0);
++        if (fdCount > RDKHM_WIRE_MAX_FDS) {
++            return false;
++        }
++    }
++    return true;
++}
++
++int32_t GpuComposeClient::Compose(const std::vector<HdiLayer *> &layers, HdiLayer *target)
++{
++    if (!CanCompose(layers, target)) {
++        return -1;
++    }
++    std::vector<HdiLayer *> ordered = layers;
++    std::sort(ordered.begin(), ordered.end(), [](HdiLayer *left, HdiLayer *right) {
++        return left->GetZorder() < right->GetZorder();
++    });
++    HdiLayerBuffer *targetBuffer = target->GetCurrentBuffer();
++    std::vector<int> fds;
++    struct rdkhm_compose_request request = {};
++    request.target_fd_index = AddFd(fds, targetBuffer->mHandle.fd);
++    request.target_fence_fd_index = AddFd(fds, target->GetAcquireFenceFd());
++    request.target_format = DrmDevice::ConvertToDrmFormat(static_cast<PixelFormat>(targetBuffer->GetFormat()));
++    request.target_width = static_cast<uint32_t>(targetBuffer->GetWight());
++    request.target_height = static_cast<uint32_t>(targetBuffer->GetHeight());
++    request.target_stride = static_cast<uint32_t>(targetBuffer->GetStride());
++    request.layer_count = static_cast<uint32_t>(ordered.size());
++    std::vector<struct rdkhm_compose_layer> wireLayers(ordered.size());
++    for (size_t i = 0; i < ordered.size(); i++) {
++        if (!FillLayer(ordered[i], fds, wireLayers[i])) {
++            return -1;
++        }
++    }
++    if (fds.size() > RDKHM_WIRE_MAX_FDS) {
++        return -1;
++    }
++    size_t payloadLength = sizeof(request) + wireLayers.size() * sizeof(struct rdkhm_compose_layer);
++    std::vector<unsigned char> payload(payloadLength);
++    memcpy(payload.data(), &request, sizeof(request));
++    if (!wireLayers.empty()) {
++        memcpy(payload.data() + sizeof(request), wireLayers.data(),
++               wireLayers.size() * sizeof(struct rdkhm_compose_layer));
++    }
++
++    int fd = Connect();
++    if (fd < 0) {
++        return -1;
++    }
++    SetTimeouts(fd, COMPOSE_TIMEOUT_MS);
++    struct rdkhm_wire_header header = {};
++    header.magic = RDKHM_WIRE_MAGIC;
++    header.version = RDKHM_WIRE_VERSION;
++    header.command = RDKHM_WIRE_COMPOSE;
++    header.payload = static_cast<uint32_t>(payloadLength);
++    header.fds = static_cast<uint16_t>(fds.size());
++    struct iovec iov = {.iov_base = &header, .iov_len = sizeof(header)};
++    char control[CMSG_SPACE(sizeof(int) * RDKHM_WIRE_MAX_FDS)] = {};
++    struct msghdr message = {};
++    message.msg_iov = &iov;
++    message.msg_iovlen = 1;
++    message.msg_control = control;
++    message.msg_controllen = CMSG_SPACE(sizeof(int) * fds.size());
++    struct cmsghdr *cmsg = CMSG_FIRSTHDR(&message);
++    cmsg->cmsg_level = SOL_SOCKET;
++    cmsg->cmsg_type = SCM_RIGHTS;
++    cmsg->cmsg_len = CMSG_LEN(sizeof(int) * fds.size());
++    memcpy(CMSG_DATA(cmsg), fds.data(), sizeof(int) * fds.size());
++    bool ok = sendmsg(fd, &message, MSG_NOSIGNAL) == static_cast<ssize_t>(sizeof(header)) &&
++              WriteAll(fd, payload.data(), payload.size());
++
++    struct rdkhm_wire_header reply = {};
++    int outputFence = -1;
++    if (ok) {
++        struct iovec replyIov = {.iov_base = &reply, .iov_len = sizeof(reply)};
++        char replyControl[CMSG_SPACE(sizeof(int))] = {};
++        struct msghdr replyMessage = {};
++        replyMessage.msg_iov = &replyIov;
++        replyMessage.msg_iovlen = 1;
++        replyMessage.msg_control = replyControl;
++        replyMessage.msg_controllen = sizeof(replyControl);
++        size_t got = 0;
++        while (got < sizeof(reply)) {
++            replyIov.iov_base = reinterpret_cast<char *>(&reply) + got;
++            replyIov.iov_len = sizeof(reply) - got;
++            ssize_t length = recvmsg(fd, &replyMessage, 0);
++            if (length <= 0) {
++                ok = false;
++                break;
++            }
++            got += static_cast<size_t>(length);
++        }
++        if (ok) {
++            for (struct cmsghdr *item = CMSG_FIRSTHDR(&replyMessage); item != nullptr;
++                 item = CMSG_NXTHDR(&replyMessage, item)) {
++                if (item->cmsg_level == SOL_SOCKET && item->cmsg_type == SCM_RIGHTS) {
++                    memcpy(&outputFence, CMSG_DATA(item), sizeof(int));
++                }
++            }
++            ok = reply.magic == RDKHM_WIRE_MAGIC && reply.command == RDKHM_WIRE_COMPOSE &&
++                 reply.payload >= sizeof(struct rdkhm_compose_response);
++            struct rdkhm_compose_response response = {};
++            if (ok) {
++                size_t copy = reply.payload < sizeof(response) ? reply.payload : sizeof(response);
++                ok = ReadAll(fd, &response, copy);
++                size_t remaining = reply.payload - copy;
++                unsigned char discard[64];
++                while (ok && remaining > 0) {
++                    size_t chunk = remaining < sizeof(discard) ? remaining : sizeof(discard);
++                    ok = ReadAll(fd, discard, chunk);
++                    remaining -= chunk;
++                }
++                ok = ok && response.status == RDKHM_STATUS_OK;
++                if (ok) {
++                    DISPLAY_LOGI("gpu compose %ux%u layers=%zu elapsed=%ums",
++                                 request.target_width, request.target_height, ordered.size(),
++                                 response.elapsed_ms);
++                } else {
++                    DISPLAY_LOGE("gpu compose failed, status=%u", response.status);
++                }
++            }
++        }
++        if (outputFence >= 0) {
++            struct pollfd ready = {.fd = outputFence, .events = POLLIN};
++            if (ok && poll(&ready, 1, COMPOSE_TIMEOUT_MS) <= 0) {
++                DISPLAY_LOGE("gpu compose fence wait failed");
++                ok = false;
++            }
++            close(outputFence);
++        }
++    }
++    close(fd);
++    return ok ? 0 : -1;
++}
++
++} // DISPLAY
++} // HDI
++} // OHOS
+diff --git a/display/composer/vdi_base/src/hdi_drm_composition.cpp b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+index d68ebef..1727690 100644
+--- a/display/composer/vdi_base/src/hdi_drm_composition.cpp
++++ b/display/composer/vdi_base/src/hdi_drm_composition.cpp
+@@ -14,6 +14,7 @@
+  */
+ 
+ #include "hdi_drm_composition.h"
++#include "gpu_compose_client.h"
+ #include <cerrno>
+ #include "hdi_drm_layer.h"
+ 
+@@ -50,6 +51,9 @@ int32_t HdiDrmComposition::SetLayers(std::vector<HdiLayer *> &layers, HdiLayer &
+     DISPLAY_LOGD();
+     mCompLayers.clear();
+     mCompLayers.push_back(&clientLayer);
++    mClientLayer = &clientLayer;
++    mGpuLayers = layers;
++    mGpuComposed = false;
+     return DISPLAY_SUCCESS;
+ }
+ 
+@@ -266,7 +270,7 @@ int32_t HdiDrmComposition::FindPlaneAndApply(drmModeAtomicReqPtr pset)
+ 
+ int32_t HdiDrmComposition::Apply(bool modeSet)
+ {
+-    int32_t crtcOutFence = -1;
++    uint64_t crtcOutFence = static_cast<uint64_t>(-1);
+     int ret = 0;
+     std::unique_ptr<DrmModeBlock> modeBlock;
+     int drmFd = mDrmDevice->GetDrmFd();
+@@ -281,6 +285,18 @@ int32_t HdiDrmComposition::Apply(bool modeSet)
+     ret = UpdateMode(pset, modeBlock);
+     DISPLAY_CHK_RETURN(ret != DISPLAY_SUCCESS, ret, DISPLAY_LOGE("update mode failed"));
+ 
++#ifdef RDK_X5_SOFTWARE_COMPOSITION
++    if (!mGpuComposed && mClientLayer != nullptr && GpuComposeClient::Available() &&
++        GpuComposeClient::CanCompose(mGpuLayers, mClientLayer)) {
++        if (GpuComposeClient::Compose(mGpuLayers, mClientLayer) == 0) {
++            mGpuComposed = true;
++        } else {
++            GpuComposeClient::Disable();
++            DISPLAY_LOGE("gpu compose failed, falling back on later frames");
++        }
++    }
++#endif
++
+     // set the outFence property
+     ret = drmModeAtomicAddProperty(atomicReqPtr.Get(), mCrtc->GetId(), mCrtc->GetOutFencePropId(),
+         (uint64_t)&crtcOutFence);
+diff --git a/display/composer/vdi_base/src/hdi_gfx_composition.cpp b/display/composer/vdi_base/src/hdi_gfx_composition.cpp
+index 6a15429..a08a653 100644
+--- a/display/composer/vdi_base/src/hdi_gfx_composition.cpp
++++ b/display/composer/vdi_base/src/hdi_gfx_composition.cpp
+@@ -14,6 +14,7 @@
+  */
+ 
+ #include "hdi_gfx_composition.h"
++#include "gpu_compose_client.h"
+ #include <cinttypes>
+ #include <dlfcn.h>
+ #include <cerrno>
+@@ -111,6 +112,14 @@ bool HdiGfxComposition::UseCompositionClient(std::vector<HdiLayer *> &layers)
+ int32_t HdiGfxComposition::SetLayers(std::vector<HdiLayer *> &layers, HdiLayer &clientLayer)
+ {
+ #ifdef RDK_X5_SOFTWARE_COMPOSITION
++    if (GpuComposeClient::Available() && GpuComposeClient::CanCompose(layers, &clientLayer)) {
++        mClientLayer = &clientLayer;
++        mCompLayers.clear();
++        for (auto *layer : layers) {
++            layer->SetDeviceSelect(COMPOSITION_DEVICE);
++        }
++        return DISPLAY_SUCCESS;
++    }
+     mClientLayer = &clientLayer;
+     mCompLayers.clear();
+     for (auto *layer : layers) {

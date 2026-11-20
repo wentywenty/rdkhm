@@ -1,0 +1,23 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] audio/0003-default-effect-channel.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+--- a/frameworks/native/audioeffect/src/audio_effect_chain_manager.cpp
++++ b/frameworks/native/audioeffect/src/audio_effect_chain_manager.cpp
+@@ -1899,8 +1899,13 @@
+     channels = DEFAULT_NUM_CHANNEL;
+     channelLayout = DEFAULT_NUM_CHANNELLAYOUT;
+     std::string sceneTypeAndDeviceKey = sceneType + "_&_" + GetDeviceTypeName();
+-    CHECK_AND_RETURN_RET_LOG(sceneTypeToEffectChainMap_.count(sceneTypeAndDeviceKey) > 0 &&
+-        sceneTypeToEffectChainMap_[sceneTypeAndDeviceKey] != nullptr, ERROR, "null audioEffectChain");
++    if (sceneTypeToEffectChainMap_.count(sceneTypeAndDeviceKey) == 0 ||
++        sceneTypeToEffectChainMap_[sceneTypeAndDeviceKey] == nullptr) {
++        /* No effect chain configured for this scene is a normal CPU-audio
++         * configuration; report the default channel layout without ERROR. */
++        AUDIO_INFO_LOG("no audioEffectChain for %{public}s, use defaults", sceneTypeAndDeviceKey.c_str());
++        return SUCCESS;
++    }
+     auto audioEffectChain = sceneTypeToEffectChainMap_[sceneTypeAndDeviceKey];
+     audioEffectChain->GetInputChannelInfo(channels, channelLayout);
+     return SUCCESS;

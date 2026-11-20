@@ -1,0 +1,2137 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] notes: add missing shared resources
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/product/default/src/main/resources/base/element/color.json b/product/default/src/main/resources/base/element/color.json
+index 0c413af..6679f18 100644
+--- a/product/default/src/main/resources/base/element/color.json
++++ b/product/default/src/main/resources/base/element/color.json
+@@ -3,6 +3,218 @@
+     {
+       "name": "color_1",
+       "value": "#fff"
++    },
++    {
++      "name": "color_ffffff",
++      "value": "#F1F3F5"
++    },
++    {
++      "name": "color_fffffB",
++      "value": "#ffffff"
++    },
++    {
++      "name": "delete_color_fa2a2d",
++      "value": "#fa2a2d"
++    },
++    {
++      "name": "cancel_color_4fb4e3",
++      "value": "#4fb4e3"
++    },
++    {
++      "name": "divider_color_e4e4e4",
++      "value": "#cce4e4e4"
++    },
++    {
++      "name": "divider_color_182431",
++      "value": "#182431"
++    },
++    {
++      "name": "button_color_419fff",
++      "value": "#419fff"
++    },
++    {
++      "name": "button_color_fb4447",
++      "value": "#fb4447"
++    },
++    {
++      "name": "text_color_3f97e9",
++      "value": "#3f97e9"
++    },
++    {
++      "name": "text_color_f86d05",
++      "value": "#f86d05"
++    },
++    {
++      "name": "folder_color_182431",
++      "value": "#182431"
++    },
++    {
++      "name": "folder_color_99182431",
++      "value": "#99182431"
++    },
++    {
++      "name": "folder_color_f86d05",
++      "value": "#f86d05"
++    },
++    {
++      "name": "folder_color_ffffff",
++      "value": "#ffffff"
++    },
++    {
++      "name": "folder_color_19ffffff",
++      "value": "#19ffffff"
++    },
++    {
++      "name": "folder_color_d6d6d6",
++      "value": "#d6d6d6"
++    },
++    {
++      "name": "folder_color_19182431",
++      "value": "#19182431"
++    },
++    {
++      "name": "notecontent_color_ffffff",
++      "value": "#ffffff"
++    },
++    {
++      "name": "notecontent_color_000000",
++      "value": "#000000"
++    },
++    {
++      "name": "folderlist_bgcolor_f1f3f5",
++      "value": "#f1f3f5"
++    },
++    {
++      "name": "search_longpress_bgcolor_f7f8f9",
++      "value": "#f7f8f9"
++    },
++    {
++      "name": "notelist_bgcolor_f1f3f5",
++      "value": "#f1f3f5"
++    },
++    {
++      "name": "notelist_bgcolor_000000",
++      "value": "#000000"
++    },
++    {
++      "name": "image_bordercolor_19182431",
++      "value": "#19182431"
++    },
++    {
++      "name": "button_color_f86d05",
++      "value": "#f86d05"
++    },
++    {
++      "name": "font_stylecolor_AD182431",
++      "value": "#AD182431"
++    },
++    {
++      "name": "New_folder_input_box_color",
++      "value": "#FFFFFF"
++    },
++    {
++      "name": "category_already_exist_font_color",
++      "value": "#FA2A2D"
++    },
++    {
++      "name": "category_already_exist_divider_color",
++      "value": "#FA2A2D"
++    },
++    {
++      "name": "create_folder_bg_color",
++      "value": "#FFFFFF"
++    },
++    {
++      "name": "delete_note_bg_color",
++      "value": "#FFFFFF"
++    },
++    {
++      "name": "choose_folder_bg_color",
++      "value": "#FFFFFF"
++    },
++    {
++      "name": "title_input_bg_color",
++      "value": "#FFFFFF"
++    },
++    {
++      "name": "Edit_title_bg_color",
++      "value": "#FFFFFF"
++    },
++    {
++      "name": "press_folder_bg_color",
++      "value": "#FFFFFF"
++    },
++    {
++      "name": "modified_time_font_color",
++      "value": "#A3A7AD"
++    },
++    {
++      "name": "delete_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "recover_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "list_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "style_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "photo_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "all_notes_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "num_of_notes_font_color",
++      "value": "#A3A7AD"
++    },
++    {
++      "name": "note_selected_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "note_title_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "note_title_font_color_blue",
++      "value": "#0000ff"
++    },
++    {
++      "name": "list_modified_time_font_color",
++      "value": "#99182431"
++    },
++    {
++      "name": "Recently_delete_prompt_font_color",
++      "value": "#99182431"
++    },
++    {
++      "name": "Empty_page_font_color",
++      "value": "#A3A7AD"
++    },
++    {
++      "name": "search_note_caret_color",
++      "value": "#F86D05"
++    },
++    {
++      "name": "set_top_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "move_font_color",
++      "value": "#182431"
++    },
++    {
++      "name": "check_all_font_color",
++      "value": "#182431"
+     }
+   ]
+ }
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/element/float.json b/product/default/src/main/resources/base/element/float.json
+new file mode 100644
+index 0000000..fe803f0
+--- /dev/null
++++ b/product/default/src/main/resources/base/element/float.json
+@@ -0,0 +1,136 @@
++{
++  "float": [
++    {
++      "name": "wh_value_1",
++      "value": "1"
++    },
++    {
++      "name": "wh_value_4",
++      "value": "4"
++    },
++    {
++      "name": "wh_value_5",
++      "value": "5"
++    },
++    {
++      "name": "wh_value_8",
++      "value": "8"
++    },
++    {
++      "name": "wh_value_10",
++      "value": "10"
++    },
++    {
++      "name": "wh_value_14",
++      "value": "14"
++    },
++    {
++      "name": "wh_value_16",
++      "value": "16"
++    },
++    {
++      "name": "wh_value_20",
++      "value": "20"
++    },
++    {
++      "name": "wh_value_24",
++      "value": "24"
++    },
++    {
++      "name": "wh_value_30",
++      "value": "30"
++    },
++    {
++      "name": "wh_value_40",
++      "value": "40"
++    },
++    {
++      "name": "wh_value_50",
++      "value": "50"
++    },
++    {
++      "name": "wh_value_60",
++      "value": "60"
++    },
++    {
++      "name": "wh_value_65",
++      "value": "65"
++    },
++    {
++      "name": "wh_value_70",
++      "value": "70"
++    },
++    {
++      "name": "wh_value_80",
++      "value": "80"
++    },
++    {
++      "name": "wh_value_100",
++      "value": "100"
++    },
++    {
++      "name": "wh_value_120",
++      "value": "120"
++    },
++    {
++      "name": "wh_value_130",
++      "value": "1300"
++    },
++    {
++      "name": "wh_value_160",
++      "value": "160"
++    },
++    {
++      "name": "wh_value_230",
++      "value": "230"
++    },
++    {
++      "name": "wh_value_280",
++      "value": "280"
++    },
++    {
++      "name": "wh_value_390",
++      "value": "390"
++    },
++    {
++      "name": "wh_value_400",
++      "value": "400"
++    },
++    {
++      "name": "font_35",
++      "value": "35"
++    },
++    {
++      "name": "font_15",
++      "value": "15"
++    },
++    {
++      "name": "font_20",
++      "value": "20"
++    },
++    {
++      "name": "font_25",
++      "value": "25"
++    },
++    {
++      "name": "font_28",
++      "value": "28"
++    },
++    {
++      "name": "font_50",
++      "value": "50"
++    },
++    {
++      "name": "control_common_font_size",
++      "value": "20"
++    },
++    {
++      "name": "slider_text_padding_left",
++      "value": "5"
++    },
++    {
++      "name": "volume_border_radius",
++      "value": "15"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/element/string.json b/product/default/src/main/resources/base/element/string.json
+index b71cead..0e95948 100644
+--- a/product/default/src/main/resources/base/element/string.json
++++ b/product/default/src/main/resources/base/element/string.json
+@@ -4,25 +4,193 @@
+       "name": "entry_MainAbility",
+       "value": "备忘录"
+     },
++    {
++      "name": "description_mainability",
++      "value": "ETS_Empty Ability"
++    },
++    {
++      "name": "note",
++      "value": "笔记"
++    },
++    {
++      "name": "allNotes",
++      "value": "全部笔记"
++    },
++    {
++      "name": "unClassified",
++      "value": "未分类"
++    },
++    {
++      "name": "recentDeletes",
++      "value": "最近删除"
++    },
++    {
++      "name": "myFavorites",
++      "value": "我的收藏"
++    },
++    {
++      "name": "create",
++      "value": "新建"
++    },
++    {
++      "name": "createFolder",
++      "value": "新建文件夹"
++    },
++    {
++      "name": "editFolder",
++      "value": "编辑文件夹"
++    },
++    {
++      "name": "deleteFolder",
++      "value": "删除文件夹"
++    },
++    {
++      "name": "createNote",
++      "value": "新建笔记"
++    },
++    {
++      "name": "cancel",
++      "value": "取消"
++    },
++    {
++      "name": "save",
++      "value": "保存"
++    },
++    {
++      "name": "delete",
++      "value": "删除"
++    },
++    {
++      "name": "delete_tips",
++      "value": "是否删除此文件夹及其中的内容？"
++    },
++    {
++      "name": "deleteNote",
++      "value": "是否删除此笔记？"
++    },
++    {
++      "name": "deleteNoteComplete",
++      "value": "此笔记将被永久删除，无法恢复。是否删除？"
++    },
++    {
++      "name": "deleteAllNote",
++      "value": "是否删除全部笔记？"
++    },
++    {
++      "name": "deletePartNote",
++      "value": "是否删除%d条笔记？"
++    },
++    {
++      "name": "selected",
++      "value": "已选择%d项"
++    },
++    {
++      "name": "none_selected",
++      "value": "未选择"
++    },
++    {
++      "name": "noteslist",
++      "value": "条笔记"
++    },
++    {
++      "name": "Empty_page",
++      "value": "没有笔记"
++    },
++    {
++      "name": "searchNote",
++      "value": "搜索笔记"
++    },
++    {
++      "name": "chooseFolder",
++      "value": "请选择文件夹"
++    },
++    {
++      "name": "category_already_exist",
++      "value": "文件夹名称已存在"
++    },
++    {
++      "name": "input_placeholder",
++      "value": "名称"
++    },
++    {
++      "name": "permanently_delete_tips",
++      "value": "笔记删除前会显示剩余天数（最长30天），之后将永久删除"
++    },
++    {
++      "name": "set_top",
++      "value": "置顶"
++    },
++    {
++      "name": "move",
++      "value": "移到"
++    },
++    {
++      "name": "recover",
++      "value": "恢复"
++    },
++    {
++      "name": "check_all",
++      "value": "多选"
++    },
++    {
++      "name": "editNoteTitle",
++      "value": "修改标题"
++    },
++    {
++      "name": "list",
++      "value": "清单"
++    },
++    {
++      "name": "style",
++      "value": "样式"
++    },
++    {
++      "name": "photo",
++      "value": "相册"
++    },
++    {
++      "name": "title",
++      "value": "标题"
++    },
++    {
++      "name": "empty_note",
++      "value": "笔记内容为空"
++    },
++    {
++      "name": "restore",
++      "value": "已恢复"
++    },
++    {
++      "name": "per_read_media",
++      "value": "是否允许备忘录访问媒体资源"
++    },
++    {
++      "name": "per_get_bundleInfo",
++      "value": "是否允许备忘录打开图库资源"
++    },
++    {
++      "name": "per_dis_dataSync",
++      "value": "是否允许备忘录流转到其它设备"
++    },
+     {
+       "name": "media_location_permission",
+-      "value": "Used for memo access to geographic location information in user media files"
++      "value": "用于备忘录访问用户媒体文件中的地理位置信息"
+     },
+     {
+       "name": "distributed_dataSync_permission",
+-      "value": "Used for memo data exchange between different equipment"
++      "value": "用于备忘录进行不同设备间的数据交换"
+     },
+     {
+       "name": "read_image_video_permission",
+-      "value": "Used to read images or video files from the user's public directory"
++      "value": "用于备忘录读取用户公共目录的图片或视频文件"
+     },
+     {
+       "name": "write_image_video_permission",
+-      "value": "Used to modify image or video files in the user's public directory"
++      "value": "用于备忘录修改用户公共目录的图片或视频文件"
+     },
+     {
+       "name": "keep_background_running_permission",
+-      "value": "Allow Service Ability to run continuously in the background"
++      "value": "允许Service Ability在后台持续运行"
+     }
+   ]
+ }
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/action_bold.svg b/product/default/src/main/resources/base/media/action_bold.svg
+new file mode 100644
+index 0000000..5dd179b
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/action_bold.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1,.cls-2{fill:none;stroke:#000;stroke-linecap:round;stroke-width:2.5px;}.cls-1{stroke-miterlimit:10;}.cls-2{stroke-linejoin:round;}</style></defs><title>文本粗细</title><path class="cls-1" d="M7.0625,4h5.625a3.625,3.625,0,0,1,0,7.25H7.0625"/><path class="cls-1" d="M7.0625,11.25h5.625a4.375,4.375,0,0,1,0,8.75H7.0625"/><line class="cls-2" x1="6.9375" y1="4" x2="6.9375" y2="20"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/addNote.svg b/product/default/src/main/resources/base/media/addNote.svg
+new file mode 100644
+index 0000000..0cbab4e
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/addNote.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>加-细</title><path class="cls-1" d="M21.25,11.25a.75.75,0,0,1,0,1.5h-7.5v-1.5Zm-8.5,10a.75.75,0,0,1-1.5,0v-8.5H2.75a.75.75,0,0,1,0-1.5h8.5V2.75a.75.75,0,0,1,1.5,0Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/allNotes.svg b/product/default/src/main/resources/base/media/allNotes.svg
+new file mode 100644
+index 0000000..0bd2d8c
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/allNotes.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>笔记</title><path fill="#182431" d="M16.5,6.25a.75.75,0,0,1,0,1.5h-9a.75.75,0,0,1,0-1.5Zm0,5a.75.75,0,0,1,0,1.5h-9a.75.75,0,0,1,0-1.5Zm-4.5,5a.75.75,0,0,1,0,1.5H7.5a.75.75,0,0,1,0-1.5ZM16.07534,2.50071l-8.0508-.00053-.20148.00148A4.06394,4.06394,0,0,0,5.75371,2.857a2.135,2.135,0,0,0-.89672.89672A4.5924,4.5924,0,0,0,4.5,6.12777l.00017,11.84769.00149.20148A4.06394,4.06394,0,0,0,4.857,20.24629a2.135,2.135,0,0,0,.89672.89672,4.23561,4.23561,0,0,0,2.171.35628L8.12777,21.5h7.74446a4.5924,4.5924,0,0,0,2.37406-.357,2.135,2.135,0,0,0,.89672-.89672,4.23561,4.23561,0,0,0,.35628-2.17095L19.5,17.87223V6.12777a4.5924,4.5924,0,0,0-.357-2.37406,2.135,2.135,0,0,0-.89672-.89672A4.23561,4.23561,0,0,0,16.07534,2.50071ZM15.87223,1a5.88441,5.88441,0,0,1,3.03985.51223l.04161.022a3.63031,3.63031,0,0,1,1.46114,1.41987l.0509.09217A5.79955,5.79955,0,0,1,21,6.12777V17.87223l-.001.22154a5.55551,5.55551,0,0,1-.51122,2.81831l-.022.04161a3.63031,3.63031,0,0,1-1.41987,1.46114l-.09217.0509A5.79955,5.79955,0,0,1,15.87223,23H8.12777l-.22154-.001a5.55537,5.55537,0,0,1-2.81831-.51123l-.04161-.022a3.63037,3.63037,0,0,1-1.46114-1.41987l-.0509-.09217A5.79955,5.79955,0,0,1,3,17.87223V6.12777a5.8843,5.8843,0,0,1,.51223-3.03985l.022-.04161A3.63037,3.63037,0,0,1,4.95414,1.58517l.09217-.0509A5.79955,5.79955,0,0,1,8.12777,1Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/back.svg b/product/default/src/main/resources/base/media/back.svg
+new file mode 100644
+index 0000000..95e1f5d
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/back.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>back</title><path d="M11.35355,3.21967a.75.75,0,0,1,.03374,1.02466l-.03374.036L4.38372,11.25h16.6895a.75.75,0,0,1,.74873.70593L21.82322,12a.75.75,0,0,1-.70593.74873l-.04407.00127H3.17678a1,1,0,0,1-.74486-1.66726l.03775-.03985,7.82322-7.82322A.75.75,0,0,1,11.35355,3.21967ZM5.384,13.75l5.96953,5.9697.03374.036a.75.75,0,0,1-1.0584,1.0584l-.036-.03374L3.26252,13.75Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/back_1.svg b/product/default/src/main/resources/base/media/back_1.svg
+new file mode 100644
+index 0000000..95e1f5d
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/back_1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>back</title><path d="M11.35355,3.21967a.75.75,0,0,1,.03374,1.02466l-.03374.036L4.38372,11.25h16.6895a.75.75,0,0,1,.74873.70593L21.82322,12a.75.75,0,0,1-.70593.74873l-.04407.00127H3.17678a1,1,0,0,1-.74486-1.66726l.03775-.03985,7.82322-7.82322A.75.75,0,0,1,11.35355,3.21967ZM5.384,13.75l5.96953,5.9697.03374.036a.75.75,0,0,1-1.0584,1.0584l-.036-.03374L3.26252,13.75Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/camera.svg b/product/default/src/main/resources/base/media/camera.svg
+new file mode 100644
+index 0000000..cd8fa1b
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/camera.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>相机</title><path d="M12,9.5a3.25,3.25,0,1,0,3.25,3.25A3.25,3.25,0,0,0,12,9.5ZM12,8a4.75,4.75,0,1,1-4.75,4.75A4.75,4.75,0,0,1,12,8Zm3.1206-3.25H8.8794a.5.5,0,0,0-.41068.2148L6.88177,7.25H4a1.5,1.5,0,0,0-1.5,1.5v9A1.5,1.5,0,0,0,4,19.25H20a1.5,1.5,0,0,0,1.5-1.5v-9A1.5,1.5,0,0,0,20,7.25H17.11823L15.53128,4.9648A.5.5,0,0,0,15.1206,4.75Zm0-1.5a2,2,0,0,1,1.64274.85921L17.90278,5.75H20a3,3,0,0,1,3,3v9a3,3,0,0,1-3,3H4a3,3,0,0,1-3-3v-9a3,3,0,0,1,3-3H6.09722L7.23666,4.10921A2,2,0,0,1,8.8794,3.25Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/check_all.svg b/product/default/src/main/resources/base/media/check_all.svg
+new file mode 100644
+index 0000000..64922fd
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/check_all.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>全选</title><path class="cls-1" d="M15.80833,10.255a.75.75,0,0,1,.03026,1.0286l-.03026.03206-5.19975,5.19975a1.75,1.75,0,0,1-2.43161.04182l-.04326-.04182L5.684,14.06569a.75.75,0,0,1,1.0286-1.09092l.03206.03026,2.09619,2.09619a.75.75,0,0,0,1.0286.03026l.03206-.03026,4.8462-4.84619A.75.75,0,0,1,15.80833,10.255ZM15.59029,2c2.22879,0,3.037.23206,3.85182.66783a4.54323,4.54323,0,0,1,1.89006,1.89006C21.76794,5.3727,22,6.18092,22,8.40971v5.96252a5.79955,5.79955,0,0,1-.53427,3.08146,3.63532,3.63532,0,0,1-.97081,1.16035c.0032-.14453.00508-.29743.00508-.45987V8.34583a5.34107,5.34107,0,0,0-.51889-2.7827,3.72583,3.72583,0,0,0-1.54424-1.54424,4.993,4.993,0,0,0-2.51749-.51707L5.84583,3.5c-.16272,0-.31588.00189-.46066.00585a3.63917,3.63917,0,0,1,1.16114-.97158A5.79955,5.79955,0,0,1,9.62777,2ZM6.4868,6a3.86181,3.86181,0,0,0-1.98888.2902,1.68085,1.68085,0,0,0-.70772.70772l-.07856.1619A4.031,4.031,0,0,0,3.501,8.75809L3.5,17.5132a3.86181,3.86181,0,0,0,.2902,1.98888,1.68085,1.68085,0,0,0,.70772.70772l.1619.07856a4.03093,4.03093,0,0,0,1.59826.21061l.22872.001h8.5264l.43743-.00418a3.102,3.102,0,0,0,1.55145-.286,1.68085,1.68085,0,0,0,.70772-.70772l.07856-.1619a4.03074,4.03074,0,0,0,.21061-1.59826L18,17.5132V8.9868l-.00418-.43743a3.102,3.102,0,0,0-.286-1.55145,1.68085,1.68085,0,0,0-.70772-.70772l-.1619-.07856A4.03077,4.03077,0,0,0,15.24191,6.001Zm8.5264-1.5a5.07467,5.07467,0,0,1,2.69628.46748,3.18031,3.18031,0,0,1,1.323,1.323l.1017.20274A5.57961,5.57961,0,0,1,19.5,8.9868v8.5264a5.07467,5.07467,0,0,1-.46748,2.69628,3.18031,3.18031,0,0,1-1.323,1.323l-.20274.1017A5.57961,5.57961,0,0,1,15.0132,22H6.4868a5.07477,5.07477,0,0,1-2.69628-.46748,3.18031,3.18031,0,0,1-1.323-1.323l-.1017-.20274A5.57961,5.57961,0,0,1,2,17.5132V8.9868a5.07477,5.07477,0,0,1,.46748-2.69628,3.18031,3.18031,0,0,1,1.323-1.323l.20274-.1017a5.12058,5.12058,0,0,1,2.22834-.3641Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/check_all1.svg b/product/default/src/main/resources/base/media/check_all1.svg
+new file mode 100644
+index 0000000..34d884f
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/check_all1.svg
+@@ -0,0 +1,13 @@
++<svg id="图层_1"
++     data-name="图层 1"
++     xmlns="http://www.w3.org/2000/svg"
++     viewBox="0 0 24 24">
++    <defs>
++        <style>.cls-1{fill:#f86d05;fill-rule:evenodd;}
++        </style>
++    </defs>
++    <title>全选</title>
++    <path
++        class="cls-1"
++        d="M15.80833,10.255a.75.75,0,0,1,.03026,1.0286l-.03026.03206-5.19975,5.19975a1.75,1.75,0,0,1-2.43161.04182l-.04326-.04182L5.684,14.06569a.75.75,0,0,1,1.0286-1.09092l.03206.03026,2.09619,2.09619a.75.75,0,0,0,1.0286.03026l.03206-.03026,4.8462-4.84619A.75.75,0,0,1,15.80833,10.255ZM15.59029,2c2.22879,0,3.037.23206,3.85182.66783a4.54323,4.54323,0,0,1,1.89006,1.89006C21.76794,5.3727,22,6.18092,22,8.40971v5.96252a5.79955,5.79955,0,0,1-.53427,3.08146,3.63532,3.63532,0,0,1-.97081,1.16035c.0032-.14453.00508-.29743.00508-.45987V8.34583a5.34107,5.34107,0,0,0-.51889-2.7827,3.72583,3.72583,0,0,0-1.54424-1.54424,4.993,4.993,0,0,0-2.51749-.51707L5.84583,3.5c-.16272,0-.31588.00189-.46066.00585a3.63917,3.63917,0,0,1,1.16114-.97158A5.79955,5.79955,0,0,1,9.62777,2ZM6.4868,6a3.86181,3.86181,0,0,0-1.98888.2902,1.68085,1.68085,0,0,0-.70772.70772l-.07856.1619A4.031,4.031,0,0,0,3.501,8.75809L3.5,17.5132a3.86181,3.86181,0,0,0,.2902,1.98888,1.68085,1.68085,0,0,0,.70772.70772l.1619.07856a4.03093,4.03093,0,0,0,1.59826.21061l.22872.001h8.5264l.43743-.00418a3.102,3.102,0,0,0,1.55145-.286,1.68085,1.68085,0,0,0,.70772-.70772l.07856-.1619a4.03074,4.03074,0,0,0,.21061-1.59826L18,17.5132V8.9868l-.00418-.43743a3.102,3.102,0,0,0-.286-1.55145,1.68085,1.68085,0,0,0-.70772-.70772l-.1619-.07856A4.03077,4.03077,0,0,0,15.24191,6.001Zm8.5264-1.5a5.07467,5.07467,0,0,1,2.69628.46748,3.18031,3.18031,0,0,1,1.323,1.323l.1017.20274A5.57961,5.57961,0,0,1,19.5,8.9868v8.5264a5.07467,5.07467,0,0,1-.46748,2.69628,3.18031,3.18031,0,0,1-1.323,1.323l-.20274.1017A5.57961,5.57961,0,0,1,15.0132,22H6.4868a5.07477,5.07477,0,0,1-2.69628-.46748,3.18031,3.18031,0,0,1-1.323-1.323l-.1017-.20274A5.57961,5.57961,0,0,1,2,17.5132V8.9868a5.07477,5.07477,0,0,1,.46748-2.69628,3.18031,3.18031,0,0,1,1.323-1.323l.20274-.1017a5.12058,5.12058,0,0,1,2.22834-.3641Z"/>
++</svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/checked.svg b/product/default/src/main/resources/base/media/checked.svg
+new file mode 100644
+index 0000000..32708c9
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/checked.svg
+@@ -0,0 +1,37 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#f86d05;}
++	.st1{filter:url(#filter-2);}
++	.st2{fill-rule:evenodd;clip-rule:evenodd;}
++	.st3{fill:none;stroke:#000000;stroke-opacity:5.000000e-02;}
++	.st4{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
++</style>
++<filter  filterUnits="objectBoundingBox" height="153.3%" id="filter-2" width="185.7%" x="-28.6%" y="-17.8%">
++	<feMorphology  in="SourceAlpha" operator="dilate" radius="1" result="shadowSpreadOuter1"></feMorphology>
++	<feOffset  dx="1" dy="1" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
++	<feMorphology  in="SourceAlpha" operator="erode" radius="1" result="shadowInner"></feMorphology>
++	<feOffset  dx="1" dy="1" in="shadowInner" result="shadowInner"></feOffset>
++	<feComposite  in="shadowOffsetOuter1" in2="shadowInner" operator="out" result="shadowOffsetOuter1"></feComposite>
++	<feGaussianBlur  in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="0.5"></feGaussianBlur>
++	<feColorMatrix  in="shadowBlurOuter1" type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0"></feColorMatrix>
++</filter>
++<title>选中后</title>
++<g id="编组" transform="translate(2.000000, 2.000000)">
++	<path id="Rectangle-2375-Copy" class="st0" d="M0,4c0-2.2,1.8-4,4-4h12c2.2,0,4,1.8,4,4v12c0,2.2-1.8,4-4,4H4c-2.2,0-4-1.8-4-4V4z"
++		/>
++	<g id="Rectangle-62" transform="translate(9.895979, 8.500859) rotate(43.000000) translate(-9.895979, -8.500859) ">
++		<g class="st1">
++			<path id="path-1_1_" class="st2" d="M7.4,14.1c-0.6,0-1-0.4-1-1c0-0.6,0.4-1,1-1l4,0l0-8.3c0-0.5,0.4-0.9,0.9-1l0.1,0
++				c0.6,0,1,0.5,1,1l0,9.2l0,0c0,0.4-0.3,0.8-0.7,0.9l-0.1,0c0,0-0.1,0-0.1,0l-0.1,0L7.4,14.1z"/>
++		</g>
++		<path class="st3" d="M12.2,2.4c0.5,0,0.9,0.2,1.2,0.4c0.3,0.3,0.5,0.7,0.5,1.1l0,0l0,9.2c0,0.3-0.1,0.6-0.3,0.9
++			c-0.2,0.3-0.5,0.5-0.8,0.6l0,0l-5.4,0.1c-0.4,0-0.8-0.2-1.1-0.4c-0.3-0.3-0.4-0.6-0.4-1.1c0-0.4,0.2-0.8,0.4-1.1
++			c0.3-0.3,0.6-0.4,1.1-0.4l0,0l3.5,0l0-7.8c0-0.4,0.1-0.7,0.4-1C11.5,2.6,11.8,2.4,12.2,2.4z"/>
++	</g>
++	<path class="st4" d="M4.2,10.9c-0.4-0.4-0.4-1-0.1-1.4c0.4-0.4,1-0.4,1.4,0l2.9,2.7l5.6-6c0.3-0.4,0.9-0.4,1.3-0.1l0.1,0.1
++		c0.4,0.4,0.4,1,0.1,1.4l-6.3,6.8l0,0c-0.3,0.3-0.7,0.4-1.1,0.2l-0.1-0.1c0,0-0.1,0-0.1-0.1l-0.1-0.1L4.2,10.9z"/>
++</g>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/choose_all.svg b/product/default/src/main/resources/base/media/choose_all.svg
+new file mode 100644
+index 0000000..64922fd
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/choose_all.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>全选</title><path class="cls-1" d="M15.80833,10.255a.75.75,0,0,1,.03026,1.0286l-.03026.03206-5.19975,5.19975a1.75,1.75,0,0,1-2.43161.04182l-.04326-.04182L5.684,14.06569a.75.75,0,0,1,1.0286-1.09092l.03206.03026,2.09619,2.09619a.75.75,0,0,0,1.0286.03026l.03206-.03026,4.8462-4.84619A.75.75,0,0,1,15.80833,10.255ZM15.59029,2c2.22879,0,3.037.23206,3.85182.66783a4.54323,4.54323,0,0,1,1.89006,1.89006C21.76794,5.3727,22,6.18092,22,8.40971v5.96252a5.79955,5.79955,0,0,1-.53427,3.08146,3.63532,3.63532,0,0,1-.97081,1.16035c.0032-.14453.00508-.29743.00508-.45987V8.34583a5.34107,5.34107,0,0,0-.51889-2.7827,3.72583,3.72583,0,0,0-1.54424-1.54424,4.993,4.993,0,0,0-2.51749-.51707L5.84583,3.5c-.16272,0-.31588.00189-.46066.00585a3.63917,3.63917,0,0,1,1.16114-.97158A5.79955,5.79955,0,0,1,9.62777,2ZM6.4868,6a3.86181,3.86181,0,0,0-1.98888.2902,1.68085,1.68085,0,0,0-.70772.70772l-.07856.1619A4.031,4.031,0,0,0,3.501,8.75809L3.5,17.5132a3.86181,3.86181,0,0,0,.2902,1.98888,1.68085,1.68085,0,0,0,.70772.70772l.1619.07856a4.03093,4.03093,0,0,0,1.59826.21061l.22872.001h8.5264l.43743-.00418a3.102,3.102,0,0,0,1.55145-.286,1.68085,1.68085,0,0,0,.70772-.70772l.07856-.1619a4.03074,4.03074,0,0,0,.21061-1.59826L18,17.5132V8.9868l-.00418-.43743a3.102,3.102,0,0,0-.286-1.55145,1.68085,1.68085,0,0,0-.70772-.70772l-.1619-.07856A4.03077,4.03077,0,0,0,15.24191,6.001Zm8.5264-1.5a5.07467,5.07467,0,0,1,2.69628.46748,3.18031,3.18031,0,0,1,1.323,1.323l.1017.20274A5.57961,5.57961,0,0,1,19.5,8.9868v8.5264a5.07467,5.07467,0,0,1-.46748,2.69628,3.18031,3.18031,0,0,1-1.323,1.323l-.20274.1017A5.57961,5.57961,0,0,1,15.0132,22H6.4868a5.07477,5.07477,0,0,1-2.69628-.46748,3.18031,3.18031,0,0,1-1.323-1.323l-.1017-.20274A5.57961,5.57961,0,0,1,2,17.5132V8.9868a5.07477,5.07477,0,0,1,.46748-2.69628,3.18031,3.18031,0,0,1,1.323-1.323l.20274-.1017a5.12058,5.12058,0,0,1,2.22834-.3641Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/circle_tick.svg b/product/default/src/main/resources/base/media/circle_tick.svg
+new file mode 100644
+index 0000000..10eba81
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/circle_tick.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><style>.cls-1{fill:none;}</style></defs><title>文本扫描 对勾</title><path d="M20,40A20,20,0,1,1,40,20,20,20,0,0,1,20,40Zm0-1A19,19,0,1,0,1,20,19,19,0,0,0,20,39Z"/><circle class="cls-1" cx="20" cy="20" r="19"/><path d="M16.99349,24.34229l12.2994-12.2994a1,1,0,0,1,1.41422,1.41422L17.7006,26.46361a1,1,0,0,1-1.41421,0l-6.9935-6.99349a1,1,0,0,1,1.41422-1.41422Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/circle_tick1.svg b/product/default/src/main/resources/base/media/circle_tick1.svg
+new file mode 100644
+index 0000000..44d44b4
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/circle_tick1.svg
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:#182431;}
++</style>
++<title>画板</title>
++<path class="st0" d="M12,1c6.1,0,11,4.9,11,11s-4.9,11-11,11S1,18.1,1,12S5.9,1,12,1z M12,2.5c-5.2,0-9.5,4.3-9.5,9.5
++	s4.3,9.5,9.5,9.5s9.5-4.3,9.5-9.5S17.2,2.5,12,2.5z M18.2,8.7c0.3,0.3,0.3,0.7,0,1l0,0l-5.9,5.9c-0.7,0.7-1.7,0.7-2.4,0l0,0
++	l-3.4-3.4c-0.1-0.1-0.2-0.2-0.2-0.4l0-0.1v-0.1c0-0.2,0.1-0.3,0.2-0.5c0.3-0.3,0.7-0.3,1,0l0,0l3.1,3.1c0.3,0.3,0.7,0.3,1,0l0,0
++	l5.6-5.6C17.4,8.4,17.9,8.4,18.2,8.7z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/cross.svg b/product/default/src/main/resources/base/media/cross.svg
+new file mode 100644
+index 0000000..c4a4e0f
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/cross.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>叉-粗</title><path d="M19.77817,18.364A1,1,0,0,1,18.364,19.77817l-5.65685-5.65685,1.41421-1.41421ZM5.636,19.77817A1,1,0,0,1,4.22183,18.364L10.58579,12l-6.364-6.364A1,1,0,0,1,5.636,4.22183L12,10.58579l6.364-6.364A1,1,0,0,1,19.77817,5.636Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/cross_thick.svg b/product/default/src/main/resources/base/media/cross_thick.svg
+new file mode 100644
+index 0000000..c4a4e0f
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/cross_thick.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>叉-粗</title><path d="M19.77817,18.364A1,1,0,0,1,18.364,19.77817l-5.65685-5.65685,1.41421-1.41421ZM5.636,19.77817A1,1,0,0,1,4.22183,18.364L10.58579,12l-6.364-6.364A1,1,0,0,1,5.636,4.22183L12,10.58579l6.364-6.364A1,1,0,0,1,19.77817,5.636Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/cross_thin.svg b/product/default/src/main/resources/base/media/cross_thin.svg
+new file mode 100644
+index 0000000..6373a78
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/cross_thin.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>叉-细</title><path class="cls-1" d="M19.77817,18.71751a.75.75,0,0,1-1.06066,1.06066l-6.01023-6.01058,1.06049-1.06048Zm0-14.49568a.75.75,0,0,1,0,1.06066L5.28249,19.77817a.75.75,0,0,1-1.06066-1.06066l6.71769-6.718-6.71769-6.717A.75.75,0,0,1,5.28249,4.22183L12,10.939l6.71751-6.71716A.75.75,0,0,1,19.77817,4.22183Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/cycle_thin1.svg b/product/default/src/main/resources/base/media/cycle_thin1.svg
+new file mode 100644
+index 0000000..1fc2cba
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/cycle_thin1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>cycle-细</title><path d="M17,3.95711a.5.5,0,0,1,.35355.14644l2.2929,2.2929a.5.5,0,0,1-.35356.85355H6.86981A4.36217,4.36217,0,0,0,2.5,11.60438,4.318,4.318,0,0,0,3.26982,14.073.75.75,0,0,1,2.0366,14.927,5.85174,5.85174,0,0,1,6.86981,5.75L16.5,5.74911v-1.292A.5.5,0,0,1,17,3.95711ZM17.12985,16.75a4.352,4.352,0,0,0,3.60046-6.82316.75.75,0,0,1,1.23339-.85368A5.852,5.852,0,0,1,17.12985,18.25L7.5,18.24911v1.29378a.5.5,0,0,1-.85355.35356l-2.2929-2.2929A.5.5,0,0,1,4.70711,16.75Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/delete.svg b/product/default/src/main/resources/base/media/delete.svg
+new file mode 100644
+index 0000000..c547c40
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/delete.svg
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
++    <title>删除</title>
++    <defs>
++        <path d="M5.629,7.5 L6.72612901,18.4738834 C6.83893748,19.6019681 7.77211147,20.4662096 8.89848718,20.4990325 L8.96496269,20.5 L15.0342282,20.5 C16.1681898,20.5 17.1211231,19.6570911 17.2655686,18.5392856 L17.2731282,18.4732196 L18.1924161,9.2527383 L18.369,7.5 L19.877,7.5 L19.6849078,9.40262938 L18.7657282,18.6220326 C18.5772847,20.512127 17.0070268,21.9581787 15.1166184,21.9991088 L15.0342282,22 L8.96496269,22 C7.06591715,22 5.47142703,20.5815579 5.24265599,18.7050136 L5.23357322,18.6231389 L4.121,7.5 L5.629,7.5 Z M10.25,11.75 C10.6642136,11.75 11,12.0857864 11,12.5 L11,18.5 C11,18.9142136 10.6642136,19.25 10.25,19.25 C9.83578644,19.25 9.5,18.9142136 9.5,18.5 L9.5,12.5 C9.5,12.0857864 9.83578644,11.75 10.25,11.75 Z M13.75,11.75 C14.1642136,11.75 14.5,12.0857864 14.5,12.5 L14.5,18.5 C14.5,18.9142136 14.1642136,19.25 13.75,19.25 C13.3357864,19.25 13,18.9142136 13,18.5 L13,12.5 C13,12.0857864 13.3357864,11.75 13.75,11.75 Z M12,1.75 C13.7692836,1.75 15.2083571,3.16379796 15.2491124,4.92328595 L15.25,5 L21,5 C21.4142136,5 21.75,5.33578644 21.75,5.75 C21.75,6.14942022 21.43777,6.47591522 21.0440682,6.49872683 L21,6.5 L14.5,6.5 C14.1005798,6.5 13.7740848,6.18777001 13.7512732,5.7940682 L13.75,5.75 L13.75,5 C13.75,4.03350169 12.9664983,3.25 12,3.25 C11.0536371,3.25 10.2827253,4.00119585 10.2510148,4.93983756 L10.25,5 L10.25,5.75 C10.25,6.14942022 9.93777001,6.47591522 9.5440682,6.49872683 L9.5,6.5 L2.75,6.5 C2.33578644,6.5 2,6.16421356 2,5.75 C2,5.35057978 2.31222999,5.02408478 2.7059318,5.00127317 L2.75,5 L8.75,5 C8.75,3.20507456 10.2050746,1.75 12,1.75 Z" id="path-1"></path>
++    </defs>
++    <g id="删除" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
++        <mask id="mask-2" fill="white">
++            <use xlink:href="#path-1"></use>
++        </mask>
++        <use id="形状结合" fill="#182431" fill-rule="nonzero" xlink:href="#path-1"></use>
++    </g>
++</svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/delete1.svg b/product/default/src/main/resources/base/media/delete1.svg
+new file mode 100644
+index 0000000..c97adea
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/delete1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>删除-实心</title><path d="M12,1.875a3.00027,3.00027,0,0,1,2.98974,2.75013L21.25,4.625a.75.75,0,0,1,.04407,1.49873L21.25,6.125H2.75a.75.75,0,0,1-.04407-1.49873L2.75,4.625l6.26026.00013A3.00027,3.00027,0,0,1,12,1.875Zm2,10a.75.75,0,0,0-.75.75v6a.75.75,0,0,0,1.5,0v-6A.75.75,0,0,0,14,11.875Zm-4,0a.75.75,0,0,0-.75.75v6a.75.75,0,0,0,1.5,0v-6A.75.75,0,0,0,10,11.875Zm9.905-4.75L18.71823,19.19314A3.25,3.25,0,0,1,15.48384,22.125H8.51616a3.25,3.25,0,0,1-3.23439-2.93186L4.094,7.125Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/delete2.svg b/product/default/src/main/resources/base/media/delete2.svg
+new file mode 100644
+index 0000000..2f1c1fb
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/delete2.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>删除</title><path d="M12.125,1.875a3.25,3.25,0,0,1,3.24911,3.17329L15.375,5.125h5.75a.75.75,0,0,1,.04407,1.49873L21.125,6.625h-6.5a.75.75,0,0,1-.74873-.70593L13.875,5.875v-.75a1.75,1.75,0,0,0-3.499-.06016l-.001.06016v.75a.75.75,0,0,1-.70593.74873L9.625,6.625H2.875a.75.75,0,0,1-.04407-1.49873L2.875,5.125h6A3.25,3.25,0,0,1,12.125,1.875Zm1.75,10a.75.75,0,0,1,.75.75v6a.75.75,0,0,1-1.5,0v-6A.75.75,0,0,1,13.875,11.875Zm-3.5,0a.75.75,0,0,1,.75.75v6a.75.75,0,0,1-1.5,0v-6A.75.75,0,0,1,10.375,11.875ZM5.754,7.625,6.85113,18.59888A2.25,2.25,0,0,0,9.02349,20.624l.06647.001h6.06927a2.25,2.25,0,0,0,2.23134-1.96071l.00756-.06607.91929-9.22048L18.494,7.625h1.508l-.19209,1.90263-.91918,9.2194a3.75,3.75,0,0,1-3.64911,3.37708l-.08239.00089H9.09a3.75,3.75,0,0,1-3.7223-3.295l-.00909-.08187L4.246,7.625Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/emptyPage.svg b/product/default/src/main/resources/base/media/emptyPage.svg
+new file mode 100644
+index 0000000..a0e85dd
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/emptyPage.svg
+@@ -0,0 +1,47 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 120 120" style="enable-background:new 0 0 120 120;" xml:space="preserve">
++<style type="text/css">
++	.st0{opacity:0.15;fill-rule:evenodd;clip-rule:evenodd;fill:#A1A7B3;enable-background:new    ;}
++	.st1{opacity:0.6;fill-rule:evenodd;clip-rule:evenodd;fill:#A1A7B3;enable-background:new    ;}
++	.st2{opacity:0.3;fill-rule:evenodd;clip-rule:evenodd;fill:#A1A7B3;enable-background:new    ;}
++	.st3{opacity:0.8;fill-rule:evenodd;clip-rule:evenodd;fill:#A1A7B3;enable-background:new    ;}
++	.st4{opacity:0.2;fill-rule:evenodd;clip-rule:evenodd;fill:#A1A7B3;enable-background:new    ;}
++	.st5{opacity:0.1;fill-rule:evenodd;clip-rule:evenodd;fill:#A1A7B3;enable-background:new    ;}
++	.st6{opacity:0.5;fill-rule:evenodd;clip-rule:evenodd;fill:#A1A7B3;enable-background:new    ;}
++</style>
++<title>笔记空页面</title>
++<g id="编组" transform="translate(25.110000, 10.000000)">
++	<g id="board" transform="translate(0.699850, 0.000000)">
++		<ellipse id="椭圆形" class="st0" cx="33.6" cy="97.8" rx="33.3" ry="2.1"/>
++		<path id="形状结合" class="st1" d="M15.7,7.7c-0.8,1.2-1.3,2.6-1.5,4.1l-4.8,0c-0.5,0-0.9,0.4-1,0.9l0,0.1v67.7
++			c0,0.5,0.4,0.9,0.9,1l0.1,0H56c0.5,0,0.9-0.4,1-0.9l0-0.1l0-21c1.3-0.8,2.6-1.6,4-2.4c0.9-0.6,1.8-1.1,2.7-1.6l0,33.8
++			c0,2.2-1.8,4-4,4H5.4c-2.2,0-4-1.8-4-4V11.7c0-2.2,1.8-4,4-4L15.7,7.7z M49.7,7.7l10,0c2.2,0,4,1.8,4,4l0,30.1
++			c-2.2,2.2-4.5,4.9-6.7,7.7l0-36.7c0-0.6-0.4-1-1-1l-4.8,0C51,10.2,50.5,8.8,49.7,7.7z"/>
++		<path id="bolder" class="st2" d="M1.4,88c0,2.2,1.8,4,4,4l0,0h54.2c2.2,0,4-1.8,4-4l0,0v1.1c0,2.2-1.8,4-4,4H5.4c-2.2,0-4-1.8-4-4
++			V88z"/>
++		<path class="st3" d="M57,59.5l0,21c0,0.6-0.4,1-1,1H9.4c-0.5,0-0.9-0.4-1-0.9l0-0.1c0,0.6,0.5,1,1,1c27-0.9,41.6-2.4,43.7-4.5
++			c1-1,1.9-6.6,2.5-16.6C56,60,56.5,59.8,57,59.5z M56,11.7c0.6,0,1,0.4,1,1l0,36.7c-0.3,0.4-0.6,0.8-0.9,1.2
++			c0.4-9.6,0.7-21.8,0.9-36.6l0-1.2l0,0c0-0.5-0.4-0.9-0.9-1L56,11.7L56,11.7z"/>
++		<path class="st4" d="M14.2,11.7l0,0.2l0,0l0,0.2l0,0.2l37,0c0-0.2,0-0.4,0-0.5l4.8,0c0.6,0,1,0.4,1,1l0,0
++			c-0.2,15.4-0.5,28-0.9,37.9c-3.6,4.8-6.7,9.5-7.9,11.9l0,0l-14.5,14l-2.4,3c-0.1,0.1-0.1,0.2,0,0.2c0,0.1,0.1,0.1,0.2,0l0,0
++			l3.2-2.1L49,63.8c1.4-0.6,3.7-1.9,6.5-3.5c-0.6,10-1.5,15.5-2.5,16.6C51,79,36.4,80.5,9.4,81.4c-0.6,0-1-0.4-1-1l0-67.7
++			c0-0.6,0.4-1,1-1L14.2,11.7z M51.2,12.9h-37v0.7c0,0.3,0.2,0.6,0.5,0.6l0.1,0h35.8c0.3,0,0.6-0.2,0.6-0.5l0-0.1V12.9z"/>
++		<path class="st5" d="M14.2,11.7l0,0.2l0,0l0,0.2l0,0.2l37,0c0-0.2,0-0.4,0-0.5l4.8,0c0.6,0,1,0.4,1,1l0,0
++			c-0.2,15.4-0.5,28-0.9,37.9c-3.6,4.8-6.7,9.5-7.9,11.9l0,0l-14.5,14l-2.4,3c-0.1,0.1-0.1,0.2,0,0.2c0,0.1,0.1,0.1,0.2,0l0,0
++			l3.2-2.1L49,63.8c1.4-0.6,3.7-1.9,6.5-3.5c-0.6,10-1.5,15.5-2.5,16.6C51,79,36.4,80.5,9.4,81.4c-0.6,0-1-0.4-1-1l0-67.7
++			c0-0.6,0.4-1,1-1L14.2,11.7z M51.2,12.9h-37v0.7c0,0.3,0.2,0.6,0.5,0.6l0.1,0h35.8c0.3,0,0.6-0.2,0.6-0.5l0-0.1V12.9z"/>
++		<path class="st1" d="M51.2,12.9v0.7c0,0.3-0.3,0.6-0.6,0.6H14.8c-0.3,0-0.6-0.3-0.6-0.6v-0.7H51.2z M32.7,0.4
++			c2.7,0,3.8,1.6,4.9,3.7l0.1,0.2h5.5c4.4,0,8,3.6,8,8l-37,0l0-0.2c0.1-4.3,3.7-7.8,8-7.8h5.5C28.6,2.2,29.9,0.4,32.7,0.4z
++			 M32.7,2.8c-1.4,0-2.5,1.1-2.5,2.5s1.1,2.5,2.5,2.5c1.4,0,2.5-1.1,2.5-2.5S34,2.8,32.7,2.8z"/>
++	</g>
++	<path id="pencil" class="st6" d="M88.3,24.5c2.7,0.8-2.5,12.1-8.3,18.6c-5.8,6.5-11.7,9.8-18.4,13.9c-5.1,3.1-9.7,5.9-11.9,6.8
++		L35.3,77.7l-3.2,2.1c-0.1,0-0.2,0-0.2,0c0-0.1,0-0.2,0-0.2l2.4-3l14.5-14c2.1-4.1,9.7-15.4,16.4-21.7c1.4-1.3,2.9-2.7,4.5-4.1
++		l0.6-0.5c0.3-0.3,0.6-0.5,1-0.8l0.6-0.5c0.1-0.1,0.2-0.2,0.3-0.3l0.6-0.5C79.6,28.6,86.4,24,88.3,24.5z M71.2,43.4
++		c-0.9,0.3-2.6,0.6-2.2,1c0.4,0.4,2.5,0.3,6.6-1.5c3.8-1.7,2.5-1.7,0.8-1.2l-0.2,0.1l0,0l-0.1,0C74.1,42.5,72.2,43.1,71.2,43.4z
++		 M73.5,39.6c-0.8,0.2-1.6,0.4-1.3,0.7c0.4,0.4,2.5,0.3,6.6-1.5s2.4-1.7,0.5-1.1c-1.9,0.6-3.9,1.3-4.8,1.6c-0.2,0.1-0.4,0.1-0.6,0.2
++		L73.5,39.6z M77.2,35c-0.8,0.2-1.5,0.4-1.2,0.7c0.4,0.4,2.5,0.3,6.6-1.5c3.8-1.7,2.5-1.7,0.8-1.2l-0.2,0.1l0,0l-0.1,0
++		c-1.9,0.6-3.9,1.3-4.8,1.6c-0.2,0.1-0.4,0.1-0.6,0.2L77.2,35z"/>
++</g>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/favorite.svg b/product/default/src/main/resources/base/media/favorite.svg
+new file mode 100644
+index 0000000..b3d1e16
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/favorite.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>收藏-实心</title><path fill="#FFBF00" d="M12.77438,2.24874a1.75,1.75,0,0,1,.7948.7948l2.01864,4.09022a1,1,0,0,0,.75294.547l4.51383.6559a1.75,1.75,0,0,1,.96987,2.985L19.6759,13.41524l-.11921.11695-.655.56353q-1.95786,1.666-3.82958,3.036-2.18369,1.5984-4.52814,2.99752l.00388-.0036L7.49726,21.731a1.75,1.75,0,0,1-2.53917-1.84481l.77106-4.49559a1,1,0,0,0-.2876-.88514L2.17531,11.32166a1.75,1.75,0,0,1,.96988-2.985L7.659,7.6808a1,1,0,0,0,.75293-.547L10.4306,3.04354A1.75,1.75,0,0,1,12.77438,2.24874Zm6.19,11.86043-.40614.39628a1,1,0,0,0-.2876.88514l.771,4.49559A1.75,1.75,0,0,1,16.50252,21.731l-3.13171-1.64644a24.58444,24.58444,0,0,0,4.37908-4.97074C17.89453,14.97283,18.35,14.61526,18.96437,14.10917Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/favorite_cancel.svg b/product/default/src/main/resources/base/media/favorite_cancel.svg
+new file mode 100644
+index 0000000..5d0e0a1
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/favorite_cancel.svg
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
++    <title>收藏</title>
++    <defs>
++        <path d="M12.7775436,1.63492692 C13.1226657,1.80525484 13.4020138,2.084603 13.5723417,2.42972506 L15.5909872,6.51994748 C15.7366492,6.81509095 16.0182148,7.01966033 16.3439249,7.06698879 L20.8577534,7.72288645 C21.8142069,7.86186728 22.4768994,8.74989227 22.3379186,9.70634578 C22.2825757,10.0872106 22.1032231,10.4392098 21.8276268,10.7078499 L18.5613898,13.891644 C18.3257038,14.1213812 18.2181553,14.4523814 18.2737932,14.7767754 L19.0448472,19.2723649 C19.2082289,20.2249537 18.5684502,21.1296265 17.6158614,21.2930083 C17.2365356,21.3580678 16.8463415,21.2962671 16.5056856,21.1171737 L13.4135001,19.4922374 C13.8890143,19.1811107 14.3594108,18.8635936 14.8246852,18.5396878 L17.2036973,19.7894766 C17.2523624,19.8150614 17.3081045,19.82389 17.3622939,19.8145958 C17.4886577,19.7929227 17.5764902,19.679939 17.5697055,19.5549525 L17.5664347,19.5259325 L16.822127,15.1896117 C16.233717,15.6534073 15.651428,16.0961739 15.0752601,16.5179114 L14.195356,17.1492968 L14.195356,17.1492968 L13.3237321,17.7504514 C12.7197717,18.1588606 12.1071016,18.5564752 11.485722,18.9432952 L10.5471205,19.5154293 L10.5471205,19.5154293 L7.5004216,21.1171737 C7.2752958,21.2355294 7.03613819,21.2999613 6.79772797,21.3150637 L6.65488977,21.3182423 C6.03733755,21.3066835 5.44481929,20.9678678 5.13709464,20.3825407 C4.95800127,20.0418849 4.89620058,19.6516907 4.96126006,19.2723649 L5.73231401,14.7767754 C5.78795195,14.4523814 5.68040346,14.1213812 5.44471738,13.891644 L2.17848044,10.7078499 C1.48638418,10.0332227 1.47222264,8.92527453 2.14684976,8.23317827 C2.41548982,7.95758191 2.76748904,7.77822934 3.14835384,7.72288645 L7.66218227,7.06698879 C7.98789244,7.01966033 8.26945802,6.81509095 8.41512003,6.51994748 L10.4337655,2.42972506 C10.8615045,1.56303116 11.9108497,1.20718791 12.7775436,1.63492692 Z M11.9591458,2.95808449 L11.9295308,2.96527007 C11.9186646,2.96861565 11.9080292,2.97269676 11.897705,2.97748605 L11.9295308,2.96527007 C11.9108155,2.97103233 11.8927846,2.97897647 11.8758497,2.9889629 L11.897705,2.97748605 C11.8806657,2.98539044 11.8644742,2.99522387 11.8494929,3.00686353 L11.8758497,2.9889629 C11.8564802,3.00038505 11.8385444,3.01447891 11.8226585,3.03103562 L11.8494929,3.00686353 C11.8349373,3.01817235 11.821524,3.03118618 11.8095853,3.04579235 L11.7788696,3.09357363 L9.76022415,7.18379605 C9.65777458,7.39138155 9.5284333,7.58104483 9.37730841,7.74907464 C9.36689578,7.76065179 9.35639741,7.77210731 9.34579765,7.78345927 C9.32154277,7.8094362 9.29672731,7.83489994 9.27139962,7.8598056 C9.25218069,7.8787174 9.23203893,7.89788572 9.21159254,7.9167049 C9.19083435,7.93581237 9.1696972,7.9546158 9.14825426,7.97304979 C9.12322683,7.9945665 9.09772876,8.01562276 9.07182858,8.03616184 C9.05048782,8.05308223 9.02904998,8.06952117 9.00735242,8.08560821 C8.98070846,8.10536464 8.95357168,8.12465932 8.92605691,8.14340738 C8.90492178,8.15781133 8.88336909,8.17201666 8.861597,8.18588799 C8.83077263,8.20552392 8.79964623,8.22441091 8.76810558,8.24261854 C8.74318259,8.25700696 8.71793447,8.27100654 8.69243707,8.28457189 C8.66690923,8.29815315 8.64115119,8.31128953 8.61515443,8.32398347 C8.58903843,8.33673475 8.5627448,8.34901131 8.53622226,8.36083563 C8.50335128,8.37549408 8.46990009,8.3895481 8.43611347,8.40288263 C8.41431502,8.41148634 8.3923271,8.41980861 8.37020461,8.4278259 C8.33780879,8.43956293 8.30534491,8.45057618 8.27261388,8.46093143 C8.24147434,8.47078718 8.20981124,8.48012444 8.17791744,8.48884419 C8.15164244,8.49602683 8.12529134,8.50277116 8.09879321,8.50909269 C8.08290893,8.51288347 8.06677784,8.51656457 8.05059453,8.52008864 L7.99067741,8.53237085 C7.97925198,8.53456774 7.96780208,8.53668672 7.95632837,8.5387273 L7.87787975,8.55139931 L3.36405132,9.20729697 C3.30964206,9.2152031 3.25935646,9.24082489 3.22097931,9.2801958 L3.17890006,9.33787805 C3.17582815,9.34368602 3.17300154,9.3495886 3.17042005,9.35557062 C3.16449622,9.36931413 3.15989,9.3833711 3.15655628,9.39766093 L3.17042005,9.35557062 C3.16039885,9.37879248 3.15407137,9.40321145 3.15142628,9.42794046 L3.15655628,9.39766093 C3.15105904,9.42122457 3.14902189,9.44542138 3.15043452,9.46944495 L3.15142628,9.42794046 C3.14920796,9.44867962 3.14957964,9.46963685 3.15253462,9.4902889 L3.15043452,9.46944495 C3.15177872,9.49230479 3.15624659,9.51500776 3.16382923,9.53685903 L3.15253462,9.4902889 C3.1560908,9.51514267 3.16338839,9.53955445 3.17441573,9.56261222 L3.16382923,9.53685903 C3.17116187,9.55798986 3.18140729,9.57832422 3.19455744,9.59723378 L3.22549797,9.63372032 L6.49173491,12.8175145 C6.66864201,12.9899563 6.81667163,13.185219 6.93345225,13.3960039 C6.9453283,13.4174491 6.95666735,13.4386412 6.96769281,13.4599807 C6.98476849,13.4930124 7.00132004,13.5268904 7.01708883,13.5611038 C7.02632136,13.5811337 7.03531842,13.6013551 7.0440433,13.6216867 C7.05986772,13.6585657 7.07476697,13.6957275 7.08876354,13.7332162 C7.0954323,13.7510694 7.10202451,13.7693658 7.10840225,13.7877355 C7.12028839,13.8219746 7.13140707,13.8563938 7.14177572,13.8910418 C7.15287113,13.9281173 7.16311244,13.9654736 7.17248413,14.0030615 C7.17796581,14.0250458 7.18315883,14.0471494 7.18805129,14.0693263 C7.19476714,14.0997675 7.20091922,14.1303611 7.20649928,14.1610769 C7.21303576,14.1970365 7.21882288,14.2334175 7.22380648,14.2699424 C7.22506929,14.2791953 7.22629025,14.2885353 7.22745863,14.2978842 C7.23350998,14.3463257 7.23814084,14.3948735 7.24134826,14.4436002 C7.24232171,14.4583669 7.24317605,14.4733923 7.24389477,14.4884329 C7.24594229,14.5312853 7.24688899,14.5742497 7.24672221,14.617297 C7.24660006,14.6501739 7.24581127,14.6834943 7.24435124,14.7168455 C7.24302405,14.7470889 7.2411662,14.7770913 7.23876161,14.8071049 C7.23781128,14.8189758 7.23676123,14.8309985 7.23562319,14.8430222 L7.23116275,14.8861574 C7.22880526,14.9071733 7.22617796,14.9281889 7.22327934,14.9491994 L7.21072649,15.030343 L6.43967255,19.5259325 C6.43037834,19.5801219 6.439207,19.6358639 6.46479177,19.684529 C6.47959651,19.7126893 6.49901555,19.7368556 6.52163151,19.7565872 C6.53066279,19.7644774 6.5403436,19.7717488 6.55045515,19.7782636 L6.52163151,19.7565872 C6.53713342,19.7701121 6.55413733,19.7815534 6.57218679,19.7907694 L6.55045515,19.7782636 C6.56710435,19.7889905 6.58492135,19.7976658 6.60348569,19.8041589 L6.57218679,19.7907694 C6.59336524,19.801583 6.61598318,19.8093327 6.63930324,19.8137894 L6.60348569,19.8041589 C6.64312221,19.8180221 6.68616551,19.8219373 6.7285231,19.8146321 L6.69635002,19.818041 C6.71659512,19.8172224 6.73691947,19.813924 6.75687892,19.8080077 L6.80240991,19.7894766 L7.099,19.6328248 L9.805,18.2098248 L10.6857887,17.6743663 C11.8872014,16.926714 13.0550101,16.1377745 14.1892882,15.3075173 C15.4071484,14.4160804 16.6554139,13.426464 17.8943402,12.3749785 L18.512841,11.844248 L20.7806092,9.63372032 C20.8199802,9.59534317 20.845602,9.54505756 20.8535081,9.4906483 L20.8540354,9.42209317 C20.8529596,9.41387917 20.8514789,9.40576962 20.8496114,9.39778877 C20.8467961,9.38572088 20.8430359,9.37379532 20.838433,9.36225854 L20.8496114,9.39778877 C20.8443233,9.3751889 20.8359338,9.35362108 20.8248541,9.33363618 L20.838433,9.36225854 C20.8310465,9.34374458 20.82149,9.3262318 20.8100323,9.31008052 L20.8248541,9.33363618 C20.8138925,9.31386434 20.8002978,9.29564184 20.7844679,9.27950211 L20.8100323,9.31008052 C20.7986234,9.29399801 20.7853296,9.27926542 20.7704162,9.26623846 L20.7844679,9.27950211 C20.771272,9.26604789 20.7565229,9.254041 20.7404512,9.24379044 L20.7704162,9.26623846 C20.7531723,9.25117575 20.7337631,9.23839341 20.7125991,9.22844136 L20.7404512,9.24379044 C20.7231627,9.23276376 20.7043437,9.22376945 20.6842813,9.21719216 L20.6420559,9.20729697 L16.1282275,8.55139931 C16.0242447,8.53628973 15.9220617,8.51476975 15.822156,8.48718644 C15.8041655,8.48221869 15.7863313,8.47707911 15.768573,8.47174673 C15.7427792,8.46400398 15.7169359,8.45578397 15.6912639,8.44715676 C15.6551722,8.43502433 15.6196273,8.42216767 15.5844409,8.4085327 C15.5644506,8.40078994 15.5442118,8.39264392 15.5240975,8.38424068 C15.4902091,8.37007802 15.4569534,8.35531648 15.4240667,8.33985247 C15.3932502,8.32536777 15.3624135,8.31008688 15.3319263,8.29418824 C15.3095091,8.28249662 15.2873855,8.27052969 15.2654562,8.25823707 C15.234202,8.24071867 15.2032705,8.22249429 15.1727562,8.20362031 C15.1514954,8.19047184 15.1302994,8.17691705 15.1093158,8.16304793 C15.0811365,8.14441718 15.0536264,8.12542572 15.0265083,8.10589129 C15.0039806,8.08966876 14.9814273,8.07284299 14.9591617,8.05563969 C14.9376716,8.03903453 14.9165082,8.02212616 14.8956203,8.00487455 C14.8659479,7.98036443 14.8369551,7.9552738 14.8085387,7.9295148 C14.7918677,7.9144102 14.7749603,7.89865958 14.7582675,7.88267054 C14.7325411,7.85802801 14.7073573,7.83285363 14.6827016,7.80712907 C14.6663058,7.79001878 14.6503228,7.77286306 14.634574,7.75547361 C14.6079416,7.72606654 14.5819842,7.69599769 14.5567238,7.66528078 C14.5445629,7.65049305 14.5325647,7.63555652 14.520731,7.62047206 C14.4925821,7.58459162 14.465341,7.54784068 14.4390743,7.51028147 C14.4305576,7.49809936 14.4223634,7.48615879 14.4142676,7.4741386 C14.3896373,7.43757254 14.3658596,7.40017205 14.343035,7.36205794 C14.3382863,7.35412737 14.3336394,7.34626964 14.3290331,7.33838204 L14.3060346,7.29814983 C14.2979469,7.28369237 14.2899937,7.26913839 14.2821768,7.25448926 L14.2458831,7.18379605 L12.2272376,3.09357363 C12.2029051,3.04427048 12.1629982,3.0043636 12.113695,2.98003104 L12.076,2.96682475 L12.0537618,2.95934967 C12.0424329,2.95699545 12.0310424,2.95545502 12.0196677,2.9547021 C11.9990062,2.95337037 11.9788315,2.95455654 11.9591458,2.95808449 Z" id="path-1"></path>
++    </defs>
++    <g id="收藏" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
++        <mask id="mask-2" fill="white">
++            <use xlink:href="#path-1"></use>
++        </mask>
++        <use id="形状结合" fill="#182431" fill-rule="nonzero" xlink:href="#path-1"></use>
++    </g>
++</svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/foldMove_select.svg b/product/default/src/main/resources/base/media/foldMove_select.svg
+new file mode 100644
+index 0000000..d9a4f73
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/foldMove_select.svg
+@@ -0,0 +1,30 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#FF6100;}
++	.st1{filter:url(#filter-2);}
++	.st2{fill-rule:evenodd;clip-rule:evenodd;}
++	.st3{fill:none;stroke:#000000;stroke-opacity:5.000000e-02;}
++	.st4{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
++</style>
++<filter  filterUnits="objectBoundingBox" height="160.0%" id="filter-2" width="160.0%" x="-30.0%" y="-20.0%">
++	<feMorphology  in="SourceAlpha" operator="dilate" radius="1" result="shadowSpreadOuter1"></feMorphology>
++	<feOffset  dx="0" dy="1" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
++	<feMorphology  in="SourceAlpha" operator="erode" radius="1" result="shadowInner"></feMorphology>
++	<feOffset  dx="0" dy="1" in="shadowInner" result="shadowInner"></feOffset>
++	<feComposite  in="shadowOffsetOuter1" in2="shadowInner" operator="out" result="shadowOffsetOuter1"></feComposite>
++	<feGaussianBlur  in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="0.5"></feGaussianBlur>
++	<feColorMatrix  in="shadowBlurOuter1" type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0"></feColorMatrix>
++</filter>
++<title>画板</title>
++<circle id="Oval-21" class="st0" cx="12" cy="12" r="10"/>
++<g id="Oval-43">
++	<g class="st1">
++		<circle id="path-1_1_" class="st2" cx="12" cy="12" r="5"/>
++	</g>
++	<circle class="st3" cx="12" cy="12" r="5.5"/>
++</g>
++<circle class="st4" cx="12" cy="12" r="5"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/foldMove_unselect.svg b/product/default/src/main/resources/base/media/foldMove_unselect.svg
+new file mode 100644
+index 0000000..3b9a209
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/foldMove_unselect.svg
+@@ -0,0 +1,18 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{opacity:0.4;}
++	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;fill-opacity:0.4;}
++	.st2{fill-rule:evenodd;clip-rule:evenodd;fill:#182431;fill-opacity:0.4;}
++</style>
++<title>未选中</title>
++<g id="未选中" class="st0">
++	<g transform="translate(2.000000, 2.000000)">
++		<circle id="Oval-21" class="st1" cx="10" cy="10" r="10"/>
++		<path id="Oval-22" class="st2" d="M10,0c5.5,0,10,4.5,10,10s-4.5,10-10,10S0,15.5,0,10S4.5,0,10,0z M10,1c-5,0-9,4-9,9s4,9,9,9
++			s9-4,9-9S15,1,10,1z"/>
++	</g>
++</g>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/folder.svg b/product/default/src/main/resources/base/media/folder.svg
+new file mode 100644
+index 0000000..f5c0bc0
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/folder.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>文件夹</title><path fill="#4fb4e3" d="M7.37868,4.5H5A2.5,2.5,0,0,0,2.501,6.93L2.5,17a2.5,2.5,0,0,0,2.43,2.499L5,19.5H19a2.5,2.5,0,0,0,2.499-2.43L21.5,17V11a2.5,2.5,0,0,0-2.43-2.499L12.41421,8.5a2.5,2.5,0,0,1-1.7083-.6747l-.05946-.05753Zm0-1.5a1.5,1.5,0,0,1,1.06066.43934l3.26777,3.26777A1,1,0,0,0,12.41421,7H19a4.043,4.043,0,0,1,.44285.02424,2.00019,2.00019,0,0,0-1.88056-1.52329L17.5,5.5l-5.543-.00013-1.50025-1.5L17.5,4A3.5,3.5,0,0,1,21,7.5l.00012.0352A3.9984,3.9984,0,0,1,23,11v6a4,4,0,0,1-4,4H5a4,4,0,0,1-4-4V7A4,4,0,0,1,5,3Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/font_color.svg b/product/default/src/main/resources/base/media/font_color.svg
+new file mode 100644
+index 0000000..70ee9ed
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/font_color.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>文本颜色</title><path class="cls-1" d="M2.5,19.02h19a1.5,1.5,0,0,1,0,3H2.5a1.5,1.5,0,0,1,0-3Z"/><path d="M14.421,10.95488H9.579l2.41086-6.66532ZM7.67463,16.202l1.33712-3.70745H14.968L16.32536,16.202H18.25L12.8205,1.98h-1.641L5.75,16.202Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/font_large.svg b/product/default/src/main/resources/base/media/font_large.svg
+new file mode 100644
+index 0000000..82436a9
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/font_large.svg
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:#182431;}
++</style>
++<title>字体大小备份 2</title>
++<path id="A" class="st0" d="M8.3,19l1.2-3.1h4.8l1.2,3.1h1.9L12.6,7.3h-1.5L6.6,19H8.3z M13.7,14.4h-3.6l1.8-4.8L13.7,14.4z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/font_size.svg b/product/default/src/main/resources/base/media/font_size.svg
+new file mode 100644
+index 0000000..90b068c
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/font_size.svg
+@@ -0,0 +1,15 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:#182431;}
++</style>
++<title>字体大小</title>
++<path id="形状结合" class="st0" d="M20.1,12c0.6,0,1.1,0.1,1.6,0.4c0.5,0.3,0.8,0.6,1.1,1.1c0.3,0.5,0.4,1.1,0.4,1.7l0,0V20H22
++	l0-0.2c0-0.4,0-0.7,0-0.8c-0.2,0.4-0.6,0.7-1,0.9s-0.9,0.3-1.4,0.3c-0.5,0-1-0.1-1.4-0.3c-0.4-0.2-0.8-0.5-1-0.8s-0.4-0.8-0.4-1.3
++	c0-0.8,0.3-1.4,0.9-1.8c0.6-0.4,1.4-0.7,2.4-0.7c0.6,0,1.1,0.1,1.7,0.2c0-1.5-0.6-2.3-1.8-2.3c-0.9,0-1.5,0.4-2,1.2l0,0l-1-0.6
++	l0.1-0.2c0.2-0.5,0.6-0.8,1.1-1.1C18.8,12.2,19.4,12,20.1,12z M9.6,3.8l6.7,16.1h-2.2l-1.9-4.8H5.4l-1.8,4.8h-2L8.1,3.8H9.6z
++	 M20.1,16.3c-0.6,0-1.2,0.1-1.5,0.4s-0.5,0.6-0.5,1.1c0,0.4,0.2,0.7,0.5,1c0.3,0.2,0.7,0.4,1.2,0.4c0.6,0,1.1-0.2,1.5-0.5
++	s0.6-0.8,0.6-1.4l0,0v-0.6l-0.3-0.1C21,16.3,20.6,16.3,20.1,16.3z M8.7,6.5l-2.6,6.9h5.5L8.7,6.5z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/font_small.svg b/product/default/src/main/resources/base/media/font_small.svg
+new file mode 100644
+index 0000000..1a77926
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/font_small.svg
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:#182431;}
++</style>
++<title>字体大小备份</title>
++<path id="A" class="st0" d="M9.6,16.3l0.7-2h3l0.8,2h1.2L12.3,9h-0.9l-2.8,7.3H9.6z M13,13.4h-2.3l1.1-3L13,13.4z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/font_style.svg b/product/default/src/main/resources/base/media/font_style.svg
+new file mode 100644
+index 0000000..1b57f3f
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/font_style.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>文本样式</title><path d="M9.35485,10.55043,5.98161,10.543,7.65616,5.69371ZM4.43707,14.56522l.99433-2.75741H9.85873l1.00885,2.75741h1.42981L8.25473,4H7.0354L3,14.56522Z"/><path class="cls-1" d="M11.75,3.75h9.5a.75.75,0,0,1,0,1.5h-9.5a.75.75,0,0,1,0-1.5Z"/><path class="cls-1" d="M13.75,8.25h7.5a.75.75,0,0,1,0,1.5h-7.5a.75.75,0,0,1,0-1.5Z"/><path class="cls-1" d="M15.75,12.75h5.5a.75.75,0,0,1,0,1.5h-5.5a.75.75,0,0,1,0-1.5Z"/><path class="cls-1" d="M2.75,18.75h18.5a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/format_italic.svg b/product/default/src/main/resources/base/media/format_italic.svg
+new file mode 100644
+index 0000000..7695394
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/format_italic.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>文本倾斜</title><path class="cls-1" d="M17.5,3a.75.75,0,0,1,0,1.5H14.104l-2.674,15h3.41848a.75.75,0,1,1,0,1.5H6.5a.75.75,0,0,1,0-1.5H9.895l2.674-15H9.15152a.75.75,0,0,1,0-1.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/format_menubullte1.svg b/product/default/src/main/resources/base/media/format_menubullte1.svg
+new file mode 100644
+index 0000000..26b7cc4
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/format_menubullte1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>符号标注2</title><path class="cls-1" d="M7.75,3.5h13.5a.75.75,0,0,1,0,1.5H7.75a.75.75,0,0,1,0-1.5Z"/><path class="cls-1" d="M7.75,11.25h13.5a.75.75,0,0,1,0,1.5H7.75a.75.75,0,0,1,0-1.5Z"/><path class="cls-1" d="M7.75,19h13.5a.75.75,0,0,1,0,1.5H7.75a.75.75,0,0,1,0-1.5Z"/><rect x="2" y="2.75" width="3" height="3" rx="0.5" ry="0.5"/><rect x="2" y="10.5" width="3" height="3" rx="0.5" ry="0.5"/><rect x="2" y="18.25" width="3" height="3" rx="0.5" ry="0.5"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/format_menubullte2.svg b/product/default/src/main/resources/base/media/format_menubullte2.svg
+new file mode 100644
+index 0000000..ebf9a2a
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/format_menubullte2.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>符号标注3</title><path class="cls-1" d="M21.25,3.5a.75.75,0,0,1,0,1.5H7.75a.75.75,0,0,1,0-1.5ZM3.5,2.75A1.5,1.5,0,1,1,2,4.25,1.5,1.5,0,0,1,3.5,2.75Zm17.75,8.5a.75.75,0,0,1,0,1.5H7.75a.75.75,0,0,1,0-1.5ZM3.5,10.5A1.5,1.5,0,1,1,2,12,1.5,1.5,0,0,1,3.5,10.5ZM21.25,19a.75.75,0,0,1,0,1.5H7.75a.75.75,0,0,1,0-1.5ZM3.5,18.25A1.5,1.5,0,1,1,2,19.75,1.5,1.5,0,0,1,3.5,18.25Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/format_menulist_alphabet.svg b/product/default/src/main/resources/base/media/format_menulist_alphabet.svg
+new file mode 100644
+index 0000000..efc97ae
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/format_menulist_alphabet.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>英文符号</title><path class="cls-1" d="M7.625,3.493h13.5a.75.75,0,0,1,0,1.5H7.625a.75.75,0,0,1,0-1.5Z"/><path class="cls-1" d="M7.625,11.243h13.5a.75.75,0,0,1,0,1.5H7.625a.75.75,0,0,1,0-1.5Z"/><path class="cls-1" d="M7.625,18.993h13.5a.75.75,0,0,1,0,1.5H7.625a.75.75,0,0,1,0-1.5Z"/><path d="M3.3332,5.32345a.65508.65508,0,0,1-.4205-.12733.4192.4192,0,0,1-.15991-.34647.43639.43639,0,0,1,.19545-.379A.9542.9542,0,0,1,3.499,4.33438a2.61049,2.61049,0,0,1,.62187.08884v.19545a.62915.62915,0,0,1-.231.51822A.85807.85807,0,0,1,3.3332,5.32345Zm-.077.49157a1.217,1.217,0,0,0,.539-.11253.91563.91563,0,0,0,.37312-.33166q.01777.11253.02961.379H4.725V3.93165a1.33643,1.33643,0,0,0-.34351-.97426A1.20817,1.20817,0,0,0,3.47534,2.605a1.42643,1.42643,0,0,0-.74328.19544,1.14883,1.14883,0,0,0-.47676.52711l.45011.26059a.78075.78075,0,0,1,.72847-.456q.67518,0,.687.83508a2.55213,2.55213,0,0,0-.68109-.09476,1.577,1.577,0,0,0-.94465.26651.84446.84446,0,0,0-.37016.72255.85641.85641,0,0,0,.154.51526.979.979,0,0,0,.41161.32574A1.39781,1.39781,0,0,0,3.25621,5.815Z"/><path d="M3.63624,13.36629a.79664.79664,0,0,1-.58754-.24739,1.04088,1.04088,0,0,1-.24458-.759,1.01182,1.01182,0,0,1,.24458-.74779.80586.80586,0,0,1,.58754-.24177.70243.70243,0,0,1,.5735.26145,1.12,1.12,0,0,1,.21365.72811,1.143,1.143,0,0,1-.21646.73935A.69854.69854,0,0,1,3.63624,13.36629Zm.10121.51727A1.19441,1.19441,0,0,0,4.37,13.70364a1.29939,1.29939,0,0,0,.4751-.5257,1.937,1.937,0,0,0,0-1.63052A1.32,1.32,0,0,0,4.37,11.0189a1.19382,1.19382,0,0,0-1.15823-.06184,1.034,1.034,0,0,0-.40763.36827V9.543H2.225v4.27872h.51165q.01123-.26988.03373-.48354a1.01876,1.01876,0,0,0,.41607.41044A1.17421,1.17421,0,0,0,3.73745,13.88356Z"/><path d="M3.649,21.395a1.359,1.359,0,0,0,.681-.168,1.11719,1.11719,0,0,0,.459-.504l-.474-.276a.76793.76793,0,0,1-.672.39.78366.78366,0,0,1-.63-.285,1.38748,1.38748,0,0,1,0-1.56.78366.78366,0,0,1,.63-.285.77027.77027,0,0,1,.672.384l.474-.276a1.11719,1.11719,0,0,0-.459-.504,1.359,1.359,0,0,0-.681-.168,1.52577,1.52577,0,0,0-.768.198,1.435,1.435,0,0,0-.552.567,1.919,1.919,0,0,0,0,1.722,1.435,1.435,0,0,0,.552.567A1.52577,1.52577,0,0,0,3.649,21.395Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/format_menulist_number.svg b/product/default/src/main/resources/base/media/format_menulist_number.svg
+new file mode 100644
+index 0000000..6e778c0
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/format_menulist_number.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>数字符号</title><path class="cls-1" d="M21.1,3.37562a.75.75,0,1,1,0,1.5H7.6a.75.75,0,1,1,0-1.5Zm0,7.75a.75.75,0,0,1,0,1.5H7.6a.75.75,0,0,1,0-1.5Zm0,7.75a.75.75,0,0,1,0,1.5H7.6a.75.75,0,1,1,0-1.5Z"/><polygon points="3.55 5.786 3.55 2.126 3.135 2.126 2.15 2.696 2.15 3.231 3.01 2.746 3.01 5.786 3.55 5.786"/><path d="M4.55,13.8584v-.476H2.95668l.7666-.85177a4.08243,4.08243,0,0,0,.55866-.7215,1.24419,1.24419,0,0,0,.15783-.61128,1.12763,1.12763,0,0,0-.14029-.57369.93337.93337,0,0,0-.38831-.37077,1.20194,1.20194,0,0,0-.55867-.12777,1.27808,1.27808,0,0,0-.744.23048,1.1231,1.1231,0,0,0-.44844.65136l.4309.24551a.957.957,0,0,1,.27808-.466.65031.65031,0,0,1,.44342-.17036.53785.53785,0,0,1,.40084.15783.61239.61239,0,0,1,.15532.44844.832.832,0,0,1-.12276.43841,4.08354,4.08354,0,0,1-.43841.55365L2.15,13.51268v.34572Z"/><path d="M3.355,21.87438a1.409,1.409,0,0,0,.6-.12645,1.00035,1.00035,0,0,0,.595-.94958.9551.9551,0,0,0-.16116-.56529.93613.93613,0,0,0-.47851-.33719.7945.7945,0,0,0,.3843-.31736.90827.90827,0,0,0,.12644-.481.96022.96022,0,0,0-.13388-.50826.90092.90092,0,0,0-.37686-.34215A1.237,1.237,0,0,0,3.35,18.12562a1.23745,1.23745,0,0,0-.72149.21074,1.11614,1.11614,0,0,0-.42892.61736l.42148.243a.92191.92191,0,0,1,.26529-.43884.6356.6356,0,0,1,.42893-.15124.55311.55311,0,0,1,.38926.13884.48642.48642,0,0,1,.15124.37686.54019.54019,0,0,1-.17852.41653.73719.73719,0,0,1-.5157.16364H2.9781v.46611h.1438q.86281,0,.86281.60992a.58533.58533,0,0,1-.181.45372.64535.64535,0,0,1-.45372.16612.80189.80189,0,0,1-.77355-.57521l-.42645.243a1.047,1.047,0,0,0,.45868.60247A1.39646,1.39646,0,0,0,3.355,21.87438Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/huaweishare1.svg b/product/default/src/main/resources/base/media/huaweishare1.svg
+new file mode 100644
+index 0000000..a587963
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/huaweishare1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>huaweishare</title><path d="M20.9634,19.015a10.72435,10.72435,0,0,1-1.05273,1.0913l-.16249.1432-.26824.23162a1,1,0,0,1-1.34764-1.47681l.04056-.037.26825-.23162a8.71745,8.71745,0,0,0,.98842-1.00416,8.9542,8.9542,0,0,0-.85234-12.34506l-.10792-.09556-.29966-.261a1,1,0,0,1,1.27123-1.54308l.04234.03492.29966.261A10.95239,10.95239,0,0,1,20.9634,19.015Zm-3.71762-2.48a6.94242,6.94242,0,0,1-.79333.80591,1,1,0,1,1-1.30611-1.51462,4.94205,4.94205,0,0,0,.56476-.57377A5.08714,5.08714,0,0,0,15.23264,8.25l-.08955-.079a1,1,0,0,1,1.27024-1.5439l.04237.03491.01921.01671A7.08582,7.08582,0,0,1,17.24578,16.53493ZM14,12.02581a2,2,0,1,1-2-2A2,2,0,0,1,14,12.02581Zm-5.2224,3.71955a1,1,0,0,1-1.30983,1.5114,6.88841,6.88841,0,0,1-.78514-.80155,7.06622,7.06622,0,0,1,.7629-9.79607l.019-.0166.04228-.035a1,1,0,0,1,1.274,1.54075l-.08842.07846a5.06783,5.06783,0,0,0-.472,6.94972A4.88862,4.88862,0,0,0,8.77761,15.74536Zm-2.95085,3.1571A1,1,0,0,1,4.47549,20.376l-.26513-.23007-.16074-.14236a10.6376,10.6376,0,0,1-1.04137-1.0849,10.92032,10.92032,0,0,1,1.16782-15.136l.29617-.25926.04226-.035a1,1,0,0,1,1.275,1.53994l-.29618.25923-.10659.09486a8.92259,8.92259,0,0,0-.84151,12.25655,8.63046,8.63046,0,0,0,.97591.9964l.26512.23006Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/icon.png b/product/default/src/main/resources/base/media/icon.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..ce307a8827bd75456441ceb57d530e4c8d45d36c
+GIT binary patch
+literal 6790
+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
+
+literal 0
+KcmV+b0RR6000031
+
+diff --git a/product/default/src/main/resources/base/media/left_justify.svg b/product/default/src/main/resources/base/media/left_justify.svg
+new file mode 100644
+index 0000000..93e982c
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/left_justify.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>左对齐</title><path class="cls-1" d="M2.75,3.5a.75.75,0,0,0,0,1.5h18.5a.75.75,0,0,0,0-1.5Zm0,5.25a.75.75,0,0,0,0,1.5h10a.75.75,0,0,0,0-1.5Zm0,5a.75.75,0,0,0,0,1.5h18.5a.75.75,0,0,0,0-1.5Zm0,5.25a.75.75,0,0,0,0,1.5h10a.75.75,0,0,0,0-1.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/location_notify.svg b/product/default/src/main/resources/base/media/location_notify.svg
+new file mode 100644
+index 0000000..44a24c0
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/location_notify.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>位置提醒</title><path d="M12.5,2.25a6.94008,6.94008,0,0,1,6.87282,5.97627l.01376.104.31356,2.50425a5.55,5.55,0,0,0-1.59559-.67087l-.205-1.63647-.01226-.09287a5.44009,5.44009,0,0,0-5.296-4.6835L12.51116,3.75l-.09367.00065A5.4401,5.4401,0,0,0,7.11392,8.42555l-.01206.09051L5.94875,17.75l5.80074-.00058a9.4048,9.4048,0,0,0,.80441,1.50083L3.25,19.25a.75.75,0,0,1,0-1.5H4.43725L5.61341,8.33022a6.94009,6.94009,0,0,1,6.78174-6.07944Zm1.79369,19.22042.1379.1524.13288.13874q.09145.09267.20349.19978a2.98473,2.98473,0,0,1-2.19209,1.03772L12.5,23a3.00028,3.00028,0,0,1-2.98974-2.75006l3.75787-.00028Q13.73064,20.84545,14.29369,21.47042Z"/><path class="cls-1" d="M12.25,3.54616c.13807,0,.27632.00849.413.022l.11674.01274.11573.0147.17117.02471.48832.07789.10183.015.09886.01306.09565.01068.0922.0078c.48209.03308.80649-.07708.80649-.66148A2.17143,2.17143,0,0,0,12.5,1a2.17143,2.17143,0,0,0-2.25,2.08322c0,.59445.20217.69821.569.65965l.07305-.00915.07709-.01214.08109-.01457.363-.07139.15157-.02715.10555-.0167.10909-.01492.05585-.00662.11429-.0112C12.04626,3.55094,12.14645,3.54616,12.25,3.54616Z"/><path class="cls-1" d="M14.75,3.25a2.25,2.25,0,0,0-4.5,0"/><path d="M16.85,14.25A1.15,1.15,0,1,1,15.7,15.4,1.15,1.15,0,0,1,16.85,14.25Zm-.07526-1.67933.05425-.00045h.046A3.16888,3.16888,0,0,1,20,15.78111c0,1.29581-.62587,2.44931-1.91307,3.975a10.3467,10.3467,0,0,1-.96979.97255.35144.35144,0,0,1-.46234.00952L16.51,20.60622c-.36266-.33371-.617-.58437-.759-.747l-.09051-.106c-1.2501-1.47535-1.91047-2.70335-1.91047-3.9721A3.13085,3.13085,0,0,1,16.77474,12.57067Zm.10026-1.50045-.13328.00057A4.53356,4.53356,0,0,0,12.25,15.6149c0,1.735.89548,3.32209,2.55947,5.19375l.116.12939.11174.11778c.184.18825.442.42883.777.72519l.28.24515.03555.02963a1.20413,1.20413,0,0,0,1.53373-.02442,13.2405,13.2405,0,0,0,1.276-1.22164C20.64853,18.879,21.5,17.38332,21.5,15.6149A4.58534,4.58534,0,0,0,16.875,11.07022Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/mid_justify.svg b/product/default/src/main/resources/base/media/mid_justify.svg
+new file mode 100644
+index 0000000..499b42c
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/mid_justify.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>居中</title><path class="cls-1" d="M21.25,3.5a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5ZM17,8.75a.75.75,0,0,1,0,1.5H7a.75.75,0,0,1,0-1.5Zm4.25,5a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5ZM17,19a.75.75,0,0,1,0,1.5H7A.75.75,0,0,1,7,19Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/minus.svg b/product/default/src/main/resources/base/media/minus.svg
+new file mode 100644
+index 0000000..fd73046
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/minus.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>减</title><path d="M3,13a1,1,0,0,1,0-2H21a1,1,0,0,1,0,2Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/more_1.svg b/product/default/src/main/resources/base/media/more_1.svg
+new file mode 100644
+index 0000000..76b19e9
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/more_1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>more</title><path class="cls-1" d="M17.75,4.75A1.75,1.75,0,1,1,16,6.5,1.75,1.75,0,0,1,17.75,4.75Zm-11.5,0A1.75,1.75,0,1,1,4.5,6.5,1.75,1.75,0,0,1,6.25,4.75Zm11.5,11A1.75,1.75,0,1,1,16,17.5,1.75,1.75,0,0,1,17.75,15.75Zm-11.5,0A1.75,1.75,0,1,1,4.5,17.5,1.75,1.75,0,0,1,6.25,15.75Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/more_list1.svg b/product/default/src/main/resources/base/media/more_list1.svg
+new file mode 100644
+index 0000000..beaecc5
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/more_list1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>more-list</title><path class="cls-1" d="M13.75,17.5A1.75,1.75,0,1,1,12,15.75,1.75,1.75,0,0,1,13.75,17.5Zm0-11A1.75,1.75,0,1,1,12,4.75,1.75,1.75,0,0,1,13.75,6.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/move.svg b/product/default/src/main/resources/base/media/move.svg
+new file mode 100644
+index 0000000..510e493
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/move.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>移动</title><path d="M13.37327,10.2271l.03206.03026,2.54289,2.54289a1.75,1.75,0,0,1,.04183,2.43162l-.04183.04326L13.40533,17.818a.75.75,0,0,1-1.09092-1.0286l.03026-.03206L14.312,14.78969l-6.937-.00041a.75.75,0,1,1,0-1.5l6.94.00041L12.34467,11.318a.75.75,0,0,1,1.0286-1.09092ZM7.37868,4.5H5A2.5,2.5,0,0,0,2.501,6.93L2.5,17a2.5,2.5,0,0,0,2.43,2.499L5,19.5H19a2.5,2.5,0,0,0,2.499-2.43L21.5,17V11a2.5,2.5,0,0,0-2.43-2.499L12.41421,8.5a2.5,2.5,0,0,1-1.7083-.6747l-.05946-.05753Zm0-1.5a1.5,1.5,0,0,1,1.06066.43934l3.26777,3.26777A1,1,0,0,0,12.41421,7H19a4.043,4.043,0,0,1,.44285.02424,2.00019,2.00019,0,0,0-1.88056-1.52329L17.5,5.5l-5.543-.00013-1.50025-1.5L17.5,4A3.5,3.5,0,0,1,21,7.5l.00012.0352A3.9984,3.9984,0,0,1,23,11v6a4,4,0,0,1-4,4H5a4,4,0,0,1-4-4V7A4,4,0,0,1,5,3Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/multi_choose.svg b/product/default/src/main/resources/base/media/multi_choose.svg
+new file mode 100644
+index 0000000..5a6c758
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/multi_choose.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>多选</title><path class="cls-1" d="M15.80833,10.255a.75.75,0,0,0-1.06066,0l-4.8462,4.84619-.03206.03026a.75.75,0,0,1-1.0286-.03026L6.74462,13.005l-.03206-.03026A.75.75,0,0,0,5.684,14.06569l2.44975,2.44975.04326.04182a1.75,1.75,0,0,0,2.43161-.04182l5.19975-5.19975.03026-.03206A.75.75,0,0,0,15.80833,10.255ZM15.59029,2c2.22879,0,3.037.23206,3.85182.66783a4.54323,4.54323,0,0,1,1.89006,1.89006C21.76794,5.3727,22,6.18092,22,8.40971v5.96252a5.79955,5.79955,0,0,1-.53427,3.08146,3.63532,3.63532,0,0,1-.97081,1.16035c.0032-.14453.00508-.29743.00508-.45987V8.34583a5.34107,5.34107,0,0,0-.51889-2.7827,3.72583,3.72583,0,0,0-1.54424-1.54424,4.993,4.993,0,0,0-2.51749-.51707L5.84583,3.5c-.16272,0-.31588.00189-.46066.00585a3.63917,3.63917,0,0,1,1.16114-.97158A5.79955,5.79955,0,0,1,9.62777,2ZM15.0132,4.5a5.07467,5.07467,0,0,1,2.69628.46748,3.18031,3.18031,0,0,1,1.323,1.323A5.07467,5.07467,0,0,1,19.5,8.9868v8.5264a5.07467,5.07467,0,0,1-.46748,2.69628,3.18031,3.18031,0,0,1-1.323,1.323A5.07477,5.07477,0,0,1,15.0132,22H6.4868a5.07477,5.07477,0,0,1-2.69628-.46748,3.18031,3.18031,0,0,1-1.323-1.323A5.07477,5.07477,0,0,1,2,17.5132V8.9868a5.07477,5.07477,0,0,1,.46748-2.69628,3.18031,3.18031,0,0,1,1.323-1.323A5.07467,5.07467,0,0,1,6.4868,4.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/narrow.svg b/product/default/src/main/resources/base/media/narrow.svg
+new file mode 100644
+index 0000000..fccbe1f
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/narrow.svg
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
++    <title>Public/ic_public_reduce</title>
++    <defs>
++        <path d="M2.96680416,4.02746433 C2.68362252,3.7442827 2.69149532,3.27728176 2.98438854,2.98438854 C3.27728176,2.69149532 3.7442827,2.68362252 4.02746433,2.96680416 L10.7801475,9.71948734 C11.0633291,10.002669 11.0554564,10.4696699 10.7625631,10.7625631 C10.4696699,11.0554564 10.002669,11.0633291 9.71948734,10.7801475 L2.96680416,4.02746433 Z M19.75,12.5 L19.7940682,12.5012732 C19.9384255,12.5096374 20.0718294,12.5588302 20.1829044,12.6374761 L20.2618461,12.7018051 L20.2946723,12.7344084 C20.4219425,12.8688111 20.5,13.0502899 20.5,13.25 C20.5,13.6296958 20.2178461,13.943491 19.8517706,13.9931534 L19.75,14 L15.0604628,13.9994628 L21.0331756,19.9725154 C21.3163684,20.2557082 21.3085047,20.7227182 21.0156115,21.0156115 C20.7227182,21.3085047 20.2557082,21.3163684 19.9725154,21.0331756 L13.9994628,15.0604628 L13.9987268,19.7940682 C13.9759152,20.18777 13.6494202,20.5 13.25,20.5 C13.090942,20.5 12.9434485,20.4504863 12.8220921,20.3660313 L12.7362032,20.2963663 L12.7036337,20.2637968 L12.6731019,20.2292885 C12.586627,20.1253173 12.5277267,19.9975979 12.5076256,19.857355 L12.5,19.75 L12.5,14.25 L12.5010148,14.1898376 C12.5310564,13.300598 13.2245361,12.5795925 14.1021145,12.5061604 L14.25,12.5 L19.75,12.5 Z M10.75,3.5 C10.909058,3.5 11.0565515,3.54951372 11.1779079,3.63396869 L11.2637968,3.7036337 L11.2963663,3.73620318 L11.3268981,3.77071147 C11.413373,3.87468274 11.4722733,4.0024021 11.4923744,4.14264502 L11.5,4.25 L11.4989852,9.81016244 C11.4689436,10.699402 10.7754639,11.4204075 9.89788549,11.4938396 L9.75,11.5 L4.2059318,11.4987268 C4.06157447,11.4903626 3.92817057,11.4411698 3.81709563,11.3625239 L3.73815385,11.2981949 L3.70532772,11.2655916 C3.5780575,11.1311889 3.5,10.9497101 3.5,10.75 C3.5,10.3703042 3.78215388,10.056509 4.14822944,10.0068466 L4.25,10 L9.2940682,9.99872683 C9.65496152,9.97781619 9.94739589,9.70172714 9.99362875,9.34820224 L10,9.25 L10,4.25 L10.0012732,4.2059318 C10.0240848,3.81222999 10.3505798,3.5 10.75,3.5 Z" id="path-1"></path>
++    </defs>
++    <g id="Public/ic_public_reduce" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
++        <mask id="mask-2" fill="white">
++            <use xlink:href="#path-1"></use>
++        </mask>
++        <use id="形状" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use>
++    </g>
++</svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/note.png b/product/default/src/main/resources/base/media/note.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd48594285247f23b6d4b50400064f34d39c8a5e
+GIT binary patch
+literal 26315
+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
+N002ovPDHLkV1gjExzYdt
+
+literal 0
+KcmV+b0RR6000031
+
+diff --git a/product/default/src/main/resources/base/media/pic_choose.svg b/product/default/src/main/resources/base/media/pic_choose.svg
+new file mode 100644
+index 0000000..ceb230f
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/pic_choose.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>复制图片</title><path class="cls-1" d="M7.46875,9.09375A1.53125,1.53125,0,1,1,5.9375,10.625,1.53124,1.53124,0,0,1,7.46875,9.09375ZM15.59029,2c2.22879,0,3.037.23206,3.85182.66783a4.54323,4.54323,0,0,1,1.89006,1.89006C21.76794,5.3727,22,6.18092,22,8.40971v5.96252a5.79955,5.79955,0,0,1-.53427,3.08146,3.63532,3.63532,0,0,1-.97081,1.16035c.0032-.14453.00508-.29743.00508-.45987V8.34583a5.34107,5.34107,0,0,0-.51889-2.7827,3.72583,3.72583,0,0,0-1.54424-1.54424,4.993,4.993,0,0,0-2.51749-.51707L5.84583,3.5c-.16272,0-.31588.00189-.46066.00585a3.63917,3.63917,0,0,1,1.16114-.97158A5.79955,5.79955,0,0,1,9.62777,2ZM14.8929,13.94839a1.71431,1.71431,0,0,0-.72238.50328l-.12251.12073-2.41,2.40988a1.97,1.97,0,0,1-2.65884.115l-.12529-.1149-.09665-.09663a2.328,2.328,0,0,0-.67615-.53112l-.06184-.02332-.05435-.01741a.93412.93412,0,0,0-.55482,0,1.71424,1.71424,0,0,0-.72236.50327l-.12251.12073L3.73313,19.77013a1.862,1.862,0,0,0,.67636.605,3.70619,3.70619,0,0,0,1.89959.31174l.17772.00062h8.5264a4.01851,4.01851,0,0,0,2.07731-.31236,1.9973,1.9973,0,0,0,.21169-.13047l.09724-.07359L17.453,20.125l-.02948.0281q.068-.05725.1302-.12042t.11859-.13235l-.01276.01322a1.94927,1.94927,0,0,0,.21559-.323,3.70619,3.70619,0,0,0,.31174-1.89959l.00062-.17772-.00022-1.04583-1.94723-1.94713a2.458,2.458,0,0,0-.647-.5172l-.0627-.02647-.05467-.01937-.028-.00881A.93409.93409,0,0,0,14.8929,13.94839ZM15.0132,4.5a5.14876,5.14876,0,0,1,2.65987.44821l.03641.01927A3.17646,3.17646,0,0,1,18.988,6.20988l.04455.08064A5.07467,5.07467,0,0,1,19.5,8.9868V14.687l-1.313-1.314.0005-4.3862a4.01851,4.01851,0,0,0-.31236-2.07731,1.86821,1.86821,0,0,0-.78463-.78463,3.70619,3.70619,0,0,0-1.89959-.31174l-.08739-.00047H6.39647l-.17629.0013a3.556,3.556,0,0,0-1.81069.31091,1.86821,1.86821,0,0,0-.78463.78463A4.01851,4.01851,0,0,0,3.3125,8.9868l.00015,8.61673.0013.17629c.00234.20241.00758.38.01613.53779l2.3722-2.37243a3.062,3.062,0,0,1,1.3271-.88736,2.2423,2.2423,0,0,1,1.13525-.04651l.19.04933.07322.02344a2.87858,2.87858,0,0,1,1.09056.7129l.16326.1571.0998.09975a.65749.65749,0,0,0,.84732.06926l.08136-.06913,2.47488-2.47428a3.06207,3.06207,0,0,1,1.3271-.88736,2.24626,2.24626,0,0,1,1.31624,0,2.81432,2.81432,0,0,1,1.17956.74545l.15665.15092L19.5,15.92383v1.7744a4.7949,4.7949,0,0,1-.45739,2.50021,3.24009,3.24009,0,0,1-1.34417,1.34417,4.19763,4.19763,0,0,1-2.04312.45121l-.24817.005L15.19823,22H6.30177a4.7949,4.7949,0,0,1-2.50021-.45739,3.24015,3.24015,0,0,1-1.34417-1.34417l-.07272-.14224-.06424-.13988-.1718-.3978.02911-.03013A7.7993,7.7993,0,0,1,2,17.5132V8.9868a5.14876,5.14876,0,0,1,.44821-2.65987l.01927-.03641A3.17646,3.17646,0,0,1,3.70988,5.012l.08064-.04455A5.07467,5.07467,0,0,1,6.4868,4.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/picture_dark.svg b/product/default/src/main/resources/base/media/picture_dark.svg
+new file mode 100644
+index 0000000..3f97504
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/picture_dark.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>图片-实心</title><path d="M8.25,7.25A1.75,1.75,0,1,0,10,9,1.75,1.75,0,0,0,8.25,7.25Zm9.15616,4.36472a2.71987,2.71987,0,0,0-2.22281,1.66871l-1.17982,2.04681a1,1,0,0,1-1.57408.20712l-.5896-.5906a2.8524,2.8524,0,0,0-3.91086-.1205Q6.59569,16.00686,5.3397,17.265q-.84243.84386-1.64045,1.71472A2.50089,2.50089,0,0,0,5.93,20.499L6,20.5H18l.16161-.00514A2.50019,2.50019,0,0,0,20.499,18.07L20.5,18v-.90239C20.5,14.0695,19.11484,11.61472,17.40616,11.61472ZM18,2a4,4,0,0,1,4,4V18a4,4,0,0,1-4,4H6a4,4,0,0,1-4-4V6A4,4,0,0,1,6,2Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/picture_white.svg b/product/default/src/main/resources/base/media/picture_white.svg
+new file mode 100644
+index 0000000..1def639
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/picture_white.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>图片</title><path d="M8.25,7.25A1.75,1.75,0,1,1,6.5,9,1.75,1.75,0,0,1,8.25,7.25Zm9.11882,5.54816a1.06768,1.06768,0,0,0-.63408,0,2.29637,2.29637,0,0,0-.96559.71316l-2.75426,2.75414a2.25128,2.25128,0,0,1-3.18187.0001l-.11045-.11043a2.3173,2.3173,0,0,0-.84342-.63365L8.817,15.50159a1.06752,1.06752,0,0,0-.63408,0,2.29623,2.29623,0,0,0-.96557.71315L3.981,19.45191q.0346.05109.07168.09966l.00012.00339c.03269.0396.067.08112.10266.12117a.47644.47644,0,0,0,.03359.03877l-.03359-.03877q.0595.06672.12441.128L4.189,19.7149q.05584.05947.116.11459l-.02523-.02534a2.18793,2.18793,0,0,0,.47389.33886,4.23561,4.23561,0,0,0,2.171.35628L7.12777,20.5h9.74446a4.5924,4.5924,0,0,0,2.37406-.357,2.135,2.135,0,0,0,.89672-.89672,4.23561,4.23561,0,0,0,.35628-2.17095L20.5,16.87223V16.384l-.00025-.707-2.22541-2.2253a2.45615,2.45615,0,0,0-.81106-.62134l-.06248-.02213ZM6.91631,22a5.47979,5.47979,0,0,1-2.85738-.52273,3.703,3.703,0,0,1-1.5362-1.5362c-.05914-.11058-.11032-.21543-.15653-.32242L2.16986,19.164l.03321-.03465A8.915,8.915,0,0,1,2,16.87223V7.12777a5.8843,5.8843,0,0,1,.51223-3.03985l.022-.04161A3.63037,3.63037,0,0,1,3.95414,2.58517l.09217-.0509A5.79955,5.79955,0,0,1,7.12777,2h9.74446a5.88441,5.88441,0,0,1,3.03985.51223l.04161.022a3.63031,3.63031,0,0,1,1.46114,1.41987l.0509.09217A5.79955,5.79955,0,0,1,22,7.12777V13.642l-1.5-1.501V7.12777a4.5924,4.5924,0,0,0-.357-2.37406,2.135,2.135,0,0,0-.89672-.89672,4.23561,4.23561,0,0,0-2.17095-.35628L7.02454,3.50018l-.20148.00148A4.06394,4.06394,0,0,0,4.75371,3.857a2.135,2.135,0,0,0-.89672.89672A4.5924,4.5924,0,0,0,3.5,7.12777l.00017,9.84769.00149.20148c.00267.23112.00865.434.01841.61416l2.71111-2.71089a3.49937,3.49937,0,0,1,1.51668-1.01413,2.57567,2.57567,0,0,1,1.51463.00322l.08368.02679a3.64246,3.64246,0,0,1,1.43294.99429l.11406.114a.75112.75112,0,0,0,1.06134.00014L14.783,12.37678a3.49944,3.49944,0,0,1,1.51669-1.01413,2.56723,2.56723,0,0,1,1.50427,0,3.52054,3.52054,0,0,1,1.5271,1.02443L22,15.05581v2.02788a5.47979,5.47979,0,0,1-.52273,2.85738,3.703,3.703,0,0,1-1.5362,1.5362,5.15367,5.15367,0,0,1-2.61861.52139L17.08369,22Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/recover.svg b/product/default/src/main/resources/base/media/recover.svg
+new file mode 100644
+index 0000000..c0ce26a
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/recover.svg
+@@ -0,0 +1,14 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:#182431;}
++</style>
++<title>恢复</title>
++<path class="st0" d="M1.7,15.8L1.7,15.8C1.2,14.6,1,13.3,1,12h2.9c0.3,0,0.5,0.2,0.5,0.5c0,0.1,0,0.2-0.1,0.3l-1.9,3.1
++	C2.3,16,2,16.1,1.8,16C1.7,15.9,1.7,15.8,1.7,15.8z M1.2,14C1.1,13.3,1,12.7,1,12C1,5.9,5.9,1,12,1c0.8,0,1.6,0.1,2.3,0.2
++	C19.3,2.3,23,6.8,23,12c0,6.1-4.9,11-11,11c-1.1,0-2.2-0.2-3.2-0.5c-1.5-0.5-2.9-1.2-4.1-2.3c-0.3-0.3-0.3-0.7-0.1-1.1
++	c0.3-0.3,0.7-0.3,1.1-0.1c1,0.9,2.2,1.6,3.5,2c0.9,0.3,1.8,0.4,2.8,0.4c5.2,0,9.5-4.3,9.5-9.5c0-4.5-3.2-8.4-7.5-9.3
++	c-0.7-0.1-1.3-0.2-2-0.2c-5.2,0-9.5,4.3-9.5,9.5c0,0.6,0.1,1.1,0.2,1.7c0.1,0.4-0.2,0.8-0.6,0.9C1.6,14.6,1.3,14.4,1.2,14z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/refresh.svg b/product/default/src/main/resources/base/media/refresh.svg
+new file mode 100644
+index 0000000..1382336
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/refresh.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>刷新 细</title><path d="M22.82369,13.97146a11.01591,11.01591,0,1,0-3.54706,6.278.75.75,0,1,0-.99265-1.12456,9.47306,9.47306,0,1,1,3.06371-5.42062.75.75,0,0,0,1.476.2672Zm-.48221,1.78616h0A10.97947,10.97947,0,0,0,23,12H20.14811a.5.5,0,0,0-.425.76339l1.90164,3.0684a.40044.40044,0,0,0,.71673-.07417Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/right_justify.svg b/product/default/src/main/resources/base/media/right_justify.svg
+new file mode 100644
+index 0000000..e433282
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/right_justify.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>右对齐</title><path class="cls-1" d="M21.25,3.5a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5Zm0,5.25a.75.75,0,0,1,0,1.5h-10a.75.75,0,0,1,0-1.5Zm0,5a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5Zm0,5.25a.75.75,0,0,1,0,1.5h-10a.75.75,0,0,1,0-1.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/save.svg b/product/default/src/main/resources/base/media/save.svg
+new file mode 100644
+index 0000000..78d5245
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/save.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>储存</title><path d="M16.25,3.5H7.75V7.25A1.25,1.25,0,0,0,8.94578,8.49885L9,8.5h6a1.25,1.25,0,0,0,1.25-1.25ZM17,15a.75.75,0,0,1,.04407,1.49873L17,16.5H7a.75.75,0,0,1-.04407-1.49873L7,15Zm.75146-11.482L17.75,7.25A2.75,2.75,0,0,1,15,10H9A2.75,2.75,0,0,1,6.25,7.25L6.24878,3.518a3.19154,3.19154,0,0,0-1.49507.339,2.135,2.135,0,0,0-.89672.89672A4.5924,4.5924,0,0,0,3.5,7.12777l.00017,9.84769.00149.20148A4.06383,4.06383,0,0,0,3.857,19.24629a2.135,2.135,0,0,0,.89672.89672,4.23561,4.23561,0,0,0,2.171.35628L7.12777,20.5h9.74446a4.5924,4.5924,0,0,0,2.37406-.357,2.135,2.135,0,0,0,.89672-.89672,4.23561,4.23561,0,0,0,.35628-2.17095L20.5,16.87223V7.12777a4.5924,4.5924,0,0,0-.357-2.37406,2.135,2.135,0,0,0-.89672-.89672A3.19123,3.19123,0,0,0,17.75146,3.518ZM17.75,2l.002.0189a4.667,4.667,0,0,1,2.16007.49333l.04161.022a3.63031,3.63031,0,0,1,1.46114,1.41987l.0509.09217A5.79955,5.79955,0,0,1,22,7.12777v9.74446l-.001.22154a5.55551,5.55551,0,0,1-.51122,2.81831l-.022.04161a3.63031,3.63031,0,0,1-1.41987,1.46114l-.09217.0509A5.79955,5.79955,0,0,1,16.87223,22H7.12777l-.22154-.001a5.55551,5.55551,0,0,1-2.81831-.51122l-.04161-.022a3.63037,3.63037,0,0,1-1.46114-1.41987l-.0509-.09217A5.79955,5.79955,0,0,1,2,16.87223V7.12777a5.8843,5.8843,0,0,1,.51223-3.03985l.022-.04161A3.63037,3.63037,0,0,1,3.95414,2.58517l.09217-.0509a4.62681,4.62681,0,0,1,2.20215-.51539L6.25,2Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/search.svg b/product/default/src/main/resources/base/media/search.svg
+new file mode 100644
+index 0000000..948fa20
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/search.svg
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 18 18" style="enable-background:new 0 0 18 18;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:#F86D05;}
++</style>
++<title>搜索</title>
++<path class="st0" d="M13.2,12.2l2.4,2.4c0.3,0.3,0.3,0.8,0,1.1s-0.8,0.3-1.1,0l-2.4-2.4C12.5,13,12.9,12.6,13.2,12.2z M7.8,1.5
++	c3.5,0,6.3,2.8,6.3,6.3c0,1.4-0.5,2.8-1.3,3.8l-0.2,0.2c-0.1,0.1-0.2,0.2-0.2,0.3l-0.1,0.1l0,0l-0.1,0.1l0,0L12,12.4l0,0l-0.3,0.2
++	l0,0l-0.1,0.1l0,0c-1.1,0.8-2.4,1.3-3.8,1.3c-3.5,0-6.3-2.8-6.3-6.3S4.3,1.5,7.8,1.5z M7.8,3C5.1,3,3,5.1,3,7.8s2.1,4.8,4.8,4.8
++	s4.8-2.1,4.8-4.8S10.4,3,7.8,3z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/search_note.svg b/product/default/src/main/resources/base/media/search_note.svg
+new file mode 100644
+index 0000000..550d831
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/search_note.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>搜索</title><path d="M10.85853,3.921a6.875,6.875,0,1,0,6.875,6.875A6.875,6.875,0,0,0,10.85853,3.921Zm0-1.5a8.37518,8.37518,0,0,1,6.372,13.81022l-.02212.0258q-.10023.11644-.20462.22912l.22674-.25492q-.13931.16317-.28672.319-.08789.09289-.17817.18273l-.06267.0617q-.10533.10266-.21516.20243-.04245.03858-.08584.07691-.10046.08875-.2032.1739l-.041.03376A8.37511,8.37511,0,1,1,10.85853,2.421Zm7.08026,14.52019,3.358,3.35742a.75.75,0,0,1-1.06066,1.06066l-3.36765-3.36775A9.43336,9.43336,0,0,0,17.93879,16.94122Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/set_top.svg b/product/default/src/main/resources/base/media/set_top.svg
+new file mode 100644
+index 0000000..f79d2d7
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/set_top.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill:#1a1a1a;}</style></defs><title>置顶</title><path class="cls-1" d="M18.22466,2.75a.75.75,0,0,1,0,1.5h-12.5a.75.75,0,0,1,0-1.5Zm-5.5376,3.96184.1083.08292a1.25047,1.25047,0,0,1,.13349.13275l6.23394,7.21182a.25.25,0,0,1-.18838.41349l-3.25219.0091a.75.75,0,0,0-.7479.75006l.00034,4.18808a.25.25,0,0,1-.25.24994h-5.5a.25.25,0,0,1-.25-.25l-.00034-4.16514a.75.75,0,0,0-.75236-.74994l-3.195.01a.25.25,0,0,1-.1907-.41243L11.033,6.93278A1.25018,1.25018,0,0,1,12.68706,6.71184ZM9.89275,5.95817l-6.1967,7.24974a1.75,1.75,0,0,0-.41973,1.14233l.00624.14351a1.75017,1.75017,0,0,0,1.749,1.6012l2.44205-.009.001,3.41406a1.75,1.75,0,0,0,1.75,1.74994h5.5l.14353-.0058A1.75016,1.75016,0,0,0,16.47466,19.5l-.001-3.441,2.50512-.00619a1.75,1.75,0,0,0,1.31881-2.89441L14.06365,5.94658a2.75,2.75,0,0,0-4.1709.01159Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/share.svg b/product/default/src/main/resources/base/media/share.svg
+new file mode 100644
+index 0000000..e767312
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/share.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>分享</title><path d="M12.25,3.75a1.5,1.5,0,1,0,1.5,1.5A1.5,1.5,0,0,0,12.25,3.75ZM20,17.25a1.5,1.5,0,1,0,1.5,1.5A1.5,1.5,0,0,0,20,17.25Zm-16,0a1.5,1.5,0,1,0,1.5,1.5A1.5,1.5,0,0,0,4,17.25Zm8.25-15a3,3,0,1,1-.77925,5.8978L5.9323,16.45509a3.00048,3.00048,0,0,1,.97312,1.54466H17.09458a3,3,0,1,1,.00026,1.5015H6.90517A2.99817,2.99817,0,1,1,4.5629,15.80272l5.599-8.39869A3,3,0,0,1,12.25,2.25Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/styles.svg b/product/default/src/main/resources/base/media/styles.svg
+new file mode 100644
+index 0000000..4fb5bb6
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/styles.svg
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<title>样式</title>
++<path id="形状结合" d="M21.2,19.5c0.4,0,0.8,0.3,0.8,0.8S21.7,21,21.2,21H2.8C2.3,21,2,20.7,2,20.2s0.3-0.8,0.8-0.8H21.2z
++	 M8.3,4.7l4,10.6h-1.4l-1-2.8H5.4l-1,2.8H3L7,4.7H8.3z M21.2,13.5c0.4,0,0.8,0.3,0.8,0.8S21.7,15,21.2,15h-5.5
++	c-0.4,0-0.8-0.3-0.8-0.8s0.3-0.8,0.8-0.8H21.2z M7.7,6.4L6,11.3l3.4,0L7.7,6.4z M21.2,9C21.7,9,22,9.3,22,9.7s-0.3,0.8-0.8,0.8h-7.5
++	c-0.4,0-0.8-0.3-0.8-0.8S13.3,9,13.8,9H21.2z M21.2,4.5c0.4,0,0.8,0.3,0.8,0.8S21.7,6,21.2,6h-9.5C11.3,6,11,5.7,11,5.2
++	s0.3-0.8,0.8-0.8H21.2z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/suojin.svg b/product/default/src/main/resources/base/media/suojin.svg
+new file mode 100644
+index 0000000..6dca6e1
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/suojin.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>缩进</title><path class="cls-1" d="M21.25,3.5a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5Zm0,5.25a.75.75,0,0,1,0,1.5h-10a.75.75,0,0,1,0-1.5Zm0,5a.75.75,0,0,1,0,1.5h-10a.75.75,0,0,1,0-1.5ZM2.28855,8.08183a.56447.56447,0,0,1,.57925-.00375l4.17075,3.4065a.61195.61195,0,0,1-.001,1.04725L2.8668,15.92257a.56409.56409,0,0,1-.57875-.00475.60522.60522,0,0,1-.288-.51925V8.60133A.60523.60523,0,0,1,2.28855,8.08183ZM21.25,19a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/suojin_back.svg b/product/default/src/main/resources/base/media/suojin_back.svg
+new file mode 100644
+index 0000000..b0c3bb7
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/suojin_back.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>缩进2</title><path class="cls-1" d="M21.25,3.5a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5Zm0,5.25a.75.75,0,0,1,0,1.5h-10a.75.75,0,0,1,0-1.5Zm0,5a.75.75,0,0,1,0,1.5h-10a.75.75,0,0,1,0-1.5ZM7.21145,8.08183a.60523.60523,0,0,1,.2885.5195v6.79724a.60522.60522,0,0,1-.288.51925.56409.56409,0,0,1-.57875.00475L2.46245,12.53183a.60559.60559,0,0,1-.29575-.5235v-.0005a.60519.60519,0,0,1,.29475-.52325L6.6322,8.07808A.56447.56447,0,0,1,7.21145,8.08183ZM21.25,19a.75.75,0,0,1,0,1.5H2.75a.75.75,0,0,1,0-1.5Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/take_picture.svg b/product/default/src/main/resources/base/media/take_picture.svg
+new file mode 100644
+index 0000000..48d8ce5
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/take_picture.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill-rule:evenodd;}</style></defs><title>拍照-实心</title><path class="cls-1" d="M12,9.5a3.25,3.25,0,1,1-3.25,3.25A3.25,3.25,0,0,1,12,9.5ZM12,8a4.75,4.75,0,1,0,4.75,4.75A4.75,4.75,0,0,0,12,8Zm3.1206-4.75a2,2,0,0,1,1.64274.85921L17.903,5.75H20a3,3,0,0,1,3,3v9a3,3,0,0,1-3,3H4a3,3,0,0,1-3-3v-9a3,3,0,0,1,3-3H6.097L7.23666,4.10921A2,2,0,0,1,8.8794,3.25Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/tick_thick.svg b/product/default/src/main/resources/base/media/tick_thick.svg
+new file mode 100644
+index 0000000..ca03aef
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/tick_thick.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>勾 粗</title><path d="M2.511,12.46079a1,1,0,0,1,1.37805-1.44864l.03616.03442,5.1016,5.10011.06926.05764a.50026.50026,0,0,0,.60509-.03614l.02735-.02541,1.4143-1.41409,3.1819-3.18211,5.75-5.75a1,1,0,0,1,1.44864,1.37806l-.03443.03616-5.74311,5.74289-.00689.00711-4.94975,4.94974a2,2,0,0,1-2.7837.04338l-.04472-.04338Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/tick_thin.svg b/product/default/src/main/resources/base/media/tick_thin.svg
+new file mode 100644
+index 0000000..cd56ace
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/tick_thin.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>勾 细</title><path d="M10.73744,17.73376a1.75,1.75,0,0,1-2.43162.04182l-.04326-.04182L2.56282,12.034a.75.75,0,0,1,1.0286-1.09092l.03206.03026,5.34619,5.34619a.75.75,0,0,0,1.0286.03026l.03206-.03026L20.37652,5.97335A.75.75,0,0,1,21.46744,7.002l-.03026.03206Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/todo.svg b/product/default/src/main/resources/base/media/todo.svg
+new file mode 100644
+index 0000000..5eddff1
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/todo.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill:#1a1a1a;}</style></defs><title>下一步</title><path class="cls-1" d="M21.73307,9.6608a.50478.50478,0,0,0,.3539-.85486L19.30805,6.037a.49874.49874,0,0,0-.84988.3539v1.782H6.77922a4.96735,4.96735,0,1,0-.08474,9.93434H19.70184a.748.748,0,0,0,.04486-1.49539H6.77922A3.48923,3.48923,0,0,1,6.702,9.65831H21.73307Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/todo1.svg b/product/default/src/main/resources/base/media/todo1.svg
+new file mode 100644
+index 0000000..7778298
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/todo1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>todo</title><path d="M18.18718,8.71967a.75.75,0,0,1,.03026,1.0286l-.03026.03206-5.94974,5.94975a1.75,1.75,0,0,1-2.43162.04182l-.04326-.04182L6.31282,12.28033a.74644.74644,0,0,1-.20333-.37421L6.095,11.80231v-.10462a.75.75,0,0,1,1.24645-.50828l.03207.03026,3.09619,3.09619a.75.75,0,0,0,1.0286.03026l.03206-.03026,5.59619-5.59619A.75.75,0,0,1,18.18718,8.71967ZM12,2.5A9.5,9.5,0,1,0,21.5,12,9.5,9.5,0,0,0,12,2.5ZM12,1A11,11,0,1,1,1,12,11,11,0,0,1,12,1Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/todo_1.svg b/product/default/src/main/resources/base/media/todo_1.svg
+new file mode 100644
+index 0000000..b1c784c
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/todo_1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>todo-实心</title><path d="M18.18718,8.71967a.75.75,0,0,0-1.06066,0l-5.59619,5.59619-.03206.03026a.75.75,0,0,1-1.0286-.03026L7.37348,11.21967l-.03207-.03026a.75.75,0,0,0-1.24645.50828v.10462l.01453.10381a.74644.74644,0,0,0,.20333.37421l3.44974,3.44975.04326.04182a1.75,1.75,0,0,0,2.43162-.04182l5.94974-5.94975.03026-.03206A.75.75,0,0,0,18.18718,8.71967ZM12,1A11,11,0,1,1,1,12,11,11,0,0,1,12,1Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/topped.svg b/product/default/src/main/resources/base/media/topped.svg
+new file mode 100644
+index 0000000..7a9093a
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/topped.svg
+@@ -0,0 +1,12 @@
++<svg id="图层_1"
++     data-name="图层 1"
++     xmlns="http://www.w3.org/2000/svg"
++     viewBox="0 0 24 24">
++    <defs>
++        <style>.cls-1{fill:#A3A7AD;fill-rule:evenodd;}</style>
++    </defs>
++    <title>置顶-实心</title>
++    <path
++        class="cls-1"
++        d="M18,2.84625a1,1,0,0,1,0,2H6a1,1,0,1,1,0-2ZM13.25406,6.07536a1.9993,1.9993,0,0,1,.21349.21236l6.664,7.71105a.99993.99993,0,0,1-.75541,1.65428L16.25,15.65225v4.5015a1,1,0,0,1-1,1H8.75a1,1,0,0,1-1-1v-4.5015l-3.12611.0008a1.00023,1.00023,0,0,1-.75962-1.64938L10.4375,6.29752A1.99626,1.99626,0,0,1,13.25406,6.07536Z"/>
++</svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/triangle.svg b/product/default/src/main/resources/base/media/triangle.svg
+new file mode 100644
+index 0000000..6bd84c7
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/triangle.svg
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 6 12" style="enable-background:new 0 0 6 12;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#182431;fill-opacity:0.6;}
++</style>
++<title>下拉三角</title>
++<path class="st0" d="M1,4.5h4c0.3,0,0.5,0.2,0.5,0.5c0,0.1,0,0.2-0.1,0.3l-2,2.5C3.2,8,2.9,8.1,2.7,7.9c0,0-0.1,0-0.1-0.1l-2-2.5
++	C0.4,5.1,0.5,4.8,0.7,4.6C0.8,4.5,0.9,4.5,1,4.5z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/tudo2_1.svg b/product/default/src/main/resources/base/media/tudo2_1.svg
+new file mode 100644
+index 0000000..be9ec5a
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/tudo2_1.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>tudo2</title><path d="M12,2.5A9.5,9.5,0,1,0,21.5,12,9.5,9.5,0,0,0,12,2.5ZM12,1A11,11,0,1,1,1,12,11,11,0,0,1,12,1Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/unChecked.svg b/product/default/src/main/resources/base/media/unChecked.svg
+new file mode 100644
+index 0000000..fada73a
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/unChecked.svg
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;fill-opacity:0.4;}
++	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#182431;fill-opacity:0.4;}
++</style>
++<title>选中前</title>
++<g id="编组" transform="translate(2.000000, 2.000000)">
++	<path id="Rectangle-2375-Copy" class="st0" d="M0,4c0-2.2,1.8-4,4-4h12c2.2,0,4,1.8,4,4v12c0,2.2-1.8,4-4,4H4c-2.2,0-4-1.8-4-4V4z"
++		/>
++	<path id="Rectangle-2375-Copy-2" class="st1" d="M16,0c2.2,0,4,1.8,4,4v12c0,2.2-1.8,4-4,4H4c-2.2,0-4-1.8-4-4V4c0-2.2,1.8-4,4-4
++		H16z M15.7,1H4.3C2.5,1,1,2.5,1,4.3l0,0v11.5C1,17.5,2.5,19,4.3,19l0,0h11.5c1.8,0,3.3-1.5,3.3-3.3l0,0V4.3C19,2.5,17.5,1,15.7,1
++		L15.7,1z"/>
++</g>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/unClassified.svg b/product/default/src/main/resources/base/media/unClassified.svg
+new file mode 100644
+index 0000000..10be823
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/unClassified.svg
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
++    <title>未分类图标</title>
++    <g id="未分类图标" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
++        <path d="M6,23 C4.34314575,23 3,21.6568542 3,20 L3,4 C3,2.34314575 4.34314575,1 6,1 L18,1 C19.6568542,1 21,2.34314575 21,4 L21,20 C21,21.6568542 19.6568542,23 18,23 L6,23 Z M7.25,2.5 L6,2.5 C5.22030388,2.5 4.57955132,3.09488808 4.50686658,3.85553999 L4.5,4 L4.5,20 C4.5,20.7796961 5.09488808,21.4204487 5.85553999,21.4931334 L6,21.5 L7.25,21.5 L7.25,2.5 Z M13,2.5 L8.75,2.5 L8.75,21.5 L18,21.5 C18.7796961,21.5 19.4204487,20.9051119 19.4931334,20.14446 L19.5,20 L19.5,4 C19.5,3.17157288 18.8284271,2.5 18,2.5 L17.75,2.5 L17.75,8.60696035 C17.75,8.80959843 17.6241436,8.95854085 17.4747134,8.99261024 L17.4095268,9 C17.3655893,9 17.3208978,8.98992961 17.2778651,8.96839378 L15.6217319,7.91271676 C15.4841217,7.82507842 15.314438,7.81108657 15.1666498,7.87051518 L15.081036,7.914981 L13.5378527,8.91603645 C13.4760179,8.96763087 13.4074821,8.99087779 13.340558,8.99087779 C13.1865541,8.99087779 13.0413173,8.86749043 13.0074144,8.68130167 L13,8.59783814 L13,2.5 Z M16.5,2.5 L14.25,2.5 L14.25,6.95222182 L15.358483,6.18509007 L16.5,6.95898847 L16.5,2.5 Z" id="形状" fill="#182431"></path>
++    </g>
++</svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/underline.svg b/product/default/src/main/resources/base/media/underline.svg
+new file mode 100644
+index 0000000..85d31b3
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/underline.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>下划线</title><rect x="4" y="19.7398" width="16" height="1.5102" rx="0.75" ry="0.75"/><path d="M17,2.75a.75.75,0,0,1,.74873.70593L17.75,3.5V13.51666C17.75,16.36948,15.15492,18.25,12,18.25c-3.12337,0-5.698-1.83536-5.74922-4.64793L6.25,13.51666V3.5a.75.75,0,0,1,1.49873-.04407L7.75,3.5V13.51666C7.75,15.49293,9.63207,16.75,12,16.75c2.3394,0,4.20458-1.21766,4.24918-3.16205l.00082-.07129V3.5A.75.75,0,0,1,17,2.75Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/undo.svg b/product/default/src/main/resources/base/media/undo.svg
+new file mode 100644
+index 0000000..d322c11
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/undo.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><style>.cls-1{fill:#1a1a1a;}</style></defs><title>上一步</title><path class="cls-1" d="M2.26446,9.6608a.49846.49846,0,0,1-.35141-.84738L4.68948,6.037a.49873.49873,0,0,1,.84987.3539v1.782h11.679a4.96736,4.96736,0,1,1,.08723,9.93434H4.29569a.748.748,0,0,1-.04486-1.49539H17.2183a3.48922,3.48922,0,0,0,.07726-6.95353H2.26446Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/unlock.svg b/product/default/src/main/resources/base/media/unlock.svg
+new file mode 100644
+index 0000000..8b24ba9
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/unlock.svg
+@@ -0,0 +1 @@
++<svg id="图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>解锁</title><path d="M13.5,13.875a2,2,0,1,1-2,2A2,2,0,0,1,13.5,13.875Zm4.5-2.75H9a1.5,1.5,0,0,0-1.499,1.44377L7.5,12.625v6.5a1.5,1.5,0,0,0,1.44377,1.499L9,20.625h9a1.5,1.5,0,0,0,1.499-1.44377L19.5,19.125v-6.5a1.5,1.5,0,0,0-1.44377-1.499ZM7.25,1.875a4.25,4.25,0,0,1,4.24925,4.16924L11.5,6.125v3.5H18a3,3,0,0,1,3,3v6.5a3,3,0,0,1-3,3H9a3,3,0,0,1-3-3v-6.5a3,3,0,0,1,3-3h1v-3.5a2.75,2.75,0,0,0-5.49907-.0721L4.5,8.389a.75.75,0,0,1-1.49873.04407L3,8.389V6.125A4.25,4.25,0,0,1,7.25,1.875Z"/></svg>
+\ No newline at end of file
+diff --git a/product/default/src/main/resources/base/media/verticalBar.svg b/product/default/src/main/resources/base/media/verticalBar.svg
+new file mode 100644
+index 0000000..1531d9e
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/verticalBar.svg
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 4 16" style="enable-background:new 0 0 4 16;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill-rule:evenodd;clip-rule:evenodd;}
++</style>
++<title>画板</title>
++<path fill = "#4fb4e3" id="矩形备份-3" class="st0" d="M2,0L2,0c1.1,0,2,0.9,2,2v12c0,1.1-0.9,2-2,2l0,0c-1.1,0-2-0.9-2-2V2C0,0.9,0.9,0,2,0z"/>
++</svg>
+diff --git a/product/default/src/main/resources/base/media/zoom.svg b/product/default/src/main/resources/base/media/zoom.svg
+new file mode 100644
+index 0000000..ac8e444
+--- /dev/null
++++ b/product/default/src/main/resources/base/media/zoom.svg
+@@ -0,0 +1,15 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
++<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
++	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
++<style type="text/css">
++	.st0{fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;}
++</style>
++<title>画板</title>
++<g id="编组" transform="translate(4.000000, 4.000000)">
++	<path id="路径" class="st0" d="M0,6.2V0.9C0,0.4,0.4,0,0.9,0h5.4"/>
++	<line id="路径-56" class="st0" x1="0.5" y1="0.5" x2="6.2" y2="6.2"/>
++	<path class="st0" d="M16,9.7v5.4c0,0.5-0.4,0.9-0.9,0.9H9.8"/>
++	<line class="st0" x1="15.5" y1="15.5" x2="9.8" y2="9.7"/>
++</g>
++</svg>

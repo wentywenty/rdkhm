@@ -2,7 +2,7 @@
 
 ## Reference
 
-The local reference is `/home/robo/roboparty_repo/bsp/roboparty_build`:
+The local reference is `$RDKHM_BSP/roboparty_build`:
 
 - `config/boards/rdk-x5.csc`: QSPI firmware, ARM64 and ttyS0 at 115200.
 - `config/sources/families/hobot-x5.conf`: 4 MiB gap, CONFIG FAT32, active ext4 root.
@@ -48,7 +48,15 @@ See [drivers.md](drivers.md) for per-device coverage and remaining HDI work.
 Product init config supplies device permissions and starts the USB setup service.
 USB setup uses an existing UDC; it does not change a host port's role.
 `persist.rdkhm.usb.controller` can select a controller when several exist.
-HDC uses FunctionFS and upstream readiness triggers. TCP transport is disabled.
+HDC uses FunctionFS for USB and can also listen on TCP `5555`. The source
+product init sets `persist.hdc.port=5555`, `persist.hdc.mode.tcp=enable` and
+starts `hdcd` in `post-fs-data`; images built before this change may still need
+the manual `service_control start hdcd`. `rdkhm-usb.sh` guards an
+already-mounted `/config` configfs and mounts functionfs idempotently.
+The 20:54 unified image (kernel #6) cold boot created the `1d6b:0104` gadget,
+`ep0/ep1/ep2` and a high-speed configured UDC; host-side USB enumeration must
+be checked on the PC physically connected to the board. See
+[board-validation-20261119.md](board-validation-20261119.md).
 USB identifiers are development identifiers, not production assignments.
 
 Same-release prebuilt HAPs supply Launcher, SystemUI and Settings.
@@ -86,6 +94,14 @@ SELinux policy generation is enabled for this product. The X5 overlay adds
 labels for `/dev/galcore`, `/dev/bpu*`, `/dev/video*` and the manual accelerator
 wrapper, with minimum development IO rules. These rules still require AVC
 review on a booted board before enforcing a production policy.
+
+The image also includes `/rdkhm/system-security-status.sh`. It is a read-only
+post-boot audit for the SELinux mount/enforce state, boot arguments, Binder and
+access-token nodes, core service processes, HDC TCP state, and AVC/startup
+matches in the captured hilog files. It does not switch enforcing mode or start
+services. The X5 access-token ioctl rule is limited to `time_service` and
+`0x5413`; a kernel `magic fail` still indicates an ABI mismatch rather than an
+SELinux denial.
 
 The previous `rdkhm-x5-bringup-0.1.img` remains a BusyBox-only image with the earlier kernel.
 It is not updated by compiling new kernel or userspace artifacts.

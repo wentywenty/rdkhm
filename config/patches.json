@@ -1,0 +1,520 @@
+{
+  "schema_version": 1,
+  "collections": {
+    "kernel": [
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0001-openharmony-core.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0002-builtin-display-bridge.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0003-display-deferred-probe-devres.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0004-rdk-direct-scanout.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0005-display-object-list-lifetime.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0006-accesstoken-ioctl-noise.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0007-rtg-qos-proc.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0008-trace-eval-null-guard.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0009-qos-proc-unconditional.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0010-fixed-mac.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0011-fix-ethernet-mac-buffer.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0012-rtg-ioctl-compat.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0013-wdt-disable-on-suspend.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0014-wdt-force-disable.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0015-vs-drm-runtime-pm-balance.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0016-aic8800-cmd-recovery.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0017-aic8800-sdio-power-toggle.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0018-tcan-spi-max-speed.patch"
+      },
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "kernel/0019-hmdfs-backport.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony/drivers/hdf_core",
+        "patch": "kernel/hdf-core/0001-arm64-kernel-build.patch"
+      }
+    ],
+    "kernel-rt": [
+      {
+        "repo": "sources/rdk/x5-kernel",
+        "patch": "optional/preempt-rt/patch-6.1.83-rt28.patch"
+      }
+    ],
+    "openharmony": [
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/screenlock",
+        "patch": "screenlock/0001-unlock-without-account.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/base/theme/screenlock_mgr",
+        "patch": "screenlock/0002-default-unlocked.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/screenlock",
+        "patch": "screenlock/0003-auto-unlock-fallbacks.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/launcher",
+        "patch": "launcher/0001-create-window-before-rdb.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/launcher",
+        "patch": "launcher/0002-rdk-desktop-experiment.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/launcher",
+        "patch": "launcher/0003-style-config-fallback.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/launcher",
+        "patch": "launcher/0004-bringup-desktop-fallbacks.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/settings",
+        "patch": "settings/0001-storage-statvfs.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/settings",
+        "patch": "settings/0002-storage-uri.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/settings",
+        "patch": "settings/0003-nearlink-settings-page.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/settings",
+        "patch": "settings/0004-module-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/calendardata",
+        "patch": "calendardata/0001-calendar-month-page.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/call",
+        "patch": "call/0001-strict-null.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/contacts_data",
+        "patch": "contacts-data/0001-allow-unverified-account.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/contacts",
+        "patch": "contacts/0001-bringup-permission-gate.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/filemanagement/user_file_service",
+        "patch": "filemanager/0001-fileaccess-extension-exported.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/filemanagement/dfs_service",
+        "patch": "dfs/0001-disable-hmdfs-for-bringup.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/photos",
+        "patch": "photos/0001-photos-resources.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/photos",
+        "patch": "photos/0002-defer-media-library.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/multimedia/media_library",
+        "patch": "media-library/0001-skip-user-unlock-check.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/multimedia/media_library",
+        "patch": "media-library/0002-datashare-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0001-x5-software-drm.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0002-composer-c-entrypoints.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0003-crtc-mask-selection.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0004-drm-power-and-present.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0005-primary-plane-zpos.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0006-primary-plane-format.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0007-composer-release-entrypoint.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0008-display-buffer-metadata-noop.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "display/0009-gpu-composition.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "input/0001-evdev-touch-capabilities.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "audio/0001-x5-alsa-integration.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/multimedia/audio_framework",
+        "patch": "audio/0002-optional-sink-aux.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/multimedia/audio_framework",
+        "patch": "audio/0003-default-effect-channel.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/multimedia/audio_framework",
+        "patch": "audio/0004-optional-running-lock.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/multimedia/audio_framework",
+        "patch": "audio/0005-running-lock-optional.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/multimedia/media_foundation",
+        "patch": "media-foundation/0001-avbuffer-default-memory-type.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/base/account/os_account",
+        "patch": "account/0001-empty-index-object.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/build",
+        "patch": "build-host/0001-select-host-gcc.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/build",
+        "patch": "build-host/0002-hvigor-nodejs18.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/build",
+        "patch": "build-host/0003-compile-app-hvigor26.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/arkcompiler/ets_frontend",
+        "patch": "ets-frontend/0001-node14-rimraf.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/developtools/ace_ets2bundle",
+        "patch": "ace-ets2bundle/0001-host-gcc.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/ability/ability_runtime",
+        "patch": "ability-runtime/0001-dialog-want-import.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/arkui/ace_engine",
+        "patch": "ace-engine/0001-pixelmap-ani-dependency.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/graphic/graphic_3d",
+        "patch": "graphic3d/0001-host-shader-toolchain.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/graphic/graphic_2d",
+        "patch": "graphic2d/0001-software-render-build.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/graphic/graphic_2d",
+        "patch": "graphic2d/0002-render-service-image-manager-guards.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/graphic/graphic_2d",
+        "patch": "graphic2d/0003-app-server-drawable-split.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/graphic/graphic_2d",
+        "patch": "graphic2d/0004-client-drawable-guards.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/window/window_manager",
+        "patch": "window-manager/0001-input-window-display-id.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/window/window_manager",
+        "patch": "window-manager/0002-input-display-binding-test.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/bundlemanager/bundle_framework",
+        "patch": "bundlemanager/0001-optional-bms-extension.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/resourceschedule/resource_schedule_service",
+        "patch": "resourceschedule/0001-pin-auth-secon.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/resourceschedule/device_usage_statistics",
+        "patch": "resourceschedule/0002-bundle-active-optional.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/resourceschedule/resource_schedule_service",
+        "patch": "resourceschedule/0003-pin-auth-hdf-args.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/communication/dsoftbus",
+        "patch": "dsoftbus/0001-optional-client-plugin.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/distributedhardware/device_manager",
+        "patch": "device-manager/0002-optional-resident-log.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/deviceprofile/device_info_manager",
+        "patch": "device-profile/0001-optional-sync-adapter.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/base/security/security_component_manager",
+        "patch": "security-component/0001-optional-enhance-log.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/base/security/device_auth",
+        "patch": "security-component/0002-device-auth-syscap.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/base/tee/tee_client",
+        "patch": "tee/0001-teecd-device-ownership.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/base/security/device_auth",
+        "patch": "security-component/0003-deviceauth-sandbox.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/arkcompiler/runtime_core",
+        "patch": "ark-runtime/0001-node14-rimraf.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/distributedhardware/device_manager",
+        "patch": "device-manager/0001-respect-headless-product.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/third_party/libnl",
+        "patch": "libnl/0001-use-installed-host-tools.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/applications_auth_widget",
+        "patch": "haps/applications_auth_widget-null-guards.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/call",
+        "patch": "haps/call-build-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/theme",
+        "patch": "haps/theme-build-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/printspooler",
+        "patch": "haps/printspooler-build-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/admin_provisioning",
+        "patch": "haps/admin_provisioning-build-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/camera",
+        "patch": "haps/camera-build-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/camera",
+        "patch": "camera/0001-lazy-save-asset.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "camera/0002-vdi-basic-stream-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/camera",
+        "patch": "camera/0003-init-race.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/camera",
+        "patch": "camera/0004-bringup-permission-gate.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/camera",
+        "patch": "camera/0005-open-without-await.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/camera",
+        "patch": "camera/0006-session-commit-timeout.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/systemui",
+        "patch": "haps/systemui-build-config.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/systemui",
+        "patch": "haps/systemui-resource-manager.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/notes",
+        "patch": "haps/notes-resources.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/notes",
+        "patch": "haps/notes-db-init.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/contacts",
+        "patch": "haps/contacts-arkts-worker-migration.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/applications/standard/mms",
+        "patch": "haps/mms-arkts-worker-migration.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/drivers/peripheral",
+        "patch": "nnrt/0001-x5-nnrt-hdi-service.patch"
+      }
+    ]
+  },
+  "globs": {
+    "nearlink-bsp": "sources/rdk/ws73-bsp-94a02d3a",
+    "nearlink-ssap": "sources/oh/nearlink-ssap"
+  }
+}

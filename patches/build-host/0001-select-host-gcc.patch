@@ -1,5 +1,8 @@
-diff --git a/config/compiler/BUILD.gn b/config/compiler/BUILD.gn
-index 702e8ea..5b92640 100755
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] build-host/0001-select-host-gcc.patch
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
 --- a/config/compiler/BUILD.gn
 +++ b/config/compiler/BUILD.gn
 @@ -181,6 +181,14 @@ config("default_include_dirs") {
@@ -26,8 +29,6 @@ index 702e8ea..5b92640 100755
    inputs = []
  
    # System-specific flags. If your compiler flags apply to one of the
-diff --git a/config/compiler/compiler.gni b/config/compiler/compiler.gni
-index 4cdc956..b0f1c03 100755
 --- a/config/compiler/compiler.gni
 +++ b/config/compiler/compiler.gni
 @@ -20,6 +20,7 @@ if (current_cpu == "arm" || current_cpu == "arm64") {
@@ -38,8 +39,6 @@ index 4cdc956..b0f1c03 100755
    # How many symbols to include in the build. This affects the performance of
    # the build since the symbols are large and dealing with them is slow.
    #   2 means regular build with symbols.
-diff --git a/scripts/compile_app.py b/scripts/compile_app.py
-index 3d906f9..0ab8cd4 100755
 --- a/scripts/compile_app.py
 +++ b/scripts/compile_app.py
 @@ -87,6 +87,10 @@ def make_env(build_profile: str, cwd: str, ohpm_registry: str, options):
@@ -53,8 +52,6 @@ index 3d906f9..0ab8cd4 100755
      root_dir = get_root_dir()
      ohpm_path = os.path.join(root_dir, "prebuilts/tool/command-line-tools/ohpm/bin/ohpm")
      if not os.path.exists(ohpm_path):
-diff --git a/toolchain/gcc_toolchain.gni b/toolchain/gcc_toolchain.gni
-index ef98dd7..8e773d2 100644
 --- a/toolchain/gcc_toolchain.gni
 +++ b/toolchain/gcc_toolchain.gni
 @@ -883,6 +883,9 @@ template("clang_toolchain") {
