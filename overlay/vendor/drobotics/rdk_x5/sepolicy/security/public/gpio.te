@@ -4,6 +4,3 @@ allow rdkhm_gpio rdkhm_gpio_socket:file { create read write getattr setattr unli
 allow rdkhm_gpio rdkhm_gpio_exec:file { execute execute_no_trans open read map getattr };
 allow rdkhm_gpio system_file:file { execute execute_no_trans open read map getattr };
 allow rdkhm_gpio system_file:dir { search getattr };
-allow rdkhm_gpio sysfs:file { open read write getattr setattr };
-allow rdkhm_gpio sysfs:dir { search getattr };
-allow rdkhm_gpio devtmpfs:dir { add_name remove_name search write };
