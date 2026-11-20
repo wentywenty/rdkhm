@@ -1,0 +1,20 @@
+From: rdkhm <rdkhm@localhost>
+Subject: [PATCH] account: fall back to default user when foreground map is empty
+Signed-off-by: rdkhm <rdkhm@localhost>
+
+---
+--- a/services/accountmgr/src/osaccount/inner_os_account_manager.cpp
++++ b/services/accountmgr/src/osaccount/inner_os_account_manager.cpp
+@@ -2663,6 +2663,12 @@ ErrCode IInnerOsAccountManager::IsOsAccountForeground(const int32_t localId, con
+ ErrCode IInnerOsAccountManager::GetForegroundOsAccountLocalId(const uint64_t displayId, int32_t &localId)
+ {
+     if (!foregroundAccountMap_.Find(displayId, localId)) {
++        if (displayId == Constants::DEFAULT_DISPALY_ID &&
++            defaultActivatedId_ >= Constants::START_USER_ID) {
++            localId = defaultActivatedId_;
++            ACCOUNT_LOGW("Foreground map empty, fallback to default activated account %{public}d", localId);
++            return ERR_OK;
++        }
+         return ERR_ACCOUNT_COMMON_ACCOUNT_IN_DISPLAY_ID_NOT_FOUND_ERROR;
+     }
+     return ERR_OK;

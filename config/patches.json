@@ -545,6 +545,11 @@
       {
         "repo": "sources/oh/openharmony-full/third_party/ffmpeg",
         "patch": "ffmpeg/0001-disable-vulkan-cplat.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/base/account/os_account",
+        "patch": "account/0002-foreground-fallback.patch",
+        "ignore_whitespace": true
       }
     ]
   },
