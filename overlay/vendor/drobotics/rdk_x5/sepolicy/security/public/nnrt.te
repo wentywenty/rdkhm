@@ -1,0 +1,26 @@
+type nnrt_host, hdfdomain, domain;
+type hdf_nnrt_device_service, hdf_service_attr;
+
+allow init nnrt_host:process { transition rlimitinh siginh };
+allow chipset_init nnrt_host:process { transition rlimitinh siginh };
+
+allow nnrt_host hdf_devhost_exec:file { entrypoint map read execute };
+allow nnrt_host vendor_bin_file:file { entrypoint map read execute };
+allow nnrt_host vendor_lib_file:dir { search };
+allow nnrt_host vendor_lib_file:file { getattr open read map execute execute_no_trans };
+allow nnrt_host vendor_etc_file:dir search;
+allow nnrt_host vendor_etc_file:file { getattr open read };
+
+allow nnrt_host hdf_devmgr:binder { call transfer };
+allow nnrt_host hdf_device_manager:hdf_devmgr_class { get };
+allow nnrt_host hdf_nnrt_device_service:hdf_devmgr_class { add };
+
+allow nnrt_host dev_unix_socket:dir search;
+allow nnrt_host dev_unix_socket:sock_file { getattr open read write };
+allow nnrt_host dev_unix_socket:unix_stream_socket connectto;
+allow nnrt_host self:unix_stream_socket { connect read write getattr };
+
+allow nnrt_host musl_param:file { map read open };
+allow nnrt_host debug_param:file { open read map };
+allow nnrt_host hilog_param:file { map open read };
+allow nnrt_host proc_file:file { open read };

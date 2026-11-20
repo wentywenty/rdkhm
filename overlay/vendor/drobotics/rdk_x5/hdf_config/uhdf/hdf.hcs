@@ -158,5 +158,22 @@ root {
                 }
             }
         }
+
+        nnrt :: host {
+            hostName = "nnrt_host";
+            priority = 50;
+            uid = "system";
+            gid = ["system", "graphics"];
+            initconfig = ["\"secon\" : \"u:r:nnrt_host:s0\""];
+            nnrt_device :: device {
+                device0 :: deviceNode {
+                    policy = 2;
+                    priority = 50;
+                    preload = 0;
+                    moduleName = "libnnrt_driver.z.so";
+                    serviceName = "nnrt_device_service";
+                }
+            }
+        }
     }
 }

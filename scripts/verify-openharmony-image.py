@@ -159,6 +159,8 @@ def main():
             "lib64/libasound.so", "etc/hdfconfig/audio_adapter.json",
             "etc/hdfconfig/alsa_adapter.json", "etc/audio/audio_policy_config.xml",
             "lib64/librdkhm_ssap.so",
+            "lib64/libnnrt_driver.z.so",
+            "lib64/libnnrt_device_service_2.1.z.so",
             "lib64/libcamera_host_service_1.0.z.so",
             "lib64/libcodec_driver.z.so", "lib64/libcodec_image_driver.z.so",
             "etc/hdfconfig/camera_host_config.hcb",
@@ -192,6 +194,10 @@ def main():
             if path == "/system/etc/param/syscap.para":
                 require("const.SystemCapability.Security.DeviceAuth=true" in target.read_text(),
                         "DeviceAuth syscap is not declared in syscap.para")
+            if partition == "vendor" and path == "/etc/hdfconfig/hdf_default.hcb":
+                hcb = target.read_bytes()
+                require(b"nnrt_host" in hcb and b"nnrt_device_service" in hcb,
+                        "NNRT HDF host is missing from hdf_default.hcb")
             if partition == "vendor" and path == "/etc/init/hdf_devhost.cfg":
                 services = json.loads(target.read_text())["services"]
                 usb = [s for s in services if s.get("name") == "usb_serial_host"]
