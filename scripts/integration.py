@@ -403,18 +403,28 @@ def main():
                     raise ValueError(f"HAP source has no build-profile.json5: {app_dir}")
             pipeline = json.loads((ROOT / "config/build/pipeline.json").read_text())
             haps_stage = pipeline["stages"].get("haps", [])
-            hap_builds = {command[2] for command in haps_stage
-                          if len(command) > 2 and command[0] == "python3"
-                          and command[1] == "scripts/build-hap.py"}
+            build_commands = [command for command in haps_stage
+                              if len(command) > 2 and command[0] == "python3"
+                              and command[1] == "scripts/build-hap.py"]
+            uses_all = any("--all" in command for command in build_commands)
+            if not uses_all:
+                listed = {command[2] for command in build_commands}
+                if listed != set(haps.get("apps", {})):
+                    raise ValueError(
+                        "haps stage must build every registered HAP with --all "
+                        "or list them all explicitly")
             image_haps = haps.get("image", {})
-            missing_hap_builds = [name for name in image_haps.get("apps", {})
-                                  if name not in hap_builds]
-            if missing_hap_builds:
-                raise ValueError("Image HAPs missing from the haps stage: "
-                                 + ", ".join(sorted(missing_hap_builds)))
-            for name in image_haps.get("modules", {}):
-                if name not in hap_builds:
-                    raise ValueError(f"Image HAP module source missing from the haps stage: {name}")
+            if not uses_all:
+                missing_hap_builds = [name for name in image_haps.get("apps", {})
+                                      if name not in listed]
+                if missing_hap_builds:
+                    raise ValueError("Image HAPs missing from the haps stage: "
+                                     + ", ".join(sorted(missing_hap_builds)))
+            if not uses_all:
+                for name in image_haps.get("modules", {}):
+                    if name not in listed:
+                        raise ValueError(
+                            f"Image HAP module source missing from the haps stage: {name}")
             if any(extra.get("name") == "rdkhm_pintool"
                    for extra in image_haps.get("extra", [])):
                 if not any("scripts/build-pintool-hap.sh" in command for command in haps_stage):

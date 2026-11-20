@@ -164,7 +164,6 @@ The complete-system development artifact is
 `out/images/rdkhm-x5-openharmony-dev.img` (7172 MiB), with system services,
 Launcher/SystemUI and a software-rendering integration. Earlier iterations have
 booted on X5 and produced HDMI output; the latest fixes require cold-boot acceptance.
-The older `rdkhm-x5-bringup-0.1.img` is only a kernel/shell checkpoint.
 The current checkpoint is recorded in [STATUS.md](STATUS.md).
 
 ## Repository layout
@@ -191,6 +190,7 @@ never part of the integration commit boundary and can be rebuilt or re-fetched.
 
 ## Handoff and debug records
 
+- [Documentation index](docs/README.md)
 - [Debug history and pitfalls](docs/debug-history.md)
 - [Board login and HDC](docs/board-access.md)
 - [Fastboot partition flashing](docs/fastboot-flashing.md)
@@ -247,18 +247,6 @@ every requested enabled/disabled setting survives Kconfig dependency resolution.
 The initial patches integrate Ashmem, AccessToken, Binder token propagation and
 HDF core. They are NOT a complete OpenHarmony kernel qualification; see
 `docs/kernel-port.md` for the remaining ABI and runtime checks.
-
-## SD bring-up image
-
-```sh
-bash scripts/build-bringup-userspace.sh
-bash scripts/make-bringup-image.sh
-python3 scripts/verify-bringup-image.py
-```
-
-Image construction uses regular files, fakeroot, and mke2fs; it does not mount
-filesystems, allocate loop devices, or write a physical disk. Rebuilds are
-scriptable but not bit-for-bit reproducible (timestamps and filesystem UUIDs).
 
 ## OpenHarmony userspace
 

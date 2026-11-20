@@ -19,6 +19,9 @@ __pycache__/
 /components/
 /roboparty_rdk/
 
+# Local scratch notes.
+/todo
+
 # Editor, agent and OS noise.
 .DS_Store
 *.swp

@@ -12,6 +12,8 @@ All scripts resolve paths through `env.sh`; do not hardcode
 | `components.py` | Component build/package/deploy implementation |
 | `apply-patches.py` | Applies or reverts `config/patches.json` collections idempotently |
 | `build-hap.py` | Builds one HAP from `config/build/haps.json`; `--all --jobs N` builds in parallel |
+| `image_haps.py` | Resolves the shared HAP-to-image manifest |
+| `hvigor_sdk.py` | Internal hvigor SDK layout helper (used by the CLI below) |
 | `workspace-env.sh` | Exports workspace settings to shell entry points |
 
 ## Sources and preparation
@@ -27,6 +29,11 @@ All scripts resolve paths through `env.sh`; do not hardcode
 | `prepare-nearlink.py` | Exports WS73/SSAP sources and config |
 | `prepare-ws73-bsp.py` | Imports the pinned WS73 BSP archive |
 | `prepare-accelerators.py` | Captures the private accelerator runtime |
+| `prepare-driver-bundle.py` | Stages kernel modules, firmware and driver config |
+| `import-driver-firmware.py` | Imports firmware and validates its lock file |
+| `inject-driver-bundle.py` | Injects the staged driver bundle into a vendor image |
+| `install-system-sdk-api.sh` | Installs source-generated system API declarations |
+| `prepare-host-tools.sh` | Checks/installs host build prerequisites |
 | `link-hdf.sh`, `link-product.sh` | Create generated links into source trees |
 
 ## Build, image and verification
@@ -46,18 +53,23 @@ All scripts resolve paths through `env.sh`; do not hardcode
 | `sdk-home.py` | Print/create the hvigor-compatible SDK root |
 | `test-gpio-daemon.py` | GPIO socket service protocol smoke test |
 | `check-hap-signatures.py` | Verify HAPs use the official OpenHarmony release key |
+| `check-patch-coverage.py` | Reject orphan patch files and manifest drift |
+| `check-patch-format.py` | Validate patch mail headers and diff format |
+| `check-access-token-abi.py` | Check the access-token ioctl ABI against the kernel |
+| `check-composer-abi.py` | Check required composer VDI exports |
 | `make-openharmony-image.sh` | Assemble the SD image |
 | `verify-openharmony-image.py` | Offline image verifier |
-| `check-*.py` | Patch coverage/format, access-token ABI, composer ABI |
-| `test-*.sh`, `test_*.py` | Offline regression tests |
+| `test-audio.sh`, `test-nearlink.sh` | Board/host regression helpers |
+| `test-accelerators.py`, `test-accelerator-socket.py` | Accelerator runtime and socket tests |
+| `test-*.py` | Offline regression tests |
 
 ## Board access and deployment
 
 | Script | Role |
 | --- | --- |
-| `deploy-composer-fix.sh` | Dry-run-first composer hot deploy |
-| `deploy-nearlink-fix.sh` | WS73 module staging and insmod |
-| `deploy-boot-audio-fix.sh` | Audio system libraries and module |
+| `deploy-composer-fix.sh` | Legacy dry-run-first composer hot deploy; prefer `./rdkhm deploy` |
+| `deploy-nearlink-fix.sh` | Legacy WS73 module staging; prefer `./rdkhm deploy` |
+| `deploy-boot-audio-fix.sh` | Legacy audio library deploy; prefer `./rdkhm deploy` |
 | `collect-board-logs.sh` | Read-only board log capture |
 | `board-input-test.sh` | UI snapshot and input observation |
 | `serial-monitor.py` | Serial console capture |

@@ -6,7 +6,7 @@ tree="$RDKHM_OH_TREE"
 python3 "$workspace/scripts/prepare-nearlink.py"
 [[ -d "$tree/.repo" ]] || { echo 'Run scripts/sync-openharmony.sh first' >&2; exit 1; }
 python3 "$workspace/scripts/apply-patches.py" --only openharmony
-python3 "$workspace/scripts/prepare-hvigor-sdk.py"
+python3 "$workspace/scripts/sdk-home.py" >/dev/null
 # Install the shared Python archive sequentially. The upstream downloader can
 # write the same cache file concurrently for python and python_llvm.
 name=python-linux-x86-GLIBC2.35-3.11.4_20250807.tar.gz
