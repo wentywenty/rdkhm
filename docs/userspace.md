@@ -44,12 +44,13 @@ Settings > 星闪 page. It reports whether the USB module (`ffff:3733`) is
 enumerated and whether `SystemCapability.Communication.NearLink` is exported;
 it does not provide pairing because no NearLink service or HDI is integrated.
 
-The image packages the prebuilt Settings HAP by default. Run
-`./build hap settings` (or `python3 scripts/build-hap.py settings`) to build,
-sign and stage `out/settings/Settings.hap`; `make-openharmony-image.sh`
-replaces the system HAP when that file exists. `build-settings-hap.sh` remains
-a compatibility wrapper around the generic builder. This is a source and
-packaging change only, not a board-verified feature.
+`make-openharmony-image.sh` now builds, signs and stages
+`out/settings/Settings.hap` automatically before assembling the system image,
+so Settings source changes (including the GPU composition developer option)
+are baked into every image. Set `RDKHM_SKIP_SETTINGS_HAP=1` only for offline
+re-assembly of an existing image. `build-settings-hap.sh` and
+`python3 scripts/build-hap.py settings` remain available for a standalone
+build.
 
 Other rebuilt HAPs live under `out/haps/` (for example `contacts.hap`,
 `mms.hap`). The image builder does not inject them automatically; see

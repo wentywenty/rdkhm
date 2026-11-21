@@ -232,8 +232,15 @@ if [[ -f "$stage/system.img" ]]; then
     inject "$workspace/out/bringup-bin/busybox" /rdkhm/busybox 0100755
     inject "$workspace/out/bringup-bin/rdkhm-gpio" /rdkhm/gpio 0100755
     inject "$workspace/out/bringup-bin/rdkhm-gpio-daemon" /rdkhm/gpio-daemon 0100755
+    inject "$workspace/out/bringup-bin/rdkhm-sle-daemon" /rdkhm/sle-daemon 0100755
     inject "$workspace/out/bringup-bin/rdk_x5_40pin.tsv" /rdkhm/rdk_x5_40pin.tsv 0100644
     inject "$workspace/bringup/gpio/gpio-status.sh" /rdkhm/gpio-status.sh 0100755
+    # Settings carries the GPU composition developer option. Build it from the
+    # patched source during image assembly so the image never picks up a stale
+    # prebuilt. Set RDKHM_SKIP_SETTINGS_HAP=1 only for offline re-assembly.
+    if [[ "${RDKHM_SKIP_SETTINGS_HAP:-0}" != "1" ]]; then
+        python3 "$workspace/scripts/build-hap.py" settings
+    fi
     # Locally built HAPs replace their upstream counterparts through one
     # manifest (config/build/haps.json "image") shared with the verifier.
     # Optional artifacts (PinTool) are skipped when absent; a missing required
