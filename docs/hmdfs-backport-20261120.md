@@ -115,3 +115,5 @@ hmdfs: Unknown symbol filemap_remove_folio (err -2)
 - `patches/kernel/0019-hmdfs-backport.patch`
 - `config/kernel/openharmony-base.config`
 - `config/kernel/modules.json`
+
+测试计划和板端验收项见 [hmdfs-testing-20261120.md](hmdfs-testing-20261120.md)。

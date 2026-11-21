@@ -204,13 +204,14 @@ root PARTUUID `38b083ac-02`) was booted on `<board-ip>:5555`, boot_id
 ## NNRT integration
 
 Source, wire protocol, build result and board-enable steps are documented in
-[nnrt-backend.md](nnrt-backend.md). Current state: the patch is present and a
-component build passed; the libraries are not enabled in an image (no HCS host,
-no SELinux rules). MobileNetV2 inference passed through the private daemon on
-2026-11-20 (`sum=1.000000`, top=892), and a ResNet18 ONNX was converted to
-`.bin` and tested (3.17 ms / 314 FPS); the OH NNRT HDI/API path is still
-untested. Only the vendor offline-`.bin`/`.hbm` path is supported; the
-operator-graph `PrepareModel()` path returns `NNRT_NOT_SUPPORT`.
+[nnrt-backend.md](nnrt-backend.md). Current state: the HDI service, HCS host and
+SELinux rules are present; the OH NNRT C API now runs a ResNet18 `.bin` end to
+end on the board (2026-11-20, `top=473 value=3.481126`), matching the private
+daemon. That board run used a hot-deployed runtime/proxy and bind-mounted
+service/stub. The 2026-11-21 SD image now contains the same four artifacts,
+verified byte-for-byte, but it has not been flashed. Only the vendor
+offline-`.bin`/`.hbm` path is supported; the operator-graph `PrepareModel()`
+path returns `NNRT_NOT_SUPPORT`.
 
 ## Next integration
 
@@ -224,7 +225,7 @@ composer-side `COMPOSE` path is implemented in `display/0009` and builds, but
 is disabled by default after the 2026-11-20 dma-buf sg_table kernel panic;
 enable it only after `kernel/0021-dmabuf-sgtable-guard.patch` is flashed.
 
-BPU: validate memory allocation and a known model on X5, then extend the service
-protocol from capability checks to bounded inference requests and register
-an OH NNRT backend for supported model formats/operators. No inference capability
-or OpenHarmony NNRT registration is advertised by the current response.
+BPU: the OH NNRT C API path is working for raw offline models. Remaining work is
+to bake the runtime/HDI patches into a flashed image, add model-cache/dynamic
+shape support if needed, and keep the operator-graph path explicitly
+unsupported until an HBM compiler is integrated.

@@ -157,6 +157,19 @@ response: status, elapsed_ms, layers；输出 fence fd 随 SCM_RIGHTS 返回
 - GPU 进程使用 `card0` 或 `renderD128` 都可验证；优先尝试 render node，
   避免和 composer 的 master/状态冲突。
 
+## 开发者选项开关
+
+设置应用「开发者选项」新增 **GPU 合成** 开关（`settings/0005-gpu-compose-developer-option.patch`）：
+
+- 开关写入系统参数 `persist.rdkhm.gpu.compose`（`1` 开，`0` 关）。
+- `accelerator-daemon` 的 `gpu_compose_enabled()` 读取该参数（`param get`，缓存 2s），
+  同时保留 `/vendor/etc/rdkhm-gpu-compose.enable` 和 `RDKHM_GPU_COMPOSE=1` 的
+  开发/测试覆盖。
+- composer 每 2s 重新探测 `GPU_COMPOSE_CHECK`，因此开关切换后无需重启服务；
+  关闭后下一帧回退软件合成。
+- 当前板端已用 HDC 直接设置参数验证：`0` 返回 `GPU_COMPOSE_UNAVAILABLE`，
+  `1` 返回 `GPU_COMPOSE_READY`，无 Oops。设置 HAP 需要重新构建部署后才能在 UI 中点击。
+
 ## 分阶段计划
 
 ### P0：离屏双图层合成验证（S，已完成 2026-11-20）

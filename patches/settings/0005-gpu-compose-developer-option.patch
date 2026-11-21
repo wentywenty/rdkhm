@@ -1,0 +1,181 @@
+From: wentywenty <2321901849@qq.com>
+Subject: [PATCH] settings: add GPU composition developer option
+
+Signed-off-by: wentywenty <2321901849@qq.com>
+---
+diff --git a/product/phone/src/main/ets/pages/developerOptions.ets b/product/phone/src/main/ets/pages/developerOptions.ets
+--- a/product/phone/src/main/ets/pages/developerOptions.ets
++++ b/product/phone/src/main/ets/pages/developerOptions.ets
+@@ -16,6 +16,7 @@
+ import deviceInfo from '@ohos.deviceInfo';
+ import parameter from '@ohos.systemparameter';
+ import OverdrawController from '../controller/developerOptions/OverdrawController';
++import GpuComposeController from '../controller/developerOptions/GpuComposeController';
+ import UsbDebuggingController from '../controller/developerOptions/UsbDebuggingController';
+ import LogUtil from '../../../../../../common/utils/src/main/ets/default/baseUtil/LogUtil';
+ import ConfigData from '../../../../../../common/utils/src/main/ets/default/baseUtil/ConfigData';
+@@ -29,6 +30,7 @@
+ const MODULE_TAG = ConfigData.TAG + '.developerOptions -> ';
+ const GRAPHIC_ANIMATION_SCALE_NAME = "persist.sys.graphic.animationscale";
+ const ARKUI_ANIMATION_SCALE_NAME = "persist.sys.arkui.animationscale";
++const GPU_COMPOSE_PARAM = "persist.rdkhm.gpu.compose";
+ 
+ /**
+  * Developer options
+@@ -41,12 +43,14 @@
+   @State checked: string = "1";
+   @State controllerLayoutBoundariesIsOn: boolean = false;
+   @State controllerOverdrawIsOn: boolean = false;
++  @State controllerGpuComposeIsOn: boolean = false;
+   @State controllerDebugIsOn: boolean = false;
+   @State isPhoneOrRK: boolean = false;
+   @State getAnimationMultiplier: string =  parameter.getSync(ARKUI_ANIMATION_SCALE_NAME);
+ 
+   private controller: UsbDebuggingController = new UsbDebuggingController();
+   private controllerOverdraw: OverdrawController = new OverdrawController();
++  private controllerGpuCompose: GpuComposeController = new GpuComposeController();
+   private controllerLayoutBoundaries: LayoutBoundariesController = new LayoutBoundariesController();
+   private AnimationMultiplier: string[] = ["0", "0.5", "1", "1.5", "2", "5", "10"];
+ 
+@@ -87,6 +91,8 @@
+     } else {
+       this.controllerLayoutBoundariesIsOn = Boolean(parameter.getSync("persist.ace.debug.boundary.enabled"));
+     }
++
++    this.controllerGpuComposeIsOn = parameter.getSync(GPU_COMPOSE_PARAM) === "1";
+     LogUtil.info(MODULE_TAG + "aboutToAppear end");
+   }
+ 
+@@ -180,6 +186,16 @@
+             switchHeight: $r("app.float.wh_value_56")
+           })
+             .margin({ top: $r("app.float.distance_12") })
++
++          SwitchComponent({
++            title: $r("app.string.Gpu_Compose"),
++            summary: $r("app.string.Gpu_Compose_Summary"),
++            isOn: $controllerGpuComposeIsOn,
++            controller: this.controllerGpuCompose,
++            switchHeight: $r("app.float.wh_value_72")
++          })
++            .margin({ top: $r("app.float.distance_12") })
++
+           SubEntryComponent({
+             targetPage: "pages/compatibilityAssessment",
+             title: $r("app.string.OpenHarmony_Compatibility_Assessment")
+diff --git a/product/phone/src/main/resources/base/element/string.json b/product/phone/src/main/resources/base/element/string.json
+--- a/product/phone/src/main/resources/base/element/string.json
++++ b/product/phone/src/main/resources/base/element/string.json
+@@ -1243,6 +1243,14 @@
+     {
+       "name": "Debug_GPU_OverDraw",
+       "value": "调试 GPU 过度绘制"
++    },
++    {
++      "name": "Gpu_Compose",
++      "value": "GPU 合成"
++    },
++    {
++      "name": "Gpu_Compose_Summary",
++      "value": "使用 GPU 合成显示图层；失败时自动回退软件合成"
+     },
+     {
+       "name": "Animation_Multiplier",
+diff --git a/product/phone/src/main/resources/zh_CN/element/string.json b/product/phone/src/main/resources/zh_CN/element/string.json
+--- a/product/phone/src/main/resources/zh_CN/element/string.json
++++ b/product/phone/src/main/resources/zh_CN/element/string.json
+@@ -1243,6 +1243,14 @@
+     {
+       "name": "Debug_GPU_OverDraw",
+       "value": "调试 GPU 过度绘制"
++    },
++    {
++      "name": "Gpu_Compose",
++      "value": "GPU 合成"
++    },
++    {
++      "name": "Gpu_Compose_Summary",
++      "value": "使用 GPU 合成显示图层；失败时自动回退软件合成"
+     },
+     {
+       "name": "Animation_Multiplier",
+diff --git a/product/phone/src/main/resources/en_US/element/string.json b/product/phone/src/main/resources/en_US/element/string.json
+--- a/product/phone/src/main/resources/en_US/element/string.json
++++ b/product/phone/src/main/resources/en_US/element/string.json
+@@ -1239,6 +1239,14 @@
+     {
+       "name": "Debug_GPU_OverDraw",
+       "value": "Debug GPU OverDraw"
++    },
++    {
++      "name": "Gpu_Compose",
++      "value": "GPU Composition"
++    },
++    {
++      "name": "Gpu_Compose_Summary",
++      "value": "Compose display layers with the GPU; falls back to software on failure"
+     },
+     {
+       "name": "Animation_Multiplier",
+diff --git a/product/phone/src/main/resources/phone/element/string.json b/product/phone/src/main/resources/phone/element/string.json
+--- a/product/phone/src/main/resources/phone/element/string.json
++++ b/product/phone/src/main/resources/phone/element/string.json
+@@ -1199,6 +1199,14 @@
+     {
+       "name": "Debug_GPU_OverDraw",
+       "value": "调试 GPU 过度绘制"
++    },
++    {
++      "name": "Gpu_Compose",
++      "value": "GPU 合成"
++    },
++    {
++      "name": "Gpu_Compose_Summary",
++      "value": "使用 GPU 合成显示图层；失败时自动回退软件合成"
+     },
+     {
+       "name": "Animation_Multiplier",
+diff --git a/product/phone/src/main/ets/controller/developerOptions/GpuComposeController.ts b/product/phone/src/main/ets/controller/developerOptions/GpuComposeController.ts
+new file mode 100644
+--- /dev/null
++++ b/product/phone/src/main/ets/controller/developerOptions/GpuComposeController.ts
+@@ -0,0 +1,39 @@
++/**
++ * Copyright (c) 2026 Huawei Device Co., Ltd.
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++import ConfigData from '../../../../../../../common/utils/src/main/ets/default/baseUtil/ConfigData';
++import ISettingsController from '../../../../../../../common/component/src/main/ets/default/controller/ISettingsController';
++import SwitchController from '../../../../../../../common/component/src/main/ets/default/controller/SwitchController';
++import LogUtil from '../../../../../../../common/utils/src/main/ets/default/baseUtil/LogUtil';
++import { LogAll } from '../../../../../../../common/utils/src/main/ets/default/baseUtil/LogDecorator';
++import parameter from '@ohos.systemparameter';
++
++const MODULE_TAG = ConfigData.TAG + '.GpuComposeController -> ';
++const GPU_COMPOSE_PARAM = 'persist.rdkhm.gpu.compose';
++
++@LogAll
++export default class GpuComposeController extends SwitchController {
++  initData(): ISettingsController {
++    super.initData();
++    return this;
++  }
++
++  afterCurrentValueChanged() {
++    parameter.set(GPU_COMPOSE_PARAM, this.isOn ? '1' : '0').then(() => {
++      LogUtil.info(MODULE_TAG + (this.isOn ? 'enable gpu compose success' : 'disable gpu compose success'));
++    }).catch((error) => {
++      LogUtil.info(MODULE_TAG + 'set gpu compose failed ' + JSON.stringify(error));
++    });
++  }
++}

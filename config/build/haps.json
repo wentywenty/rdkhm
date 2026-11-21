@@ -172,6 +172,12 @@
         "source": "out/haps/rdkhm_pintool.hap",
         "dest": "/system/app/com.rdkhm.pintool/PinTool.hap",
         "optional": true
+      },
+      {
+        "name": "launcher_settings",
+        "source": "out/haps/launcher_settings.hap",
+        "dest": "/system/app/com.ohos.launcher/Launcher_Settings.hap",
+        "optional": false
       }
     ]
   },

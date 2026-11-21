@@ -1,0 +1,15 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] hdc: enable TCP mode in root hdcd service
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+--- a/src/daemon/etc/hdcd.root.cfg
++++ b/src/daemon/etc/hdcd.root.cfg
+@@ -88,6 +88,7 @@
+     "services" : [{
+             "name" : "hdcd",
+             "path" : ["/system/bin/hdcd"],
++            "args" : ["-t"],
+             "uid" : "root",
+             "gid" : [ "root", "shell", "log", "readproc", "file_manager" ],
+             "setuid" : true,

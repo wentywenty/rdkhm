@@ -1,0 +1,78 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] qemu: start HDC TCP in arm virt
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+--- a/arm_virt/linux/rootfs/BUILD.gn
++++ b/arm_virt/linux/rootfs/BUILD.gn
+@@ -33,6 +33,13 @@
+   part_name = "qemu_arm_linux_chipset"
+ }
+ 
++ohos_prebuilt_etc("qemu.arm.linux.hdc.cfg") {
++  source = "init.qemu.arm.linux.hdc.cfg"
++  install_images = [ "system" ]
++  module_install_dir = "etc/init"
++  part_name = "qemu_arm_linux_chipset"
++}
++
+ ohos_prebuilt_etc("qemu.arm.linux.updater.cfg") {
+   source = "qemu.arm.linux.updater.cfg"
+   install_images = [ "updater" ]
+@@ -46,6 +53,13 @@
+   part_name = "qemu_arm_linux_chipset"
+ }
+ 
++ohos_prebuilt_para("qemu_hdc_param") {
++  source = "qemu.hdc.para"
++  install_images = [ "system" ]
++  module_install_dir = "etc/param"
++  part_name = "qemu_arm_linux_chipset"
++}
++
+ # The minimal product has no component that contributes a foundation-process
+ # SA profile, so the merged profile is absent. safwk's init entry still starts
+ # /system/bin/sa_main with this path; an empty profile keeps the process
+@@ -61,7 +75,9 @@
+   deps = [
+     ":default_param",
+     ":foundation_profile",
++    ":qemu.arm.linux.hdc.cfg",
+     ":qemu.arm.linux.init.cfg",
++    ":qemu_hdc_param",
+     ":qemu.arm.linux.updater.cfg",
+     ":qemu.arm.linux.usb.cfg",
+   ]
+diff --git a/arm_virt/linux/rootfs/init.qemu.arm.linux.hdc.cfg b/arm_virt/linux/rootfs/init.qemu.arm.linux.hdc.cfg
+new file mode 100644
+--- /dev/null
++++ b/arm_virt/linux/rootfs/init.qemu.arm.linux.hdc.cfg
+@@ -0,0 +1,18 @@
++{
++    "jobs" : [{
++        "name" : "boot",
++        "cmds" : [
++            "setparam persist.hdc.mode tcp",
++            "setparam persist.hdc.mode.tcp enable",
++            "setparam persist.hdc.mode.usb disable",
++            "setparam persist.hdc.port 5555",
++            "setparam persist.hdc.control true",
++            "setparam const.security.developermode.state true",
++            "setparam const.debuggable 1",
++            "setparam persist.hdc.root 1",
++            "/system/bin/toybox ifconfig eth0 10.0.2.15/24",
++            "/system/bin/toybox ifconfig eth0 up",
++            "start hdcd"
++        ]
++    }]
++}
+diff --git a/arm_virt/linux/rootfs/qemu.hdc.para b/arm_virt/linux/rootfs/qemu.hdc.para
+new file mode 100644
+--- /dev/null
++++ b/arm_virt/linux/rootfs/qemu.hdc.para
+@@ -0,0 +1,5 @@
++persist.hdc.mode = "tcp"
++persist.hdc.mode.tcp = "enable"
++persist.hdc.mode.usb = "disable"
++persist.hdc.port = "5555"
++persist.hdc.control = "true"

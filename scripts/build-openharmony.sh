@@ -27,4 +27,4 @@ if [[ $# == 0 ]]; then
     run_build --build-target ohos_declaration_ets_api 2>&1 | tee "$workspace/out/logs/sdk-api.log"
     bash "$workspace/scripts/install-system-sdk-api.sh"
 fi
-run_build "$@" 2>&1 | tee "$workspace/out/logs/openharmony-build.log"
+run_build --deps-guard=false "$@" 2>&1 | tee "$workspace/out/logs/openharmony-build.log"

@@ -5,12 +5,12 @@ Status of the OpenHarmony Neural Network Runtime (NNRt) path on the X5 BPU.
 | Item | State |
 | --- | --- |
 | Source and patch | present |
-| Component build | passed (2026-11-19) |
-| Installed in vendor.img | yes (verified by debugfs) |
-| vendor_image target | aborted by unrelated deps_guard |
+| Component build | passed (2026-11-20, ninja) |
+| Installed in images | yes: runtime/proxy in system.img, service/stub/driver in vendor.img |
+| Image assembly | passed (2026-11-21, `1e5d24a5...`) |
 | HDF host enabled | yes on 0021 cold boot (`nnrt_host`) |
-| OH NNRT C API | X5-BPU found; offline `.bin` build rejected by NNRt core |
-| Board inference | passed via private daemon (MobileNetV2, ResNet18) |
+| OH NNRT C API | passed (raw `.bin`, 2026-11-20) |
+| Board inference | passed via C API and private daemon (ResNet18) |
 | ONNX conversion | passed (ResNet18, 2026-11-20) |
 | Real X5 models | MobileNetV2 + converted ResNet18 |
 
@@ -40,11 +40,14 @@ Only the vendor offline-model path is implemented:
 
 1. `OH_NNCompilation_ConstructWithOfflineModelFile()` or
    `...OfflineModelBuffer()`.
-2. NNRT core calls `PrepareOfflineModel()` with the model bytes in a
+2. NNRT core queries input/output tensor descriptors through
+   `INnrtDevice::GetOfflineModelIO()` (vendor extension) so it can create
+   executor tensors for a raw model.
+3. NNRT core calls `PrepareOfflineModel()` with the model bytes in a
    `SharedBuffer`.
-3. The HDI service forwards the fd to the daemon, which calls
+4. The HDI service forwards the fd to the daemon, which calls
    `hbDNNInitializeFromDDR()`.
-4. `IPreparedModel::Run()` forwards input/output shared buffers to
+5. `IPreparedModel::Run()` forwards input/output shared buffers to
    `hbDNNInfer()` + `hbDNNWaitTaskDone()`.
 
 The operator-graph path (`PrepareModel()` with NNRT `Model` nodes) returns
@@ -79,6 +82,15 @@ Added by `patches/nnrt/0001-x5-nnrt-hdi-service.patch` into
 - `src/nnrt_device_service.cpp`, `src/rdkhm_accel_client.cpp`,
   `src/nnrt_device_driver.cpp`
 
+The raw-offline C API path is added by:
+
+- `patches/nnrt/0002-vendor-offline-model-io.patch` — `drivers/interface`
+  `INnrtDevice::GetOfflineModelIO()` IDL method.
+- `patches/nnrt/0003-raw-offline-runtime.patch` — `foundation/ai/neural_network_runtime`
+  accepts offline path/buffer, queries IO descriptors, and implements the raw
+  HDI `PrepareOfflineModel()` / `GetOfflineModelIO()` calls in
+  `HDIDeviceV2_1`.
+
 Integration repository:
 
 - `bringup/probes/accelerator-daemon.c` and `bringup/probes/accel_wire.h`
@@ -94,37 +106,72 @@ Integration repository:
 
 ## Build
 
-Component-only build, no image assembly:
+Component-only build, no image assembly. The `build-target.sh` wrapper currently
+aborts at the unrelated `deps_guard` check, so the 2026-11-20 build used ninja
+directly:
 
 ```sh
-scripts/build-target.sh drivers/peripheral/nnrt:libnnrt_driver
+cd sources/oh/openharmony-full/out/rdk_x5
+ninja -w dupbuild=warn libnnrt_stub_2.1 libnnrt_proxy_2.1
+ninja -w dupbuild=warn libneural_network_runtime
+ninja -w dupbuild=warn libnnrt_device_service_2.1 libnnrt_driver
 ```
 
-Observed on 2026-11-19: `rdk_x5 build success`, about one minute.
+If the notice scripts fail under a `python`/Python-2 shim, prepend a directory
+where `python` points to Python 3.
 
 Artifacts:
 
 - `out/rdk_x5/hdf/drivers_peripheral_nnrt_x5/libnnrt_driver.z.so`
 - `out/rdk_x5/hdf/drivers_peripheral_nnrt_x5/libnnrt_device_service_2.1.z.so`
   (exports `NnrtDeviceImplGetInstance`, `NnrtDeviceImplRelease`)
+- `out/rdk_x5/hdf/drivers_interface_nnrt/libnnrt_stub_2.1.z.so`
+- `out/rdk_x5/hdf/drivers_interface_nnrt/libnnrt_proxy_2.1.z.so`
+- `out/rdk_x5/ai/neural_network_runtime/libneural_network_runtime.so`
 
-Neither artifact is installed into `packages/phone` by the component target;
-that happens on a unified image build.
+Only the service/driver artifacts are installed by the component target; the
+runtime is part of the system image in a unified build.
 
 ## Enabling on a board
 
-The libraries are intentionally not activated yet:
+Source enablement is complete:
 
-1. Merge `overlay/vendor/drobotics/rdk_x5/nnrt/nnrt_device.hcs` into
+1. `overlay/vendor/drobotics/rdk_x5/nnrt/nnrt_device.hcs` is merged into
    `overlay/vendor/drobotics/rdk_x5/hdf_config/uhdf/hdf.hcs`.
-2. Add SELinux rules for the NNRT HDF host to connect to
-   `/dev/unix/socket/rdkhm_accel`. Check the actual host domain and socket label
-   from `dmesg`/AVC logs before adding broad rules.
-3. Build an image and confirm both `.so` files are in `/vendor/lib64`.
-4. Push a real `.hbm` model and run the NNRT C API test described below.
+2. `nnrt.te` and `hdf_service_contexts` cover the host and socket.
+3. `drivers_peripheral_nnrt_x5` is part of the product `hdf` subsystem and the
+   `nnrt` component builds the service/driver.
 
-Do not add permissive rules or a global SELinux exception just to make the host
-start.
+The 2026-11-20 board test hot-deployed the new libraries without an image:
+
+```sh
+# push runtime, proxy, stub and service to /data/local/tmp/nnrt-sync
+mount --bind /data/local/tmp/nnrt-sync/libnnrt_device_service_2.1.z.so \
+  /vendor/lib64/libnnrt_device_service_2.1.z.so
+mount --bind /data/local/tmp/nnrt-sync/libnnrt_stub_2.1.z.so \
+  /vendor/lib64/libnnrt_stub_2.1.z.so
+service_control stop nnrt_host
+service_control start nnrt_host
+LD_LIBRARY_PATH=/data/local/tmp/nnrt-sync:/system/lib64:/system/lib64/platformsdk:/system/lib64/ndk \
+  /data/local/tmp/nnrt-capi-test /data/local/tmp/resnet18.bin
+```
+
+The bind mounts are not persistent. On 2026-11-21 16:35 the SD image was
+reassembled from the OpenHarmony package images, and the four NNRT artifacts in
+the final image match the built files byte for byte:
+
+| Artifact | SHA256 |
+| --- | --- |
+| `system/lib64/ndk/libneural_network_runtime.so` | `5e9bb17e...` |
+| `system/lib64/platformsdk/libnnrt_proxy_2.1.z.so` | `7e43f39d...` |
+| `vendor/lib64/libnnrt_device_service_2.1.z.so` | `2448c523...` |
+| `vendor/lib64/libnnrt_stub_2.1.z.so` | `7ff4affa...` |
+
+Final image: `out/images/rdkhm-x5-openharmony-dev.img`, SHA256
+`1e5d24a599d429c43e85b93cbce0cb08c3f0afc7caf3f29f23fd68b870826cf4`.
+It is **not flashed**, so the 2026-11-20 board result is still the only
+end-to-end NPU evidence. Do not add permissive rules or a global SELinux
+exception just to make the host start.
 
 ## Verification plan
 
@@ -135,18 +182,18 @@ Already covered offline:
 - C++ transport client against the ARM64 daemon under QEMU;
 - component build and exported factory symbols.
 
-Board inference through the **private daemon path** passed on 2026-11-20 with
-MobileNetV2; see the board probe below. The **OH NNRT HDI/API path** is still
-untested because the service is not enabled in an image.
+Board inference through the **private daemon path** and the **OH NNRT C API**
+passed on 2026-11-20 with ResNet18. The C API returned the same top-1 result as
+the daemon (`top=473 value=3.481126`). See the C API verification section below.
 
-Remaining board test:
+Remaining board test is image-level, not a code path:
 
-1. `OH_NNDevice_GetAllDevicesID()` exposes the X5 device.
-2. `OH_NNCompilation_ConstructWithOfflineModelFile("/data/mobilenetv2.bin")`.
-3. `OH_NNCompilation_SetDevice()` + `OH_NNCompilation_Build()`.
-4. Allocate input/output tensors, run, compare the output against the private
-   daemon result.
-5. Check the daemon stayed alive and the kernel did not log BPU errors.
+1. Build a unified image containing the new runtime/proxy/stub/service.
+2. Boot it and confirm `OH_NNDevice_GetAllDevicesID()` still exposes the X5
+   device.
+3. Run the same `.bin` through `OH_NNCompilation_Build()` + `RunSync()` without
+   bind mounts or `LD_LIBRARY_PATH`.
+4. Check the daemon stayed alive and the kernel did not log BPU errors.
 
 ## Board probe 2026-11-20
 
@@ -260,40 +307,36 @@ CIL includes the new rules, but the policy target still aborts at the unrelated
 ### OH NNRT C API verification (2026-11-20)
 
 Board: `10.43.9.213:5555`, boot_id
-`9482e12c-d08d-49fb-ae66-05062ed23e2a`, kernel `#12`
+`d39aa3c9-7ac0-4475-8f5e-28d93d73c533`, kernel `#12`
 (2026-11-20 16:04 CST). Log:
-`out/board-logs/20261120-npu/capi-verify.log`.
+`out/board-logs/20261120-npu/capi-offline-ok.log`.
 
-Device discovery succeeds:
+The previous run failed inside the OH 6.0 runtime with
+`CreateCompiler failed, only support build NN model and NN model cache`.
+The three NNRT patches now implement the missing raw-offline path:
+accept offline path/buffer, query IO descriptors through the vendor
+`GetOfflineModelIO()` HDI method, prepare the raw buffer, and create the
+executor with those descriptors.
+
+The C API test now passes end-to-end:
 
 ```text
 device=11919407101284969601 name=X5-BPU_D-Robotics_v2_1 count=1
+inputs=1 outputs=1
+input 0 bytes=150528
+output 0 bytes=4000
+output 0 elements=1000 sum=0.026968 top=473 value=3.481126
+PASS: OH NNRT offline model inference
 ```
 
-`OH_NNCompilation_Build()` then fails with `OH_NN_FAILED` before reaching the
-HDI offline-model path:
+`top=473 value=3.481126` matches the private daemon result for the same
+ResNet18 `.bin`, so the C API path is executing the same model on the BPU.
 
-```text
-[Nnbackend.cpp(CreateCompiler:118)] CreateCompiler failed,
-only support build NN model and NN model cache.
-[neural_network_core.cpp(CreateCompiler:596)] CreateCompiler failed
-```
-
-The OH 6.0 NNRT core rejects `OH_NNCompilation_ConstructWithOfflineModelFile`
-and `...OfflineModelBuffer` in `NNBackend::CreateCompiler`. The HDI
-`PrepareOfflineModel()` path exists, but this core only uses it for a MindSpore
-Lite graph with a custom op, not for a raw vendor `.bin`.
-
-The private daemon path still works with the same model:
-
-```text
-run status=0
-output 0 dims=[1,1000,1,1] sum=0.026968 top=473 value=3.481126
-```
-
-Supporting a raw `.bin` through the C API requires a framework patch: let
-`NNBackend::CreateCompiler` accept offline path/buffer and route the build to
-`HDIDeviceV2_1::PrepareOfflineModel` (or an equivalent raw-buffer Device API).
+This run used hot deployment, not a new image: the new service/stub were
+bind-mounted over `/vendor/lib64`, and the runtime/proxy were loaded from
+`/data/local/tmp/nnrt-sync` through `LD_LIBRARY_PATH`. The flashed vendor image
+still contains the 2026-11-20 12:06 service. A unified image build is required
+before the fix survives a reboot.
 
 The `interface token check failed` lines are the v1.0/v2.0 backend probes; the
 v2.1 device is registered and named `X5-BPU_D-Robotics_v2_1`.
@@ -319,7 +362,7 @@ Temporary board files left for reuse: `/data/local/tmp/accelerator-daemon`,
 - Only precompiled vendor models (`.bin` / `.hbm`) are accepted; ONNX is not accepted at runtime.
 - No operator-graph compilation.
 - No model cache, dynamic shape, float16, performance or priority settings.
-- Board inference is proven only through the private daemon; the OH NNRT HDI/API path is still untested.
+- Board inference is proven through both the OH NNRT C API and the private daemon; the hot-deployed fix is not yet in a flashed image.
 - ONNX conversion is proven for ResNet18; robot-policy ONNX files are not converted or validated.
 - `bringup/probes/accel_wire.h` and the copy in
   `drivers/peripheral/nnrt/include/accel_wire.h` must stay identical.

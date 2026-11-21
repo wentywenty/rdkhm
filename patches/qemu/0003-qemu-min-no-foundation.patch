@@ -1,0 +1,26 @@
+From: rdkhm <rdkhm@local>
+Subject: [PATCH] qemu: do not start foundation in minimal QEMU products
+
+Signed-off-by: rdkhm <rdkhm@local>
+---
+--- a/etc/profile/BUILD.gn
++++ b/etc/profile/BUILD.gn
+@@ -21,7 +21,13 @@ ohos_prebuilt_etc("foundation_trust") {
+ }
+ 
+ ohos_prebuilt_etc("foundation_cfg") {
+-  if (!defined(global_parts_info) || defined(global_parts_info.window_scene_board_ext)) {
++  if (defined(product_name) && (product_name == "qemu-arm64-linux-min" ||
++      product_name == "qemu-arm-linux-min" ||
++      product_name == "qemu-arm-linux-headless")) {
++    # The minimal QEMU products have no foundation SA provider; starting the
++    # critical foundation service without a profile only causes a crash loop.
++    source = "qemu/foundation.cfg"
++  } else if (!defined(global_parts_info) || defined(global_parts_info.window_scene_board_ext)) {
+     source = "foundation.cfg"
+   } else {
+     source = "no_sceneboard/foundation.cfg"
+--- /dev/null
++++ b/etc/profile/qemu/foundation.cfg
+@@ -0,0 +1 @@
++{}

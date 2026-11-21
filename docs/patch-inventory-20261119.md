@@ -4,14 +4,23 @@
 
 ## 计数
 
-- manifest 显式列出：**103** 个 patch
-  - `kernel`: 19
+- manifest 显式列出：**120** 个 patch
+  - `kernel`: 22
   - `kernel-rt`: 1（optional，仅 RT profile）
-  - `openharmony`: 83
-- `patches/` 实际 `.patch` 文件：**106** 个
+  - `openharmony`: 97
+- `patches/` 实际 `.patch` 文件：**123** 个
 - glob 管理的额外 patch：**3** 个（`nearlink-bsp` 2、`nearlink-ssap` 1；不在 openharmony 显式列表中）
-- `./rdkhm check` 当前报告 103 listed / 106 files present；glob/optional 文件由 coverage 脚本按规则处理。
+- `./rdkhm check` 当前报告 120 listed / 123 files present；glob/optional 文件由 coverage 脚本按规则处理。
 - 所有 patch 统一使用 `From/Subject/Signed-off-by` 头；`check-patch-format.py` 最近一次为 0 failure。
+
+### 2026-11-20 增量
+
+| Patch | Repo | 用途 |
+| --- | --- | --- |
+| `qemu/0004-hdc-tcp-init.patch` | `device/qemu` | QEMU arm virt 启动 HDC TCP，安装 init/para |
+| `hdc/0001-hdcd-root-tcp.patch` | `developtools/hdc` | root `hdcd` service 增加 `-t` |
+
+下方按领域表格是 2026-11-19 快照，不重排编号；当前计数以上方为准。
 
 ## 按领域计数
 

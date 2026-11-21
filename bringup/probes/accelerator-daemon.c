@@ -73,13 +73,37 @@ static void stop_handler(int signal_number)
     }
 }
 
+static int gpu_compose_parameter(void)
+{
+    static long long checked_at;
+    static int cached;
+    long long now = milliseconds();
+    if (now - checked_at < 2000) {
+        return cached;
+    }
+    checked_at = now;
+    cached = 0;
+    FILE *pipe = popen("/system/bin/param get persist.rdkhm.gpu.compose 2>/dev/null", "r");
+    if (pipe != NULL) {
+        char value[16] = {0};
+        if (fgets(value, sizeof(value), pipe) != NULL && value[0] == '1') {
+            cached = 1;
+        }
+        (void)pclose(pipe);
+    }
+    return cached;
+}
+
 static int gpu_compose_enabled(void)
 {
     const char *value = getenv("RDKHM_GPU_COMPOSE");
     if (value != NULL && strcmp(value, "1") == 0) {
         return 1;
     }
-    return access("/vendor/etc/rdkhm-gpu-compose.enable", F_OK) == 0;
+    if (access("/vendor/etc/rdkhm-gpu-compose.enable", F_OK) == 0) {
+        return 1;
+    }
+    return gpu_compose_parameter();
 }
 
 static int load_library(const char *name)

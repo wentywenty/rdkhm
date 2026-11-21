@@ -2,9 +2,11 @@
 
 Full design and status: `docs/nnrt-backend.md`.
 
-Source lives in `patches/nnrt/0001-x5-nnrt-hdi-service.patch`; `prepare-openharmony.sh`
-applies it into `drivers/peripheral/nnrt`. This directory keeps only the
-product-side HCS fragment and these notes.
+Source lives in `patches/nnrt/0001-x5-nnrt-hdi-service.patch` (service),
+`0002-vendor-offline-model-io.patch` (HDI IO descriptor query) and
+`0003-raw-offline-runtime.patch` (NNRt raw offline path); `prepare-openharmony.sh`
+applies them. This directory keeps only the product-side HCS fragment and these
+notes.
 
 ## Build result
 
@@ -45,10 +47,9 @@ Source enablement is complete:
 - an `nnrt` component and image-verifier checks exist.
 
 The HCS, SELinux policy and `hdf_service_contexts` generation all pass. A
-`vendor_image` build aborted at an unrelated `deps_guard` check, but the
+`vendor_image` build still aborts at an unrelated `deps_guard` check, but the
 produced vendor image contains both NNRT libraries and the `nnrt_host` HCB
-block; the system policy contains the NNRT types. The remaining step is a
-successful unified image build and flash, then
-`OH_NNCompilation_ConstructWithOfflineModelFile()` with a real model.
-`tests/nnrt-capi-test.c` is ready; on the current image it reports zero
-devices.
+block; the system policy contains the NNRT types. On 2026-11-20 the C API test
+ran a ResNet18 `.bin` end to end after hot-deploying the new runtime/proxy and
+bind-mounting the new service/stub (`top=473 value=3.481126`). The remaining
+step is a unified image build and flash so the fix survives reboot.

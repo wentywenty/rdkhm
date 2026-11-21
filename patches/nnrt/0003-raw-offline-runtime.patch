@@ -1,0 +1,529 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] nnrt/0003-raw-offline-runtime.patch
+
+Signed-off-by: RDKHM <rdkhm@localhost>
+---
+--- a/frameworks/native/neural_network_runtime/device.h
++++ b/frameworks/native/neural_network_runtime/device.h
+@@ -17,6 +17,7 @@
+ #define NEURAL_NETWORK_RUNTIME_DEVICE_H
+ 
+ #include <string>
++#include <utility>
+ #include <vector>
+ #include <memory>
+ 
+@@ -62,6 +63,29 @@ public:
+                                                  const ModelConfig& config,
+                                                  std::shared_ptr<PreparedModel>& preparedModel) = 0;
+ 
++    virtual OH_NN_ReturnCode PrepareOfflineModel(const void* model, size_t modelSize,
++                                                 const ModelConfig& config,
++                                                 std::shared_ptr<PreparedModel>& preparedModel)
++    {
++        (void)model;
++        (void)modelSize;
++        (void)config;
++        (void)preparedModel;
++        return OH_NN_OPERATION_FORBIDDEN;
++    }
++
++    virtual OH_NN_ReturnCode GetOfflineModelIO(
++        const void* model, size_t modelSize,
++        std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>>& inputs,
++        std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>>& outputs)
++    {
++        (void)model;
++        (void)modelSize;
++        (void)inputs;
++        (void)outputs;
++        return OH_NN_OPERATION_FORBIDDEN;
++    }
++
+     virtual void* AllocateBuffer(size_t length) = 0;
+     virtual void* AllocateTensorBuffer(size_t length, std::shared_ptr<TensorDesc> tensor) = 0;
+     virtual void* AllocateTensorBuffer(size_t length, std::shared_ptr<NNTensor> tensor) = 0;
+--- a/frameworks/native/neural_network_runtime/hdi_device_v2_0.h
++++ b/frameworks/native/neural_network_runtime/hdi_device_v2_0.h
+@@ -54,6 +54,7 @@ public:
+                                                 const ModelConfig& config,
+                                                 std::shared_ptr<PreparedModel>& preparedModel,
+                                                 bool& isUpdatable) override;
++    using Device::PrepareOfflineModel;
+     OH_NN_ReturnCode PrepareOfflineModel(std::shared_ptr<const mindspore::lite::LiteGraph> model,
+                                          const ModelConfig& config,
+                                          std::shared_ptr<PreparedModel>& preparedModel) override;
+--- a/frameworks/native/neural_network_runtime/hdi_device_v2_1.cpp
++++ b/frameworks/native/neural_network_runtime/hdi_device_v2_1.cpp
+@@ -15,6 +15,9 @@
+ 
+ #include "hdi_device_v2_1.h"
+ 
++#include <string>
++#include <utility>
++
+ #include "hdf_base.h"
+ #include "mindir.h"
+ #include "securec.h"
+@@ -32,6 +35,94 @@ namespace NeuralNetworkRuntime {
+ const size_t OFFLINE_MODEL_MINIMUM_INPUT_SIZE = 2;
+ 
+ namespace {
++OH_NN_DataType TransHDIToNNDataType(const V2_1::DataType& dataType)
++{
++    switch (dataType) {
++        case V2_1::DataType::DATA_TYPE_BOOL:
++            return OH_NN_BOOL;
++        case V2_1::DataType::DATA_TYPE_INT8:
++            return OH_NN_INT8;
++        case V2_1::DataType::DATA_TYPE_INT16:
++            return OH_NN_INT16;
++        case V2_1::DataType::DATA_TYPE_INT32:
++            return OH_NN_INT32;
++        case V2_1::DataType::DATA_TYPE_INT64:
++            return OH_NN_INT64;
++        case V2_1::DataType::DATA_TYPE_UINT8:
++            return OH_NN_UINT8;
++        case V2_1::DataType::DATA_TYPE_UINT16:
++            return OH_NN_UINT16;
++        case V2_1::DataType::DATA_TYPE_UINT32:
++            return OH_NN_UINT32;
++        case V2_1::DataType::DATA_TYPE_UINT64:
++            return OH_NN_UINT64;
++        case V2_1::DataType::DATA_TYPE_FLOAT16:
++            return OH_NN_FLOAT16;
++        case V2_1::DataType::DATA_TYPE_FLOAT32:
++            return OH_NN_FLOAT32;
++        case V2_1::DataType::DATA_TYPE_FLOAT64:
++            return OH_NN_FLOAT64;
++        default:
++            return OH_NN_UNKNOWN;
++    }
++}
++
++OH_NN_Format TransHDIToNNFormat(const V2_1::Format& format)
++{
++    switch (format) {
++        case V2_1::Format::FORMAT_NCHW:
++            return OH_NN_FORMAT_NCHW;
++        case V2_1::Format::FORMAT_NHWC:
++            return OH_NN_FORMAT_NHWC;
++        default:
++            return OH_NN_FORMAT_NONE;
++    }
++}
++
++OH_NN_ReturnCode ConvertHDITensorToDesc(const V2_1::Tensor& tensor, size_t index, bool isInput,
++    std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>& tensorDesc)
++{
++    auto desc = CreateSharedPtr<TensorDesc>();
++    if (desc == nullptr) {
++        LOGE("Create tensor desc failed when converting offline model IO.");
++        return OH_NN_MEMORY_ERROR;
++    }
++
++    OH_NN_DataType dataType = TransHDIToNNDataType(tensor.dataType);
++    OH_NN_ReturnCode ret = desc->SetDataType(dataType);
++    if (ret != OH_NN_SUCCESS) {
++        LOGE("Set offline model tensor data type failed, dataType: %{public}d.",
++            static_cast<int32_t>(dataType));
++        return ret;
++    }
++
++    ret = desc->SetFormat(TransHDIToNNFormat(tensor.format));
++    if (ret != OH_NN_SUCCESS) {
++        return ret;
++    }
++
++    if (tensor.dims.empty()) {
++        LOGE("Offline model tensor %{public}zu has empty dimensions.", index);
++        return OH_NN_INVALID_PARAMETER;
++    }
++    ret = desc->SetShape(tensor.dims.data(), tensor.dims.size());
++    if (ret != OH_NN_SUCCESS) {
++        return ret;
++    }
++
++    std::string name = tensor.name;
++    if (name.empty()) {
++        name = (isInput ? "input" : "output") + std::to_string(index);
++    }
++    ret = desc->SetName(name.c_str());
++    if (ret != OH_NN_SUCCESS) {
++        return ret;
++    }
++
++    tensorDesc = std::make_pair(std::move(desc), OH_NN_TENSOR);
++    return OH_NN_SUCCESS;
++}
++
+ OH_NN_DeviceType TransHDIDeviceV2_1Type(const V2_1::DeviceType& iDeviceType)
+ {
+     switch (iDeviceType) {
+@@ -677,6 +768,119 @@ OH_NN_ReturnCode HDIDeviceV2_1::PrepareOfflineModel(std::shared_ptr<const mindsp
+     return OH_NN_SUCCESS;
+ }
+ 
++OH_NN_ReturnCode HDIDeviceV2_1::PrepareOfflineModel(const void* model, size_t modelSize,
++                                                    const ModelConfig& config,
++                                                    std::shared_ptr<PreparedModel>& preparedModel)
++{
++    if (model == nullptr || modelSize == 0) {
++        LOGE("Raw offline model is empty.");
++        return OH_NN_INVALID_PARAMETER;
++    }
++
++    void* deviceBuffer = AllocateBuffer(modelSize);
++    if (deviceBuffer == nullptr) {
++        LOGE("Allocate buffer for raw offline model failed.");
++        return OH_NN_MEMORY_ERROR;
++    }
++    if (memcpy_s(deviceBuffer, modelSize, model, modelSize) != EOK) {
++        (void)ReleaseBuffer(deviceBuffer);
++        LOGE("Copy raw offline model to device buffer failed.");
++        return OH_NN_MEMORY_ERROR;
++    }
++
++    auto memManager = MemoryManager::GetInstance();
++    Memory memory;
++    OH_NN_ReturnCode ret = memManager->GetMemory(deviceBuffer, memory);
++    if (ret != OH_NN_SUCCESS) {
++        (void)ReleaseBuffer(deviceBuffer);
++        LOGE("Retrieve raw offline model device memory failed.");
++        return ret;
++    }
++
++    V2_1::ModelConfig iModelConfig;
++    iModelConfig.enableFloat16 = config.enableFloat16;
++    iModelConfig.mode = TransPerformanceMode(config.mode);
++    iModelConfig.priority = TransPriority(config.priority);
++    V2_1::SharedBuffer iBuffer {memory.fd, memory.length, 0, memory.length};
++    OHOS::sptr<V2_1::IPreparedModel> iPreparedModel;
++    auto preparedRet = m_iDevice->PrepareOfflineModel({iBuffer}, iModelConfig, iPreparedModel);
++
++    (void)ReleaseBuffer(deviceBuffer);
++
++    if (preparedRet != V2_1::NNRT_ReturnCode::NNRT_SUCCESS || iPreparedModel == nullptr) {
++        return CheckReturnCode_V2_1(preparedRet, OH_NN_FAILED, "Prepare raw offline model failed");
++    }
++
++    preparedModel = CreateSharedPtr<HDIPreparedModelV2_1>(iPreparedModel);
++    if (preparedModel == nullptr) {
++        LOGE("Create prepared model for raw offline model failed.");
++        return OH_NN_MEMORY_ERROR;
++    }
++    return OH_NN_SUCCESS;
++}
++
++OH_NN_ReturnCode HDIDeviceV2_1::GetOfflineModelIO(
++    const void* model, size_t modelSize,
++    std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>>& inputs,
++    std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>>& outputs)
++{
++    if (model == nullptr || modelSize == 0) {
++        LOGE("Raw offline model is empty.");
++        return OH_NN_INVALID_PARAMETER;
++    }
++
++    void* deviceBuffer = AllocateBuffer(modelSize);
++    if (deviceBuffer == nullptr) {
++        LOGE("Allocate buffer for raw offline model IO query failed.");
++        return OH_NN_MEMORY_ERROR;
++    }
++    if (memcpy_s(deviceBuffer, modelSize, model, modelSize) != EOK) {
++        (void)ReleaseBuffer(deviceBuffer);
++        LOGE("Copy raw offline model to device buffer failed.");
++        return OH_NN_MEMORY_ERROR;
++    }
++
++    auto memManager = MemoryManager::GetInstance();
++    Memory memory;
++    OH_NN_ReturnCode ret = memManager->GetMemory(deviceBuffer, memory);
++    if (ret != OH_NN_SUCCESS) {
++        (void)ReleaseBuffer(deviceBuffer);
++        LOGE("Retrieve raw offline model device memory failed.");
++        return ret;
++    }
++
++    V2_1::SharedBuffer iBuffer {memory.fd, memory.length, 0, memory.length};
++    std::vector<V2_1::Tensor> iInputs;
++    std::vector<V2_1::Tensor> iOutputs;
++    auto queryRet = m_iDevice->GetOfflineModelIO(iBuffer, iInputs, iOutputs);
++    (void)ReleaseBuffer(deviceBuffer);
++
++    if (queryRet != V2_1::NNRT_ReturnCode::NNRT_SUCCESS) {
++        return CheckReturnCode_V2_1(queryRet, OH_NN_FAILED, "Get offline model IO failed");
++    }
++
++    inputs.clear();
++    outputs.clear();
++    for (size_t i = 0; i < iInputs.size(); i++) {
++        std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType> inputDesc;
++        ret = ConvertHDITensorToDesc(iInputs[i], i, true, inputDesc);
++        if (ret != OH_NN_SUCCESS) {
++            return ret;
++        }
++        inputs.emplace_back(std::move(inputDesc));
++    }
++    for (size_t i = 0; i < iOutputs.size(); i++) {
++        std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType> outputDesc;
++        ret = ConvertHDITensorToDesc(iOutputs[i], i, false, outputDesc);
++        if (ret != OH_NN_SUCCESS) {
++            return ret;
++        }
++        outputs.emplace_back(std::move(outputDesc));
++    }
++
++    return OH_NN_SUCCESS;
++}
++
+ OH_NN_ReturnCode HDIDeviceV2_1::ReadOpVersion(int& currentOpVersion)
+ {
+     LOGE("HDIDeviceV2_1.0 not support ReadOpVersion.");
+--- a/frameworks/native/neural_network_runtime/hdi_device_v2_1.h
++++ b/frameworks/native/neural_network_runtime/hdi_device_v2_1.h
+@@ -57,6 +57,13 @@ public:
+     OH_NN_ReturnCode PrepareOfflineModel(std::shared_ptr<const mindspore::lite::LiteGraph> model,
+                                          const ModelConfig& config,
+                                          std::shared_ptr<PreparedModel>& preparedModel) override;
++    OH_NN_ReturnCode PrepareOfflineModel(const void* model, size_t modelSize,
++                                         const ModelConfig& config,
++                                         std::shared_ptr<PreparedModel>& preparedModel) override;
++    OH_NN_ReturnCode GetOfflineModelIO(
++        const void* model, size_t modelSize,
++        std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>>& inputs,
++        std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>>& outputs) override;
+ 
+     void* AllocateBuffer(size_t length) override;
+     void* AllocateTensorBuffer(size_t length, std::shared_ptr<TensorDesc> tensor) override;
+--- a/frameworks/native/neural_network_runtime/nnbackend.cpp
++++ b/frameworks/native/neural_network_runtime/nnbackend.cpp
+@@ -15,7 +15,10 @@
+ 
+ #include "nnbackend.h"
+ 
++#include <fstream>
+ #include <new>
++#include <utility>
++#include <vector>
+ #include "log.h"
+ #include "utils.h"
+ #include "nncompiler.h"
+@@ -27,6 +30,32 @@
+ 
+ namespace OHOS {
+ namespace NeuralNetworkRuntime {
++namespace {
++bool ReadOfflineModelFile(const char* path, std::vector<uint8_t>& data)
++{
++    std::ifstream file(path, std::ios::binary | std::ios::ate);
++    if (!file.is_open()) {
++        LOGE("[NNBackend] CreateCompiler failed, cannot open offline model file.");
++        return false;
++    }
++
++    const std::streampos end = file.tellg();
++    if (end <= 0) {
++        LOGE("[NNBackend] CreateCompiler failed, offline model file is empty.");
++        return false;
++    }
++
++    data.resize(static_cast<size_t>(end));
++    file.seekg(0, std::ios::beg);
++    if (!file.read(reinterpret_cast<char*>(data.data()), static_cast<std::streamsize>(end))) {
++        LOGE("[NNBackend] CreateCompiler failed, cannot read offline model file.");
++        data.clear();
++        return false;
++    }
++    return true;
++}
++} // namespace
++
+ NNBackend::NNBackend(const std::shared_ptr<Device>& device, size_t backendID)
+     : m_device(device),
+     m_backendID(backendID) {}
+@@ -111,18 +140,23 @@ Compiler* NNBackend::CreateCompiler(Compilation* compilation)
+         return nullptr;
+     }
+ 
+-    // 仅支持从nnmodel 和 nnmodel-cache构建编译器
+-    if ((compilation->offlineModelPath != nullptr) ||
+-        ((compilation->offlineModelBuffer.first != nullptr) ||
+-         (compilation->offlineModelBuffer.second != static_cast<size_t>(0)))) {
+-        LOGE("[NNBackend] CreateCompiler failed, only support build NN model and NN model cache.");
+-        return nullptr;
++    std::vector<uint8_t> offlineModel;
++    if (compilation->offlineModelPath != nullptr && compilation->offlineModelPath[0] != '\0') {
++        if (!ReadOfflineModelFile(compilation->offlineModelPath, offlineModel)) {
++            return nullptr;
++        }
++    } else if (compilation->offlineModelBuffer.first != nullptr &&
++               compilation->offlineModelBuffer.second != static_cast<size_t>(0)) {
++        const auto* begin = static_cast<const uint8_t*>(compilation->offlineModelBuffer.first);
++        offlineModel.assign(begin, begin + compilation->offlineModelBuffer.second);
+     }
+ 
+     // 如果nnmodel是空值，构建空的编译器，后续从cache编译模型,
+-    // 如果nnmodel不为空，则从对应模型构建编译器
++    // 如果nnmodel不为空，则从对应模型构建编译器。离线模型优先使用原始buffer。
+     NNCompiler* nnCompiler = nullptr;
+-    if (compilation->nnModel == nullptr) {
++    if (!offlineModel.empty()) {
++        nnCompiler = new (std::nothrow) NNCompiler(m_device, m_backendID, std::move(offlineModel));
++    } else if (compilation->nnModel == nullptr) {
+         nnCompiler = new (std::nothrow) NNCompiler(m_device, m_backendID);
+     } else {
+         nnCompiler = new (std::nothrow) NNCompiler(compilation->nnModel, m_device, m_backendID);
+--- a/frameworks/native/neural_network_runtime/nncompiler.cpp
++++ b/frameworks/native/neural_network_runtime/nncompiler.cpp
+@@ -19,6 +19,7 @@
+ #include <sys/stat.h>
+ #include <fstream>
+ #include <climits>
++#include <utility>
+ #include <securec.h>
+ 
+ #include "validation.h"
+@@ -132,6 +133,15 @@ NNCompiler::NNCompiler(std::shared_ptr<Device> device, size_t backendID)
+     : m_device(device),
+     m_backendID(backendID) {}
+ 
++NNCompiler::NNCompiler(std::shared_ptr<Device> device, size_t backendID,
++    std::vector<uint8_t>&& offlineModel)
++    : m_device(device),
++    m_backendID(backendID),
++    m_offlineModel(std::move(offlineModel))
++{
++    m_isRawOfflineModel = true;
++}
++
+ NNCompiler::NNCompiler(const void* model, std::shared_ptr<Device> device, size_t backendID)
+     : m_device(device),
+     m_backendID(backendID)
+@@ -361,6 +371,39 @@ OH_NN_ReturnCode NNCompiler::BuildOfflineModel()
+     return OH_NN_SUCCESS;
+ }
+ 
++OH_NN_ReturnCode NNCompiler::BuildRawOfflineModel()
++{
++    if (m_offlineModel.empty()) {
++        LOGE("[NNCompiler] Build failed, raw offline model is empty.");
++        return OH_NN_INVALID_PARAMETER;
++    }
++
++    OH_NN_ReturnCode ret = m_device->GetOfflineModelIO(m_offlineModel.data(), m_offlineModel.size(),
++        m_inputTensorDescs, m_outputTensorDescs);
++    if (ret != OH_NN_SUCCESS) {
++        LOGE("[NNCompiler] Build failed, fail to get IO tensor descriptors of offline model: %{public}d.",
++            static_cast<int32_t>(ret));
++        return ret;
++    }
++
++    if (m_inputTensorDescs.empty() || m_outputTensorDescs.empty()) {
++        LOGE("[NNCompiler] Build failed, offline model returns empty IO tensor descriptors.");
++        return OH_NN_INVALID_PARAMETER;
++    }
++
++    ModelConfig config {m_enableFp16, m_performance, m_priority, m_cachePath, m_extensionConfig};
++    ret = m_device->PrepareOfflineModel(m_offlineModel.data(), m_offlineModel.size(), config,
++        m_preparedModel);
++    if (ret != OH_NN_SUCCESS) {
++        LOGE("[NNCompiler] Build failed, fail to prepare raw offline model: %{public}d.",
++            static_cast<int32_t>(ret));
++        return ret;
++    }
++
++    m_isBuild = true;
++    return OH_NN_SUCCESS;
++}
++
+ OH_NN_ReturnCode NNCompiler::NormalBuild()
+ {
+     if ((m_liteGraph == nullptr) && (m_metaGraph == nullptr)) {
+@@ -422,6 +465,10 @@ OH_NN_ReturnCode NNCompiler::Build()
+         return OH_NN_OPERATION_FORBIDDEN;
+     }
+ 
++    if (m_isRawOfflineModel) {
++        return BuildRawOfflineModel();
++    }
++
+     OH_NN_ReturnCode ret = CheckModelParameter();
+     if (ret != OH_NN_SUCCESS) {
+         LOGE("[NNCompiler] CheckModelParameter failed, some error happened when checking model parameter.");
+@@ -764,6 +811,9 @@ OH_NN_ReturnCode NNCompiler::SetOptions(const std::vector<std::shared_ptr<void>>
+ OH_NN_ReturnCode NNCompiler::GetModelName(std::string& modelName)
+ {
+     modelName = m_extensionConfig.modelName;
++    if (modelName.empty() && m_isRawOfflineModel) {
++        modelName = "rdkhm_offline_model";
++    }
+     return OH_NN_SUCCESS;
+ }
+ 
+@@ -1154,6 +1204,10 @@ size_t NNCompiler::GetModelSizeFromCache(std::string& path, const std::string& m
+ 
+ size_t NNCompiler::GetModelSize()
+ {
++    if (m_isRawOfflineModel) {
++        return m_offlineModel.size();
++    }
++
+     size_t modelSize = 0;
+     if (m_innerModel != nullptr) {
+         modelSize = GetModelSizeFromModel(m_innerModel);
+@@ -1283,6 +1337,10 @@ OH_NN_ReturnCode NNCompiler::GetNNRtModelIDFromCache(const std::string& path, co
+ 
+ size_t NNCompiler::GetOnlineModelID()
+ {
++    if (m_isRawOfflineModel) {
++        return 0;
++    }
++
+     size_t nnrtModeId = 0;
+     OH_NN_ReturnCode ret = GetNNRtModelIDFromCache(m_cachePath, m_extensionConfig.modelName, nnrtModeId);
+     if (ret != OH_NN_SUCCESS && m_innerModel != nullptr) {
+--- a/frameworks/native/neural_network_runtime/nncompiler.h
++++ b/frameworks/native/neural_network_runtime/nncompiler.h
+@@ -16,6 +16,9 @@
+ #ifndef NEURAL_NETWORK_RUNTIME_NNCOMPILER_H
+ #define NEURAL_NETWORK_RUNTIME_NNCOMPILER_H
+ 
++#include <cstdint>
++#include <vector>
++
+ #include "compiler.h"
+ 
+ #include "mindir.h"
+@@ -31,6 +34,7 @@ class NNCompiler : public Compiler {
+ public:
+     NNCompiler() = delete;
+     NNCompiler(std::shared_ptr<Device> device, size_t backendID);
++    NNCompiler(std::shared_ptr<Device> device, size_t backendID, std::vector<uint8_t>&& offlineModel);
+     NNCompiler(const void* model, std::shared_ptr<Device> device, size_t backendID);
+     ~NNCompiler() override;
+ 
+@@ -69,6 +73,7 @@ private:
+     OH_NN_ReturnCode OnlineBuild();
+     OH_NN_ReturnCode NormalBuild();
+     OH_NN_ReturnCode BuildOfflineModel();
++    OH_NN_ReturnCode BuildRawOfflineModel();
+     OH_NN_ReturnCode CheckModelParameter() const;
+     OH_NN_ReturnCode IsOfflineModel(bool& isOfflineModel) const;
+     OH_NN_ReturnCode IsSupportedModel(const std::shared_ptr<mindspore::lite::LiteGraph>& liteGraph,
+@@ -88,6 +93,7 @@ private:
+ 
+ private:
+     bool m_isBuild {false};
++    bool m_isRawOfflineModel {false};
+     bool m_enableFp16 {false};
+     std::string m_cachePath;
+     uint32_t m_cacheVersion {0};
+@@ -99,6 +105,7 @@ private:
+     void* m_metaGraph {nullptr};
+     InnerModel* m_innerModel {nullptr};
+     std::shared_ptr<mindspore::lite::LiteGraph> m_liteGraph {nullptr};
++    std::vector<uint8_t> m_offlineModel;
+     std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>> m_inputTensorDescs;
+     std::vector<std::pair<std::shared_ptr<TensorDesc>, OH_NN_TensorType>> m_outputTensorDescs;
+     ExtensionConfig m_extensionConfig;

@@ -457,6 +457,23 @@ def main():
             _sign_hap(destination, app_dir, args.app, env)
     else:
         print("WARN: --no-sign leaves the HAP unsigned; do not use it in an image", flush=True)
+    if args.app == "launcher":
+        # The launcher bundle has a second feature HAP.  The upstream prebuilt
+        # copy uses apiReleaseType=Release, while the freshly built launcher
+        # uses Beta1; BMS rejects the mixed bundle.  Stage the freshly built
+        # settings HAP for image assembly.
+        settings = [path for path in outputs
+                    if "launcher_settings" in path.name and
+                    "phone_launcher" in path.name and path.name.endswith("-signed.hap")]
+        if not settings:
+            raise RuntimeError("No signed launcher_settings phone HAP produced")
+        staged = ROOT / "out/haps/launcher_settings.hap"
+        staged.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(settings[-1], staged)
+        print(f"Staged {staged} from {settings[-1].relative_to(app_dir)}")
+        if not args.no_sign and not _is_officially_signed(staged, env):
+            _sign_hap(staged, app_dir, "launcher", env)
+
     if args.app == "settings":
         # Image assembly consumes this legacy path; keep both HAP entry points
         # producing the same artifact.

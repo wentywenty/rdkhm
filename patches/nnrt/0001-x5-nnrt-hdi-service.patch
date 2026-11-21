@@ -5,7 +5,7 @@ Signed-off-by: RDKHM <rdkhm@localhost>
 ---
 diff --git a/nnrt/BUILD.gn b/nnrt/BUILD.gn
 new file mode 100644
-index 0000000000000000000000000000000000000000..1ec921318847f56e4aa57e93f4fbb76af8621147
+index 0000000..1ec9213
 --- /dev/null
 +++ b/nnrt/BUILD.gn
 @@ -0,0 +1,47 @@
@@ -58,7 +58,7 @@ index 0000000000000000000000000000000000000000..1ec921318847f56e4aa57e93f4fbb76a
 +}
 diff --git a/nnrt/bundle.json b/nnrt/bundle.json
 new file mode 100644
-index 0000000000000000000000000000000000000000..35d8f1ed8cf9b3616ec5740469b40f37e6e2ccd9
+index 0000000..35d8f1e
 --- /dev/null
 +++ b/nnrt/bundle.json
 @@ -0,0 +1,40 @@
@@ -104,7 +104,7 @@ index 0000000000000000000000000000000000000000..35d8f1ed8cf9b3616ec5740469b40f37
 +}
 diff --git a/nnrt/include/accel_wire.h b/nnrt/include/accel_wire.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..d911fffa3ff2d2a89f7c90eeb29b7cb5987f6368
+index 0000000..d911fff
 --- /dev/null
 +++ b/nnrt/include/accel_wire.h
 @@ -0,0 +1,137 @@
@@ -247,10 +247,10 @@ index 0000000000000000000000000000000000000000..d911fffa3ff2d2a89f7c90eeb29b7cb5
 +#endif /* RDKHM_ACCEL_WIRE_H */
 diff --git a/nnrt/include/nnrt_device_service.h b/nnrt/include/nnrt_device_service.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..2a4ec0d8663177bac57dfc43a5f76e4f853e0375
+index 0000000..cb92fd3
 --- /dev/null
 +++ b/nnrt/include/nnrt_device_service.h
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,74 @@
 +#ifndef RDKHM_NNRT_DEVICE_SERVICE_H
 +#define RDKHM_NNRT_DEVICE_SERVICE_H
 +
@@ -310,6 +310,8 @@ index 0000000000000000000000000000000000000000..2a4ec0d8663177bac57dfc43a5f76e4f
 +    int32_t PrepareOfflineModel(const std::vector<SharedBuffer> &offlineModels,
 +                                const ModelConfig &config,
 +                                sptr<IPreparedModel> &preparedModel) override;
++    int32_t GetOfflineModelIO(const SharedBuffer &model, std::vector<Tensor> &inputs,
++                              std::vector<Tensor> &outputs) override;
 +    int32_t AllocateBuffer(uint32_t length, SharedBuffer &buffer) override;
 +    int32_t ReleaseBuffer(const SharedBuffer &buffer) override;
 +
@@ -325,7 +327,7 @@ index 0000000000000000000000000000000000000000..2a4ec0d8663177bac57dfc43a5f76e4f
 +#endif // RDKHM_NNRT_DEVICE_SERVICE_H
 diff --git a/nnrt/include/rdkhm_accel_client.h b/nnrt/include/rdkhm_accel_client.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..5d9c1d8182843b2175a08e349badda00f2cf0354
+index 0000000..5d9c1d8
 --- /dev/null
 +++ b/nnrt/include/rdkhm_accel_client.h
 @@ -0,0 +1,55 @@
@@ -386,7 +388,7 @@ index 0000000000000000000000000000000000000000..5d9c1d8182843b2175a08e349badda00
 +#endif // RDKHM_ACCEL_CLIENT_H
 diff --git a/nnrt/src/nnrt_device_driver.cpp b/nnrt/src/nnrt_device_driver.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..17c423b22a1b44d17fe4753b1ef3a5a43b45992a
+index 0000000..17c423b
 --- /dev/null
 +++ b/nnrt/src/nnrt_device_driver.cpp
 @@ -0,0 +1,91 @@
@@ -483,10 +485,10 @@ index 0000000000000000000000000000000000000000..17c423b22a1b44d17fe4753b1ef3a5a4
 +#endif
 diff --git a/nnrt/src/nnrt_device_service.cpp b/nnrt/src/nnrt_device_service.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..b33e2d5d5048599728269084270bf031fff3c30a
+index 0000000..27ca8cd
 --- /dev/null
 +++ b/nnrt/src/nnrt_device_service.cpp
-@@ -0,0 +1,242 @@
+@@ -0,0 +1,341 @@
 +#ifndef _GNU_SOURCE
 +#define _GNU_SOURCE
 +#endif
@@ -521,6 +523,71 @@ index 0000000000000000000000000000000000000000..b33e2d5d5048599728269084270bf031
 +std::vector<uint32_t> ShapeOf(const rdkhm::IoDesc &desc)
 +{
 +    return std::vector<uint32_t>(desc.dims, desc.dims + desc.rank);
++}
++
++DataType MapDataType(uint32_t type)
++{
++    switch (type) {
++        case 8:
++            return DataType::DATA_TYPE_INT8;
++        case 9:
++            return DataType::DATA_TYPE_UINT8;
++        case 10:
++            return DataType::DATA_TYPE_FLOAT16;
++        case 11:
++            return DataType::DATA_TYPE_INT16;
++        case 12:
++            return DataType::DATA_TYPE_UINT16;
++        case 13:
++            return DataType::DATA_TYPE_FLOAT32;
++        case 14:
++            return DataType::DATA_TYPE_INT32;
++        case 15:
++            return DataType::DATA_TYPE_UINT32;
++        case 16:
++            return DataType::DATA_TYPE_FLOAT64;
++        case 17:
++            return DataType::DATA_TYPE_INT64;
++        case 18:
++            return DataType::DATA_TYPE_UINT64;
++        /* HB_DNN image tensor types: Y, NV12, NV12_SEPARATE, YUV444, RGB, BGR. */
++        case 1:
++        case 2:
++        case 3:
++        case 4:
++        case 5:
++            return DataType::DATA_TYPE_UINT8;
++        default:
++            return DataType::DATA_TYPE_UNKNOWN;
++    }
++}
++
++Format MapFormat(uint32_t format)
++{
++    switch (format) {
++        case 0:
++            return Format::FORMAT_NHWC;
++        case 2:
++            return Format::FORMAT_NCHW;
++        default:
++            return Format::FORMAT_NONE;
++    }
++}
++
++void DescribeTensor(const rdkhm::IoDesc &desc, bool input, size_t index, Tensor &tensor)
++{
++    tensor.name = (input ? "input" : "output") + std::to_string(index);
++    tensor.dataType = MapDataType(desc.type);
++    tensor.dims.resize(desc.rank);
++    for (uint32_t i = 0; i < desc.rank; i++) {
++        tensor.dims[i] = static_cast<int32_t>(desc.dims[i]);
++    }
++    tensor.format = MapFormat(desc.format);
++    tensor.data.fd = -1;
++    tensor.data.bufferSize = 0;
++    tensor.data.offset = 0;
++    tensor.data.dataSize = 0;
++    tensor.quantParams.clear();
 +}
 +
 +} // namespace
@@ -694,6 +761,40 @@ index 0000000000000000000000000000000000000000..b33e2d5d5048599728269084270bf031
 +    return Success();
 +}
 +
++int32_t RdkhmNnrtDeviceService::GetOfflineModelIO(const SharedBuffer &model,
++                                                  std::vector<Tensor> &inputs,
++                                                  std::vector<Tensor> &outputs)
++{
++    if (model.fd < 0) {
++        return Failure(NNRT_ReturnCode::NNRT_INVALID_MODEL);
++    }
++
++    rdkhm::AccelClient client(socket_);
++    uint32_t session = 0;
++    int32_t status = client.LoadFd(model.fd, session);
++    if (status != RDKHM_STATUS_OK) return status;
++
++    std::vector<rdkhm::IoDesc> inputDescs;
++    std::vector<rdkhm::IoDesc> outputDescs;
++    status = client.Info(session, inputDescs, outputDescs);
++    (void)client.Release(session);
++    if (status != RDKHM_STATUS_OK) return status;
++
++    inputs.clear();
++    outputs.clear();
++    for (size_t i = 0; i < inputDescs.size(); i++) {
++        Tensor tensor{};
++        DescribeTensor(inputDescs[i], true, i, tensor);
++        inputs.push_back(std::move(tensor));
++    }
++    for (size_t i = 0; i < outputDescs.size(); i++) {
++        Tensor tensor{};
++        DescribeTensor(outputDescs[i], false, i, tensor);
++        outputs.push_back(std::move(tensor));
++    }
++    return Success();
++}
++
 +int32_t RdkhmNnrtDeviceService::AllocateBuffer(uint32_t length, SharedBuffer &buffer)
 +{
 +    int fd = memfd_create("rdkhm-nnrt", MFD_CLOEXEC);
@@ -731,7 +832,7 @@ index 0000000000000000000000000000000000000000..b33e2d5d5048599728269084270bf031
 +}
 diff --git a/nnrt/src/rdkhm_accel_client.cpp b/nnrt/src/rdkhm_accel_client.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..a349ca1229f7cb33ca9641942898ca465b370a18
+index 0000000..a349ca1
 --- /dev/null
 +++ b/nnrt/src/rdkhm_accel_client.cpp
 @@ -0,0 +1,285 @@

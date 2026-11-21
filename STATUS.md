@@ -9,6 +9,20 @@ See [board-validation-20261119.md](docs/board-validation-20261119.md).
 
 ### 2026-11-20 SLE userspace probe
 
+- 2026-11-21 Launcher persistence: Beta1 `Launcher_Settings.hap` was copied into
+  `/system/app/com.ohos.launcher/` (backup in `/data/local/tmp/*.recovery.old`).
+  After reboot `boot_id=07c25a60-5171-4cc0-99f2-d30e6e8b2da7`, `account.ready=true`,
+  Launcher bundle registered and Settings opens. Initial cold-boot frame is still
+  black because `bootanimation` remains; killing it and restarting Launcher shows
+  the desktop. Evidence: `out/board-logs/20261121-launcher-persist/`.
+- 2026-11-20 17:22 hmdfs test image: `rdkhm-x5-openharmony-dev.img`
+  SHA256 `7948f022b3073c8ec1688c57774dafd512c78572ae8432ec48f16ea8162329c8`;
+  `const.distributed_file_property.enabled=true` and current kernel Image
+  (`6e6cb22c...`) are inside the image. The vendor partition was manually
+  resynced with the current driver bundle. Full verifier currently stops at
+  `/system/lib64/libaccountmgr.z.so` because concurrent builds changed the
+  packaged artifact after image assembly; image is **not fully verified and
+  not flashed**.
 - 2026-11-20 13:00 full image: `rdkhm-x5-openharmony-dev.img`
   SHA256 `a8248fa2c812f2b5c6819488587a21d152ca3f1703d4abafcd192e506a83500c`;
   built from the new kernel Image (`15187353...`) and all OH images. Verification
@@ -27,6 +41,11 @@ See [board-validation-20261119.md](docs/board-validation-20261119.md).
   (224 comparisons); the final image reuses the signed HAP set because the
   post-deps_guard HAP rebuild hit SDK API mismatches. The image is not flashed; serial cold-boot verification
   is pending. See [galcore panic record](docs/galcore-dmabuf-errptr-20261120.md).
+- 2026-11-20 account foreground fallback: `GetForegroundOsAccountLocalId()`
+  now falls back to the activated default account when the AMS foreground
+  callback is missing. `libaccountmgr` and the image were rebuilt/injected;
+  image `5e60512e...` passes verification. Not flashed; board validation
+  pending. See [account foreground fallback](docs/account-foreground-fallback-20261120.md).
 - All 22 HAPs were rebuilt; 25 image HAPs passed official-key verification and
   were injected. The re-signed allowlist bundles were updated to the official
   leaf fingerprint.
@@ -47,7 +66,7 @@ See [board-validation-20261119.md](docs/board-validation-20261119.md).
   (`#5`, 2026-11-19 16:13 CST).
 - Board image SHA256 was not captured from the running system. The current
   local `out/images/rdkhm-x5-openharmony-dev.img.sha256` is
-  `582d2b1e2bb74f3db281ddc7c394fba61aa2ef0b75d9f8b87e514433fb61d4d5`;
+  `1e5d24a599d429c43e85b93cbce0cb08c3f0afc7caf3f29f23fd68b870826cf4`;
   earlier `db0a75bb...`, `4368578f...`, `883c8123...` and `8f1f4ea9...`
   references are historical.
 - Current 20:54 image boot: display is black; Launcher is not running and BMS
@@ -143,7 +162,7 @@ diagnostic fixes) reached HDMI connected/enabled with a 256-byte EDID, running
 render_service/composer/Launcher and QDtech MPI5001 event1, but the panel
 remained black. HDC TCP worked only after manually starting hdcd. See
 [board-validation-20261117.md](docs/board-validation-20261117.md).
-The latest image `4368578ffed5043c1ac74be22556f61b1bf99a52c435e18928b6905b955a6727`
+The latest image `1e5d24a599d429c43e85b93cbce0cb08c3f0afc7caf3f29f23fd68b870826cf4`
 adds the composer service release export and color-gamut answer, the render-service
 guards, the BusyBox-safe hardware report, optional-vendor ABI stubs (including
 `libtask_controller.z.so`), tracefs mounts, PSI and RTG/QoS compatibility proc entries. It has not been flashed. A temporary live deployment of the new display libs on the running board produced a visible lock screen at 800x480; see `out/board-logs/20261118-live/screen-final.jpeg`.
@@ -155,7 +174,7 @@ null guards and the kernel/image were rebuilt. The panic log is
 lock screen was visible after wake (`out/board-logs/20261118-new-image/screen-lock.jpeg`).
 `/proc/thread-self/sched_qos_ctrl` was still missing because `CONFIG_SCHED_DEBUG`
 is off; `kernel/0009` makes that proc entry unconditional and the current
-image is `4368578f...` (not yet flashed).
+image is `1e5d24a5...` (not yet flashed).
 
 Live fixes on 2026-11-16 established account.ready=true and
 bms.main.bundles.ready=true. User 100 now has Launcher and the input method.
@@ -231,8 +250,10 @@ device names and reads all advertised ABS axis ranges using bitmap bit indices.
 - Packages an isolated glibc GPU/DNN runtime, a dedicated `rdkhm_accel` service
   domain and bounded GPU/NPU capability socket. QEMU can load the real vendor
   libraries and read DNN version 1.24.5; the BPU probe exposes model tensor
-  descriptors. The service explicitly reports NNRT backend unavailable and
-  does not claim hardware inference. GPU bring-up found that `eglCreateContext`
+  descriptors. The NNRT HDI service and HCS host are enabled; the OH NNRT C API
+  performs ResNet18 inference on the board (2026-11-20, hot-deployed runtime and
+  bind-mounted service/stub). The 2026-11-21 image contains the same artifacts
+  byte-for-byte; it has not been flashed. GPU bring-up found that `eglCreateContext`
   failed with `0x3005` because the private runtime omitted the `dlopen`ed
   `libGLSLC.so`; adding it makes offscreen pbuffer and GBM-window contexts pass
   on the current board (`Vivante GC8000L`, `OpenGL ES 3.1`). The staging script
@@ -248,7 +269,7 @@ Current kernel Image SHA256:
 `out/images/rdkhm-x5-openharmony-dev.img` (7172 MiB).
 Its companion `.img.sha256` records the checksum of the latest assembly.
 The current SHA256 is
-`4368578ffed5043c1ac74be22556f61b1bf99a52c435e18928b6905b955a6727`
+`1e5d24a599d429c43e85b93cbce0cb08c3f0afc7caf3f29f23fd68b870826cf4`
 (run `out/runs/20261118T053124Z-0nkn4n3v`).
 Rebuild and inspect with:
 
@@ -286,7 +307,8 @@ HDMI, input, HDC enumeration or HAP execution on X5.
   permissive mode does not enforce access denials. Production recovery/OTA
   are not qualified. GPU/BPU
   kernel/runtime integration has started; RenderService GPU buffers/window-system
-  adaptation and executable NNRT inference remain incomplete.
+  adaptation remain incomplete. NNRT raw-offline inference is proven after a
+  hot deployment; image integration is still pending.
   USB camera HDF host registration and the common provider HCS are packaged;
   `/dev/video*` and real stream tests remain board-dependent. Codec HDI/OMX
   libraries are packaged, but no X5 VPU capability table is advertised until

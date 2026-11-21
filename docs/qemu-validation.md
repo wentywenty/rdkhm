@@ -1,6 +1,7 @@
 # QEMU validation plan
 
-Status: planned, **not executed**. Written 2026-11-20.
+Status: **partially executed**. L1 passed; L2 arm32 min boots to samgr with HDC still blocked;
+C4 passes and C5 is blocked. Written 2026-11-20.
 Task split for the three separate paths: [qemu-three-paths-20261120.md](qemu-three-paths-20261120.md).
 Scope: use QEMU for every check that does not require X5 hardware. The X5
 image itself is not a QEMU target; see "Not verifiable under QEMU".
@@ -10,7 +11,7 @@ image itself is not a QEMU target; see "Not verifiable under QEMU".
 | Layer | QEMU mode | What it proves | Ready now |
 | --- | --- | --- | --- |
 | L1 | `qemu-aarch64-static` (user mode) | our AArch64 daemons/probes run and speak their protocols | yes |
-| L2 | `qemu-system-aarch64/arm -M virt` | generic OpenHarmony boots: init, samgr, IPC, hdc, hilog, framework | needs an OH product build |
+| L2 | `qemu-system-aarch64/arm -M virt` | generic OpenHarmony boots: init, samgr, IPC, hdc, hilog, framework | partial: arm32 min boots; HDC not connected |
 | L3 | system QEMU + graphics | Launcher/SystemUI/HAP rendering | **not supported** by the products in this tree |
 | — | X5 kernel/driver paths | composer, HDMI, touch, camera, audio, CAN, GPIO, WS73, BPU/GPU | **no** |
 
@@ -252,7 +253,13 @@ not a QEMU run of the current artifacts, and is out of scope for this pass.
 | `test-accelerator-socket.py` | PASS: inherited socket, framing, bounds, timeout, shutdown, invalid fd |
 | `test-nearlink.sh --ohos` | PASS: codec, server, feature, link (135 assertions) |
 
-### L2: blocked by upstream product defects
+### L2: partial for arm32 min (2026-11-20)
+
+`qemu-arm-linux-min` rebuilds and boots to samgr/hdf/hilog with the qemu-only
+foundation disable patch; foundation no longer triggers a critical-service panic.
+HDC and UI remain unverified. Earlier arm64 product packaging is still blocked.
+
+### Original L2 blockers
 
 `qemu-arm64-linux-min` cannot build from this release snapshot without upstream
 source changes. Failures found, in order:
@@ -358,6 +365,35 @@ Conclusion for this pass: the arm32 minimal image boots the OpenHarmony
 userspace core under QEMU; a full headless/app-framework image needs the
 product converted to a proper 6.0 graphics configuration (or an upstream
 prebuilt image). The X5 image itself remains non-bootable under QEMU.
+
+### L2 HDC update (2026-11-20)
+
+QEMU mainline 11.1.91 + libslirp was built in
+`/home/robo/zhitai2/qemu-src/prefix` and used for the arm32 min image.
+The earlier "network Oops" was a panic backtrace after `/bin/init` could not be
+exec'd: the hand-built command line lacked
+`ohos.required_mount.system/vendor` and the virtio-mmio disk order did not match
+the expected `vda..vdd` layout. With the full command line and reversed disk
+device order, arm32 min reaches `samgr`.
+
+HDC work in this pass:
+
+- added QEMU-only `qemu/0004-hdc-tcp-init.patch`:
+  - `init.qemu.arm.linux.hdc.cfg`
+  - `qemu.hdc.para`
+  - `BUILD.gn` install rules
+- added `hdc/0001-hdcd-root-tcp.patch`:
+  - root `hdcd` service gets `args: ["-t"]`
+- `qemu-arm-linux-min` `system_image` rebuild succeeds (~35s).
+- `hdcd` now starts instead of exiting 255; the SIGKILL entries are the
+  `persist.hdc.mode` trigger doing a `reset hdcd`.
+- HDC is still **not connected**: the guest network configuration command exits
+  127, `eth0` does not get `10.0.2.15`, and hostfwd to guest 5555/8710 never
+  reaches an HDC listener.
+
+Do not record this as an HDC pass. Remaining work is a working guest network
+configuration path (for example a functional `ifconfig`/`ip`/DHCP client) or a
+headless product with netstack, then re-test HDC.
 
 ## Do not
 

@@ -114,6 +114,9 @@ def main():
             path = f"system/app/com.ohos.{bundle}/{name}.hap"
             mapping[("system", f"/{path}")] = package / path
         mapping[("system", "/system/lib64/libtask_controller.z.so")] = package / "system/lib64/libtask_controller.z.so"
+        for path in ("lib64/ndk/libneural_network_runtime.so",
+                     "lib64/platformsdk/libnnrt_proxy_2.1.z.so"):
+            mapping[("system", f"/system/{path}")] = package / "system" / path
         mapping[("system", "/system/etc/param/syscap.para")] = package / "system/etc/param/syscap.para"
         staged_haps = []
         for entry in manifest(workspace):
@@ -164,6 +167,7 @@ def main():
             "lib64/librdkhm_ssap.so",
             "lib64/libnnrt_driver.z.so",
             "lib64/libnnrt_device_service_2.1.z.so",
+            "lib64/libnnrt_stub_2.1.z.so",
             "lib64/libcamera_host_service_1.0.z.so",
             "lib64/libcodec_driver.z.so", "lib64/libcodec_image_driver.z.so",
             "etc/hdfconfig/camera_host_config.hcb",
@@ -194,6 +198,11 @@ def main():
             target = temp / f"artifact-{index}"
             run("debugfs", "-R", f"dump {path} {target}", str(filesystems[partition]))
             require(target.is_file() and digest(target) == digest(original), f"Artifact mismatch: {path}")
+            if path in ("/system/lib64/ndk/libneural_network_runtime.so",
+                        "/system/lib64/platformsdk/libnnrt_proxy_2.1.z.so",
+                        "/lib64/libnnrt_device_service_2.1.z.so"):
+                require(b"GetOfflineModelIO" in target.read_bytes(),
+                        f"NNRT raw offline model IO query is missing from {path}")
             if path == "/system/etc/param/syscap.para":
                 require("const.SystemCapability.Security.DeviceAuth=true" in target.read_text(),
                         "DeviceAuth syscap is not declared in syscap.para")

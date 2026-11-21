@@ -154,6 +154,11 @@
         "ignore_whitespace": true
       },
       {
+        "repo": "sources/oh/openharmony-full/applications/standard/settings",
+        "patch": "settings/0005-gpu-compose-developer-option.patch",
+        "ignore_whitespace": true
+      },
+      {
         "repo": "sources/oh/openharmony-full/applications/standard/calendardata",
         "patch": "calendardata/0001-calendar-month-page.patch",
         "ignore_whitespace": true
@@ -176,6 +181,11 @@
       {
         "repo": "sources/oh/openharmony-full/foundation/filemanagement/user_file_service",
         "patch": "filemanager/0001-fileaccess-extension-exported.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/filemanagement/storage_service",
+        "patch": "storage/0001-create-storage-media-root.patch",
         "ignore_whitespace": true
       },
       {
@@ -520,6 +530,14 @@
         "patch": "nnrt/0001-x5-nnrt-hdi-service.patch"
       },
       {
+        "repo": "sources/oh/openharmony-full/drivers/interface",
+        "patch": "nnrt/0002-vendor-offline-model-io.patch"
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/ai/neural_network_runtime",
+        "patch": "nnrt/0003-raw-offline-runtime.patch"
+      },
+      {
         "repo": "sources/oh/openharmony-full/device/qemu",
         "patch": "qemu/0001-device-subsystem-and-foundation-profile.patch",
         "ignore_whitespace": true
@@ -527,6 +545,11 @@
       {
         "repo": "sources/oh/openharmony-full/vendor/ohemu",
         "patch": "qemu/0002-product-configs.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/foundation/systemabilitymgr/safwk",
+        "patch": "qemu/0003-qemu-min-no-foundation.patch",
         "ignore_whitespace": true
       },
       {
@@ -549,6 +572,16 @@
       {
         "repo": "sources/oh/openharmony-full/base/account/os_account",
         "patch": "account/0002-foreground-fallback.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/device/qemu",
+        "patch": "qemu/0004-hdc-tcp-init.patch",
+        "ignore_whitespace": true
+      },
+      {
+        "repo": "sources/oh/openharmony-full/developtools/hdc",
+        "patch": "hdc/0001-hdcd-root-tcp.patch",
         "ignore_whitespace": true
       }
     ]

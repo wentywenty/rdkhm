@@ -8,6 +8,9 @@ updated as the tree changes. Start here instead of browsing `docs/` directly.
 - [Integration workflow](engineering.md)
 - [Engineering handoff](handoff.md)
 - [RDKHM 板端登录与调试](board-access.md)
+- [全系统测试计划（2026-11-20）](system-test-plan-20261120.md)
+- [全系统详细测试用例（2026-11-20）](system-test-cases-20261120.md)
+- [HMDFS / 账号激活测试](hmdfs-testing-20261120.md)
 - [Deferred hardware and runtime work](backlog.md)
 - [Fastboot 增量刷写 system / vendor](fastboot-flashing.md)
 

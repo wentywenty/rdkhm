@@ -144,7 +144,7 @@ index 0000000..0382957
 diff --git a/display/composer/vdi_base/src/gpu_compose_client.cpp b/display/composer/vdi_base/src/gpu_compose_client.cpp
 --- /dev/null
 +++ b/display/composer/vdi_base/src/gpu_compose_client.cpp
-@@ -0,0 +1,399 @@
+@@ -0,0 +1,396 @@
 +#include "gpu_compose_client.h"
 +
 +#include <algorithm>
@@ -338,11 +338,8 @@ diff --git a/display/composer/vdi_base/src/gpu_compose_client.cpp b/display/comp
 +bool GpuComposeClient::Available()
 +{
 +    long long now = NowMs();
-+    if (gpuState == 1) {
-+        return true;
-+    }
-+    if (gpuState == 0 && now - gpuCheckedAt < 2000) {
-+        return false;
++    if (gpuState >= 0 && now - gpuCheckedAt < 2000) {
++        return gpuState == 1;
 +    }
 +    gpuState = Probe() ? 1 : 0;
 +    gpuCheckedAt = now;

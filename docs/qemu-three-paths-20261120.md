@@ -1,7 +1,7 @@
 # QEMU 三条路径任务拆分（A/B/C）— 2026-11-20
 
-本文用于拆分 QEMU 相关工作，**不启动 QEMU、不编译、不刷板**。三条路径目标不同，
-不能互相替代：
+本文最初用于拆分 QEMU 相关工作；执行状态见末尾，**构建/启动记录不等于 X5 板端验证**。
+三条路径目标不同，不能互相替代：
 
 | 路径 | 目标 | 使用 X5 内核？ | 能否验证 X5 硬件 |
 | --- | --- | --- | --- |
@@ -222,3 +222,48 @@ config 本身不完整。补 `libuv`/`libusb`/`sqlite`/`device_info_manager` 后
 
 因此 C5 仍然 **未通过**，不能把 X5 production rootfs 或半成品 QEMU product
 算作 OpenHarmony userspace 验证。
+
+## B 执行记录（2026-11-20）
+
+arm32 `qemu-arm-linux-min` 已重新构建并启动：
+
+- 构建：成功，约 6m34s
+- QEMU：`-M virt -cpu cortex-a7 -smp 4 -m 1024 -nographic`
+- 结果：init first/second stage → hilogd/samgr/hdf_devmgr → samgr ready；120s
+  timeout 退出，未见 foundation critical-service panic。
+- 修复：`patches/qemu/0003-qemu-min-no-foundation.patch` 让 qemu min/headless
+  安装空 `foundation.cfg`，不再启动 foundation。
+- HDC/网络：已在独立 prefix 编译 QEMU mainline 11.1.91 + libslirp。之前看到的网络 Oops 实际是 init 缺少 `ohos.required_mount.system/vendor`、块设备顺序错误导致 `/bin/init` 找不到后的 panic 回溯，不是 virtio-net 驱动问题。修正启动参数后 arm32 min 能到 samgr，`hdcd` 也能以 `-t` 启动；但 guest `eth0` 配置命令仍 exit 127，未获得 `10.0.2.15`，HDC 5555/8710 均未连通。
+- headless product 构建仍被 GN/product 依赖链阻塞：补 `crypto_framework` 后又缺 `netstack`；未产出 headless images。
+- 尚未验证：HDC 网络、Launcher/ArkUI（min product 不支持 JS/UI）。
+- 日志：`out/qemu-validation/arm32-min-nofoundation-source.log`、
+  `out/qemu-validation/arm32-min-hdc-tcp-test.log`、
+  `out/qemu-validation/arm32-min-hdc-toybox-test.log`
+
+## 2026-11-20 QEMU/HDC 增量同步
+
+本轮把 QEMU arm virt 的 HDC 启动链补进源码，并在 arm32 min system 镜像验证：
+
+- `qemu/0004-hdc-tcp-init.patch`
+  - 新增 `init.qemu.arm.linux.hdc.cfg`
+  - 新增 `qemu.hdc.para`
+  - `BUILD.gn` 安装到 `/system/etc/init` / `/system/etc/param`
+- `hdc/0001-hdcd-root-tcp.patch`
+  - `hdcd` root service 增加 `args: ["-t"]`
+
+构建/启动结果：
+
+- `qemu-arm-linux-min` 的 `system_image` 增量构建成功（约 35s）。
+- 新 `system.img` 包含上述 init/para/service 配置。
+- arm32 min 可到 `samgr`；`hdcd` 不再因开发者模式或缺少 TCP 参数直接退出。
+- HDC 仍未通过：guest `eth0` 没有成功配置，`toybox ifconfig` 路径 exit 127；
+  因此 QEMU user-net hostfwd 到 5555/8710 都无法建立 HDC 连接。
+
+因此本轮状态是：
+
+- **源码/patch/manifest：已同步**
+- **QEMU system.img：已构建**
+- **HDC over TCP：未通过**
+- **X5 镜像/板端：未改动**
+
+manifest 当前为 **120 listed / 123 files**，`./rdkhm check` 通过。

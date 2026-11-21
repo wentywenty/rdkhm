@@ -168,9 +168,10 @@ CANFD_TEST_PASS id=0x123 len=8 flags=0x5 data=1011121314151617
 - `/rdkhm/gpio-status.sh` 正常输出，但板上旧脚本的 `head -100` 在 BusyBox
   下会报错；源码已改为 `head -n 100`，待下次构建更新
 - 源码已加入 GPIO 加固：CLI 拒绝非 usable/被 claim 的针；daemon 默认
-  socket `0660`、TCP opt-in、Unix `SO_PEERCRED`；新增 `rdkhm_gpio`
-  SELinux 域和 `install_list_capability` Pintool 条目。这些**尚未进入
-  20:54 镜像**，板上仍是旧 daemon（0666/TCP 开启/无 peer 校验）
+  socket `0660`、TCP opt-in、Unix `SO_PEERCRED`；init 服务显式 `-t`
+  为 PinTool 保留 loopback TCP；新增 `rdkhm_gpio` SELinux 域和
+  `install_list_capability` Pintool 条目。这些**尚未进入 20:54 镜像**，
+  板上仍是旧 daemon（0666/TCP 开启/无 peer 校验）
 - `PinTool.hap` 文件位于 `/system/app/com.rdkhm.pintool/`，但
   `bm dump -n com.rdkhm.pintool` 报错、`bm dump -a` 没有该 bundle；
   BMS 未注册，PinTool UI 不可启动

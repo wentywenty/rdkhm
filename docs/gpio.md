@@ -82,14 +82,14 @@
 服务（源码已加固，尚未进入 20:54 镜像）：
 
 - Unix socket：`/dev/rdkhm-gpio.sock`，默认 `0660`；`-m` 可覆盖
-- TCP：默认关闭；`-t` 或 `RDKHM_GPIO_TCP_ENABLE=1` 才监听 `127.0.0.1:9800`
+- TCP：daemon 默认关闭；init 的 `rdkhm-gpio` 服务显式 `-t` 为 PinTool 开启 loopback TCP；手动启动默认关闭，`-t`/`RDKHM_GPIO_TCP_ENABLE=1` 可开启调试
 - 端口可用 `RDKHM_GPIO_TCP_PORT` 覆盖
 - Unix peer 默认只允许 root；`RDKHM_GPIO_ALLOWED_UID`/`RDKHM_GPIO_ALLOWED_GID` 可放行调试 UID/GID
 - 工具路径/映射可用 `RDKHM_GPIO_TOOL`、`RDKHM_GPIO_MAP` 覆盖
 - `rdkhm-gpio` 默认拒绝 `usable_as_gpio=false`/被 claim 的针；
   `RDKHM_GPIO_ALLOW_CLAIMED=1` 仅用于显式调试
-- PinTool HAP 仍走 TCP；daemon 默认不开 TCP，所以 UI（BMS 修复后）
-  也需要先用 `-t` 调试，或完成 PinTool 到 Unix/SA 的 P1 改造
+- PinTool HAP 仍走 TCP；init 服务显式 `-t` 保留该 loopback 调试路径。
+  长期仍应完成 PinTool 到 Unix/SA 的改造，而不是依赖无认证 TCP
 
 协议（每行一个请求）：
 
@@ -153,7 +153,7 @@ ERR <exit-code>
 | 已改，源码 | `bringup/gpio/rdkhm-gpio-daemon.c` | socket 默认 `0660`；TCP 默认关闭（`-t`/`RDKHM_GPIO_TCP_ENABLE=1`）；Unix 侧 `SO_PEERCRED` 默认只允许 root/显式 UID/GID |
 | 已加，待构建/enforce | `overlay/vendor/drobotics/rdk_x5/sepolicy` | `rdkhm_gpio` domain、`rdkhm_gpio_exec`/`rdkhm_gpio_socket` 类型、`file_contexts`、init `secon` |
 | 已加，待构建/BMS 验证 | `install_list_capability.json` | 已补 `com.rdkhm.pintool` 签名条目；当前镜像仍是旧文件 |
-| 未改 | `apps/rdkhm-pintool` | NAPI 仍连 TCP `127.0.0.1:9800`，HAP 仍申请 `ohos.permission.INTERNET`；daemon 默认不开 TCP，UI 需改 Unix/SA 或用 `-t` 调试 |
+| 未改，由 init `-t` 保留 | `apps/rdkhm-pintool` | NAPI 仍连 TCP `127.0.0.1:9800`，HAP 仍申请 `ohos.permission.INTERNET`；init 服务显式 `-t` 让 UI 继续使用 loopback TCP，长期改 Unix/SA |
 | 已改，板端未更新 | `bringup/gpio/gpio-status.sh` | `head -100` 已改 `head -n 100`；板上旧脚本待下次构建 |
 | 待复核 | `config/gpio/rdk_x5_40pin.json` / CLI | Pin 7 等 usable 针仍可能是 I2S/总线功能；DTS/总线启用后重新生成并复核 |
 

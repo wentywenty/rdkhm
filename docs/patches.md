@@ -4,15 +4,15 @@ Generated from `config/patches.json`.
 
 2026-11-19 reconcile（`out/patch-*` + 历史会话）结果见
 [patches-reconcile-20261119.md](patches-reconcile-20261119.md)。
-`out/patch-*` 的 248 个文件是历史快照/重复内容，不等于 active 106。
+`out/patch-*` 的 248 个文件是历史快照/重复内容，不等于 active 123。
 
 | Collection | Count |
 | --- | --- |
-| `kernel` | 19 |
+| `kernel` | 22 |
 | `kernel-rt` | 1 |
-| `openharmony` | 83 |
+| `openharmony` | 97 |
 
-All files are registered, and `check-patch-format.py` / `check-patch-coverage.py` pass. 2026-11-19 adds launcher/0004, screenlock/0003 and settings/0004; current manifest is 103 listed / 106 files. The `kernel-rt` entry is optional (PREEMPT_RT) and is applied only when `RDKHM_KERNEL_PROFILE=rt`.
+All files are registered, and `check-patch-format.py` / `check-patch-coverage.py` pass. 2026-11-19 adds launcher/0004, screenlock/0003 and settings/0004; 2026-11-20 adds qemu/0004 and hdc/0001; current manifest is 120 listed / 123 files. The `kernel-rt` entry is optional (PREEMPT_RT) and is applied only when `RDKHM_KERNEL_PROFILE=rt`.
 
 ## Kernel
 
@@ -239,11 +239,13 @@ All files are registered, and `check-patch-format.py` / `check-patch-coverage.py
 | `media-library/0001-skip-user-unlock-check.patch` | `media_library` | skip user unlock check |
 | `media-library/0002-datashare-config.patch` | `media_library` | datashare config |
 
-### nnrt (1)
+### nnrt (3)
 
 | Patch | Repository | Purpose |
 | --- | --- | --- |
 | `nnrt/0001-x5-nnrt-hdi-service.patch` | `peripheral` | x5 nnrt hdi service |
+| `nnrt/0002-vendor-offline-model-io.patch` | `interface` | vendor offline model IO descriptors |
+| `nnrt/0003-raw-offline-runtime.patch` | `neural_network_runtime` | raw offline model runtime support |
 
 ### photos (2)
 
@@ -307,6 +309,9 @@ tree. They are not used by the X5 image.
 | --- | --- | --- |
 | `qemu/0001-device-subsystem-and-foundation-profile.patch` | `device/qemu` | align the device subsystem name with the board, add the minimal foundation profile |
 | `qemu/0002-product-configs.patch` | `vendor/ohemu` | align min/arm64/headless product configs with 6.0 components |
+| `qemu/0003-qemu-min-no-foundation.patch` | `foundation/systemabilitymgr/safwk` | disable foundation critical service in minimal QEMU products |
+| `qemu/0004-hdc-tcp-init.patch` | `device/qemu` | start HDC TCP in arm virt; install init and para files |
+| `hdc/0001-hdcd-root-tcp.patch` | `developtools/hdc` | add `-t` to the root hdcd service |
 | `build-host/0004-qemu-product-whitelist.patch` | `build` | whitelist `product_qemu-arm64-linux-min` and `product_qemu-arm-linux-headless` |
 | `hdf-core/0001-optional-rk3566-audio.patch` | `drivers/hdf_core` | only descend into the kaihong audio dir when it exists |
 | `samgr/0001-install-samgr-common.patch` | `foundation/systemabilitymgr/samgr` | install `libsamgr_common.z.so` into the image |

@@ -1,0 +1,18 @@
+From: RDKHM <rdkhm@localhost>
+Subject: [PATCH] storage: create /storage/media before user dirs
+Date: Fri, 20 Nov 2026 22:30:00 +0800
+---
+--- a/services/storage_daemon/user/src/mount_manager.cpp
++++ b/services/storage_daemon/user/src/mount_manager.cpp
+@@ -80,7 +80,8 @@ std::vector<DirInfo> MountManager::InitHmdfsDirVec()
+ 
+ std::vector<DirInfo> MountManager::InitVirtualDir()
+ {
+-    return {{"/storage/media/%d", MODE_0711, OID_USER_DATA_RW, OID_USER_DATA_RW},
++    return {{"/storage/media", MODE_0711, OID_ROOT, OID_ROOT},
++            {"/storage/media/%d", MODE_0711, OID_USER_DATA_RW, OID_USER_DATA_RW},
+             {"/storage/media/%d/local", MODE_0711, OID_USER_DATA_RW, OID_USER_DATA_RW},
+             {"/storage/cloud", MODE_0711, OID_ROOT, OID_ROOT},
+             {"/storage/cloud/%d", MODE_0711, OID_USER_DATA_RW, OID_USER_DATA_RW},
+
+Signed-off-by: RDKHM <rdkhm@localhost>
